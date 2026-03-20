@@ -1,50 +1,69 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
 
-/**
- * Middleware rewrites:
- *   /profile/[slug].md              → /api/profile/[slug]/md
- *   /profile/[slug]/llm.txt         → /api/profile/[slug]/llm
- *   /profile/[slug]/graph.json      → /api/profile/[slug]/graph
- *   /profile/[slug]/post/[post].md  → /api/post/[slug]/[post]/md
- */
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // /profile/[slug].md
+  // --- URL rewrites for .md / llm.txt / llm-full.txt / graph.json ---
+
   const profileMdMatch = pathname.match(/^\/profile\/([^/]+)\.md$/)
   if (profileMdMatch) {
-    const slug = profileMdMatch[1]
-    return NextResponse.rewrite(new URL(`/api/profile/${slug}/md`, request.url))
+    return NextResponse.rewrite(new URL(`/api/raw/profile/${profileMdMatch[1]}`, request.url))
   }
 
-  // /profile/[slug]/llm.txt
-  const llmMatch = pathname.match(/^\/profile\/([^/]+)\/llm\.txt$/)
-  if (llmMatch) {
-    const slug = llmMatch[1]
-    return NextResponse.rewrite(new URL(`/api/profile/${slug}/llm`, request.url))
-  }
-
-  // /profile/[slug]/graph.json
-  const graphMatch = pathname.match(/^\/profile\/([^/]+)\/graph\.json$/)
-  if (graphMatch) {
-    const slug = graphMatch[1]
-    return NextResponse.rewrite(new URL(`/api/profile/${slug}/graph`, request.url))
-  }
-
-  // /profile/[slug]/post/[postSlug].md
   const postMdMatch = pathname.match(/^\/profile\/([^/]+)\/post\/([^/]+)\.md$/)
   if (postMdMatch) {
-    const [, slug, postSlug] = postMdMatch
-    return NextResponse.rewrite(
-      new URL(`/api/post/${slug}/${postSlug}/md`, request.url)
-    )
+    return NextResponse.rewrite(new URL(`/api/raw/post/${postMdMatch[1]}/${postMdMatch[2]}`, request.url))
   }
 
-  return NextResponse.next()
+  const llmMatch = pathname.match(/^\/profile\/([^/]+)\/llm\.txt$/)
+  if (llmMatch) {
+    return NextResponse.rewrite(new URL(`/api/llm/${llmMatch[1]}`, request.url))
+  }
+
+  const llmFullMatch = pathname.match(/^\/profile\/([^/]+)\/llm-full\.txt$/)
+  if (llmFullMatch) {
+    return NextResponse.rewrite(new URL(`/api/llm-full/${llmFullMatch[1]}`, request.url))
+  }
+
+  const graphMatch = pathname.match(/^\/profile\/([^/]+)\/graph\.json$/)
+  if (graphMatch) {
+    return NextResponse.rewrite(new URL(`/api/graph/${graphMatch[1]}`, request.url))
+  }
+
+  // --- Refresh Supabase session on every non-rewrite request ---
+  // Required by @supabase/ssr — keeps auth cookies fresh so server
+  // components always see the correct auth state.
+  // Do NOT add logic between createServerClient and getUser().
+
+  let response = NextResponse.next({ request })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          response = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  await supabase.auth.getUser()
+
+  return response
 }
 
 export const config = {
   matcher: [
-    '/profile/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
