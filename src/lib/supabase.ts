@@ -1,13 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
+// Server-only — do NOT import this in 'use client' components.
+// For client components, import from '@/lib/supabase-browser' instead.
 import { createServerClient as createSSRServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-// Browser client (anon key) — for use in client components
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Server client (service role) — for use in API routes and server components
 export function createServerClient() {

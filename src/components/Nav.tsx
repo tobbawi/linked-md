@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import type { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 
 interface NavProps {
