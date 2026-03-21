@@ -29,11 +29,16 @@ export function DarkModeToggle() {
         border: '1px solid var(--color-border)',
         borderRadius: 'var(--radius-sm)',
         cursor: 'pointer',
-        padding: '5px 8px',
+        padding: '0',
         fontSize: '14px',
         lineHeight: 1,
         color: 'var(--color-secondary)',
         fontFamily: 'var(--font-sans)',
+        minWidth: '44px',
+        minHeight: '44px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       {dark ? '☀' : '☾'}
