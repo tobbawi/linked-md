@@ -123,5 +123,5 @@ Unresolved wikilinks: rendered as plain `[[Name]]` in muted text with tooltip.
 | 2026-03-20 | Instrument Serif for display | Serif headings signal "publication platform" not "SaaS app" — distinctive in the dev tool space |
 | 2026-03-20 | Emerald green primary | Unclaimed color in professional networking (LinkedIn=blue, GitHub=purple). Connotes growth and open source |
 | 2026-03-20 | Warm neutrals | Cool grays feel corporate (LinkedIn). Warm grays add humanity to a technical product |
-| 2026-03-20 | No dark mode in v1 | Design focus. Light mode with warm neutrals is the editorial statement. Dark mode planned for M2 |
+| 2026-03-21 | Dark mode shipped in v0.1.2.0 | Original decision deferred dark mode to M2; shipped alongside mobile responsive (M9) via CSS custom properties `[data-theme="dark"]` with localStorage persistence and flash-prevention inline script |
 | 2026-03-20 | .md URL as design feature | The visible file path below each post is the brand differentiator — styled prominently, not as a footnote |
