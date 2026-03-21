@@ -147,11 +147,14 @@ export function Nav({ user, profileSlug }: NavProps) {
                 fontSize: '13px',
                 fontWeight: 500,
                 color: 'var(--color-primary)',
-                padding: '6px 16px',
+                padding: '0 16px',
                 borderRadius: 'var(--radius-sm)',
                 background: 'var(--color-primary-light)',
                 border: '1px solid var(--color-primary)',
                 transition: 'background 150ms ease',
+                display: 'inline-flex',
+                alignItems: 'center',
+                height: '44px',
               }}
             >
               Sign in
