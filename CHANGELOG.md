@@ -6,6 +6,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [0.1.2.1] - 2026-03-21
+
+### Fixed
+- **Stored XSS (security):** Replaced `remark-html { sanitize: false }` with `remark-rehype` + `rehype-sanitize` + `rehype-stringify` in post and company page renderers. HTML-escapes user content before wikilink rendering in profile post previews. Prevents stored XSS via user-authored markdown with raw HTML.
+- **Design polish:** 5 design review fixes — mobile nav collapse, dark mode toggle 44px touch target, post title hierarchy, hero dead zone spacing, Sign In button 44px touch target.
+
+---
+
 ## [0.1.2.0] - 2026-03-21
 
 ### Added
