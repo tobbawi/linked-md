@@ -18,6 +18,17 @@
 **Context:** M1 uses basic exact-slug-match resolution. M2 needs disambiguation UI and backlink display. Consider publishing as standalone package.
 **Depends on:** M1 links table working, basic wikilink resolution proven.
 
+## Agent Gateway
+
+### Rate limiting for `?format=llm` endpoint
+**Priority:** P1
+**What:** Add `Cache-Control` header on `?format=llm` responses OR a simple in-memory rate limiter (e.g. 60 req/min per IP via `next-rate-limit` or a simple `Map`-based counter in middleware).
+**Why:** The endpoint fires a full-table ILIKE query on profiles with no auth. Trivial to abuse — a tight loop would hammer the Supabase free-tier connection pool.
+**Pros:** Protects DB before any public announcement; `Cache-Control` on search results is the zero-infrastructure option.
+**Cons:** In-memory rate limiter doesn't work across serverless instances; `Cache-Control` on search is less precise but good enough for initial protection.
+**Context:** Acceptable at launch-scale with low traffic. Must be resolved before any public post, blog entry, or Hacker News submission that could cause a traffic spike. Prefer `Cache-Control: public, s-maxage=60, stale-while-revalidate=300` as the first step — zero new dependencies.
+**Depends on:** Agent Gateway (`feat/m1-core-ui`) shipped.
+
 ## Test Coverage
 
 ### Add integration tests for API routes
