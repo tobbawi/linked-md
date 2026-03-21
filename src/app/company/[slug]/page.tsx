@@ -67,9 +67,11 @@ export default async function CompanyPage({ params }: PageProps) {
 
   // Render markdown content
   const { remark } = await import('remark')
-  const remarkHtml = (await import('remark-html')).default
+  const remarkRehype = (await import('remark-rehype')).default
+  const rehypeSanitize = (await import('rehype-sanitize')).default
+  const rehypeStringify = (await import('rehype-stringify')).default
   const withLinks = renderWikilinks(company.markdown_content, resolvedProfiles, resolvedCompanies)
-  const result = await remark().use(remarkHtml, { sanitize: false }).process(withLinks)
+  const result = await remark().use(remarkRehype).use(rehypeSanitize).use(rehypeStringify).process(withLinks)
   const contentHtml = String(result)
 
   const mdUrl = `/company/${company.slug}.md`

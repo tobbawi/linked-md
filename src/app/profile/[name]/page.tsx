@@ -455,7 +455,8 @@ export default async function ProfilePage({ params }: PageProps) {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
               {allPosts.map((post) => {
-                const postWikilinksHtml = renderWikilinks(postPreview(post), resolvedSlugs, resolvedCompanySlugs)
+                const rawPreview = postPreview(post).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]!))
+                const postWikilinksHtml = renderWikilinks(rawPreview, resolvedSlugs, resolvedCompanySlugs)
                 return (
                   <article
                     key={post.id}

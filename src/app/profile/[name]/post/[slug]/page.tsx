@@ -132,9 +132,11 @@ export default async function PostPage({ params }: PageProps) {
 
   // Render markdown server-side
   const { remark } = await import('remark')
-  const remarkHtml = (await import('remark-html')).default
+  const remarkRehype = (await import('remark-rehype')).default
+  const rehypeSanitize = (await import('rehype-sanitize')).default
+  const rehypeStringify = (await import('rehype-stringify')).default
   const withWikilinks = renderWikilinks(post.markdown_content, resolvedSlugs, resolvedCompanySlugs)
-  const result = await remark().use(remarkHtml, { sanitize: false }).process(withWikilinks)
+  const result = await remark().use(remarkRehype).use(rehypeSanitize).use(rehypeStringify).process(withWikilinks)
   const contentHtml = String(result)
 
   const mdUrl = `/profile/${profile.slug}/post/${post.slug}.md`
