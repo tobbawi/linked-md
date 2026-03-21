@@ -225,7 +225,7 @@ function PostCard({ post }: { post: FeedPost }) {
           <h3
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: '1.0625rem',
+              fontSize: '1.2rem',
               color: 'var(--color-ink)',
               lineHeight: 1.35,
               marginBottom: 'var(--space-xs)',
