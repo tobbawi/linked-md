@@ -35,7 +35,7 @@ function LandingHero() {
     <div
       style={{
         paddingTop: 'var(--space-3xl)',
-        paddingBottom: 'var(--space-3xl)',
+        paddingBottom: 'var(--space-2xl)',
         textAlign: 'center',
       }}
     >
@@ -100,7 +100,7 @@ function LandingHero() {
 
       <div
         style={{
-          marginTop: 'var(--space-3xl)',
+          marginTop: 'var(--space-xl)',
           display: 'inline-flex',
           alignItems: 'center',
           gap: 'var(--space-sm)',
