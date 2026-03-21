@@ -102,21 +102,21 @@ describe('parseWikilinkSegments', () => {
     expect(segments).toEqual([{ type: 'text', content: 'Hello world' }])
   })
 
-  it('returns resolved segment for known slug', () => {
+  it('returns profile segment for known slug', () => {
     const segments = parseWikilinkSegments('[[Alice]]', new Set(['alice']))
-    expect(segments).toEqual([{ type: 'resolved', name: 'Alice', slug: 'alice' }])
+    expect(segments).toEqual([{ type: 'profile', name: 'Alice', display: 'Alice', slug: 'alice' }])
   })
 
   it('returns unresolved segment for unknown slug', () => {
     const segments = parseWikilinkSegments('[[Ghost]]', new Set())
-    expect(segments).toEqual([{ type: 'unresolved', name: 'Ghost' }])
+    expect(segments).toEqual([{ type: 'unresolved', name: 'Ghost', display: 'Ghost' }])
   })
 
   it('interleaves text and link segments', () => {
     const segments = parseWikilinkSegments('Hello [[Jane Doe]] today', new Set(['jane-doe']))
     expect(segments).toEqual([
       { type: 'text', content: 'Hello ' },
-      { type: 'resolved', name: 'Jane Doe', slug: 'jane-doe' },
+      { type: 'profile', name: 'Jane Doe', display: 'Jane Doe', slug: 'jane-doe' },
       { type: 'text', content: ' today' },
     ])
   })
