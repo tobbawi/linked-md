@@ -21,6 +21,13 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - Warm neutrals (not cool grays)
 - The .md URL visible below each post is the brand differentiator — never hide it on desktop
 
+## Testing
+- Run tests: `npm test` (vitest)
+- Test files: `src/test/`
+- 100% coverage goal for pure functions; Supabase-dependent paths require integration tests
+- When adding new pure functions, write a corresponding test
+- When fixing a bug, write a regression test
+
 ## Architecture
 - Profiles and posts stored as markdown in PostgreSQL + exported to filesystem
 - Junction `links` table for bidirectional wikilink tracking
