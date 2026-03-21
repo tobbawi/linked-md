@@ -188,6 +188,13 @@ a {
   border-color: var(--color-primary);
 }
 
+/* Nav center */
+.nav-center {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
 /* Mobile responsive */
 @media (max-width: 640px) {
   .nav-center {

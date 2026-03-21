@@ -57,7 +57,7 @@ export function Nav({ user, profileSlug }: NavProps) {
         </Link>
 
         {/* Center nav */}
-        <div className="nav-center" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-lg)' }}>
+        <div className="nav-center">
           <Link href="/people" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
             People
           </Link>
