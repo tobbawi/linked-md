@@ -105,6 +105,35 @@ Profile cards show an `llm.txt available` badge:
 - Border: 1px solid `#0D9373`
 - Border-radius: 4px
 
+### The `/llm.txt` LandingHero Badge
+
+The hero badge row shows two badges side-by-side — human and agent entry points paired:
+
+```
+"Your profile lives at"  [/profile/your-name.md]  · "AI agents start at"  [/llm.txt]
+```
+
+- Both badges: `.md-url` class — Geist Mono 11px, `#0D9373`, bg `#E6F5F0`, padding 3px 8px, border-radius 4px
+- Container: `display: flex; flex-wrap: wrap; gap: var(--space-sm)`
+- Separator label: `font-size: 13px; color: var(--color-muted)` — `"· AI agents start at"`
+- Both badges visible on desktop and mobile — `flex-wrap` handles small screens naturally
+- The pairing is intentional: it signals that linked.md speaks both protocols (HTTP for humans, HTTP+`text/plain` for agents)
+
+### AI-Facing Copy Voice (`?format=llm`, `/llm.txt`)
+
+Text/plain API responses for AI agents follow a specific voice and format:
+
+- **Tone:** Direct and scannable — no markdown headers, no prose preamble
+- **Count line:** `Found N professionals matching "rails":` (no "We found" or "Results:")
+- **Separator:** `---` between results
+- **Field labels:** `Name:` / `Slug:` / `Title:` / `Bio:` / `Profile:` — sentence case, colon-delimited
+- **Null fields:** Omitted entirely — never emit `Title: null` or `Bio: null`
+- **Zero results:** Normal output format — `Found 0 professionals matching "rails":` (not an error)
+- **Errors:** Plain text, action-oriented:
+  - 400: `"Query required. Use ?q=rails to search professionals."`
+  - 500: `"Error: {message}"`
+- **No JSON in error paths:** An agent consuming `text/plain` cannot detect a JSON error response
+
 ### Wikilinks `[[Name]]`
 Resolved wikilinks in post content:
 - Color: `#0D9373`
@@ -123,5 +152,7 @@ Unresolved wikilinks: rendered as plain `[[Name]]` in muted text with tooltip.
 | 2026-03-20 | Instrument Serif for display | Serif headings signal "publication platform" not "SaaS app" — distinctive in the dev tool space |
 | 2026-03-20 | Emerald green primary | Unclaimed color in professional networking (LinkedIn=blue, GitHub=purple). Connotes growth and open source |
 | 2026-03-20 | Warm neutrals | Cool grays feel corporate (LinkedIn). Warm grays add humanity to a technical product |
+| 2026-03-21 | Agent Gateway /llm.txt homepage badge | Two-badge LandingHero row pairs human (/profile/your-name.md) and agent (/llm.txt) entry points using same .md-url class — signals the network speaks both protocols |
+| 2026-03-21 | AI-facing copy voice | text/plain responses are terse, colon-delimited, null-fields-omitted, errors action-oriented — format designed for LLM context windows, not human reading |
 | 2026-03-21 | Dark mode shipped in v0.1.2.0 | Original decision deferred dark mode to M2; shipped alongside mobile responsive (M9) via CSS custom properties `[data-theme="dark"]` with localStorage persistence and flash-prevention inline script |
 | 2026-03-20 | .md URL as design feature | The visible file path below each post is the brand differentiator — styled prominently, not as a footnote |
