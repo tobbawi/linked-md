@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { createAuthServerClient, createServerClient } from '@/lib/supabase'
 import { exportAllProfileFiles } from '@/lib/exports'
+import { extractWikilinks, extractCompanyLinks, toSlug } from '@/lib/wikilinks'
 import type { Post } from '@/types'
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerClient()
+  const supabase = createAuthServerClient()
 
   const {
     data: { user },
@@ -15,11 +16,14 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { display_name, bio, content, slug } = body as {
+  const { display_name, bio, markdown_content, slug, title, location, website } = body as {
     display_name: string
     bio?: string
-    content?: string
+    markdown_content?: string
     slug: string
+    title?: string
+    location?: string
+    website?: string
   }
 
   if (!display_name || !slug) {
@@ -36,8 +40,17 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         slug,
         display_name,
+        title: title ?? null,
+        location: location ?? null,
+        website: website ?? null,
         bio: bio ?? null,
-        content: content ?? null,
+        markdown_content: markdown_content ?? '',
+        outbound_links: markdown_content
+          ? Array.from(new Set(extractWikilinks(markdown_content).map(toSlug)))
+          : [],
+        company_links: markdown_content
+          ? Array.from(new Set(extractCompanyLinks(markdown_content)))
+          : [],
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'user_id' }
@@ -54,13 +67,17 @@ export async function POST(request: NextRequest) {
 
   // Export files
   try {
-    const { data: posts } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('profile_id', profile.id)
-      .returns<Post[]>()
+    const serviceClient = createServerClient()
+    const [{ data: posts }, { count: followerCount }, { count: followingCount }] = await Promise.all([
+      serviceClient.from('posts').select('*').eq('profile_id', profile.id).returns<Post[]>(),
+      serviceClient.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', profile.id),
+      serviceClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profile.id),
+    ])
 
-    await exportAllProfileFiles(profile, posts ?? [])
+    await exportAllProfileFiles(profile, posts ?? [], {
+      followerCount: followerCount ?? 0,
+      followingCount: followingCount ?? 0,
+    })
   } catch (exportErr) {
     // Export failure is non-fatal in dev — log and continue
     console.warn('Export failed:', exportErr)

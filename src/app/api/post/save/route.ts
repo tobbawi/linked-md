@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { createAuthServerClient } from '@/lib/supabase'
 import { exportAllProfileFiles, exportPostMarkdown } from '@/lib/exports'
 import type { Post, Profile } from '@/types'
 
 export async function POST(request: NextRequest) {
-  const supabase = createServerClient()
+  const supabase = createAuthServerClient()
 
   const {
     data: { user },
@@ -15,13 +15,14 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { title, slug: postSlug, content } = body as {
+  const { title, slug: postSlug, markdown_content, tags } = body as {
     title?: string
     slug: string
-    content: string
+    markdown_content: string
+    tags?: string[]
   }
 
-  if (!postSlug || !content) {
+  if (!postSlug || !markdown_content) {
     return NextResponse.json(
       { error: 'slug and content are required' },
       { status: 400 }
@@ -49,7 +50,8 @@ export async function POST(request: NextRequest) {
         profile_id: profile.id,
         slug: postSlug,
         title: title ?? null,
-        content,
+        markdown_content,
+        tags: tags ?? [],
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'profile_id,slug' }
