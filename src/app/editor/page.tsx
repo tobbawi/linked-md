@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef, useTransition, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-browser'
 import { renderWikilinks } from '@/lib/wikilinks'
 
@@ -129,14 +129,22 @@ function useWikilinkAutocomplete(
 
 // ── Main editor component ──────────────────────────────────────────────────
 
-export default function EditorPage() {
+function EditorPageInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const modeParam = searchParams.get('mode') as EditorMode | null
+  const postParam = searchParams.get('post')
+
   const [authChecked, setAuthChecked] = useState(false)
-  const [mode, setMode] = useState<EditorMode>('profile')
+  const [isNewProfile, setIsNewProfile] = useState(false)
+  const [mode, setMode] = useState<EditorMode>(modeParam === 'post' ? 'post' : 'profile')
   const [isPending, startTransition] = useTransition()
 
   // Profile fields
   const [profileDisplayName, setProfileDisplayName] = useState('')
+  const [profileTitle, setProfileTitle] = useState('')
+  const [profileLocation, setProfileLocation] = useState('')
+  const [profileWebsite, setProfileWebsite] = useState('')
   const [profileBio, setProfileBio] = useState('')
   const [profileContent, setProfileContent] = useState('')
   const [profileSlug, setProfileSlug] = useState('')
@@ -151,6 +159,7 @@ export default function EditorPage() {
   const [postSlug, setPostSlug] = useState('')
   const [postSlugEdited, setPostSlugEdited] = useState(false)
   const [postContent, setPostContent] = useState('')
+  const [postTags, setPostTags] = useState('')
   const [postPreviewHtml, setPostPreviewHtml] = useState('')
   const [postStatus, setPostStatus] = useState<{
     type: 'success' | 'error'
@@ -164,30 +173,53 @@ export default function EditorPage() {
   const profileTextareaRef = useRef<HTMLTextAreaElement>(null)
   const postTextareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auth guard
+  // Auth guard + load existing data
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) {
         router.push('/auth')
-      } else {
-        setAuthChecked(true)
-        // Load existing profile
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              setProfileDisplayName(data.display_name ?? '')
-              setProfileBio(data.bio ?? '')
-              setProfileContent(data.content ?? '')
-              setProfileSlug(data.slug ?? '')
-            }
-          })
+        return
       }
+
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+        .then(async ({ data: profileData }) => {
+          if (profileData) {
+            setProfileDisplayName(profileData.display_name ?? '')
+            setProfileTitle(profileData.title ?? '')
+            setProfileLocation(profileData.location ?? '')
+            setProfileWebsite(profileData.website ?? '')
+            setProfileBio(profileData.bio ?? '')
+            setProfileContent(profileData.markdown_content ?? '')
+            setProfileSlug(profileData.slug ?? '')
+
+            // Load existing post if ?post= param present
+            if (postParam) {
+              const { data: postData } = await supabase
+                .from('posts')
+                .select('*')
+                .eq('profile_id', profileData.id)
+                .eq('slug', postParam)
+                .single()
+              if (postData) {
+                setPostTitle(postData.title ?? '')
+                setPostSlug(postData.slug)
+                setPostSlugEdited(true)
+                setPostContent(postData.markdown_content)
+                setPostTags((postData.tags ?? []).join(', '))
+                setMode('post')
+              }
+            }
+          } else {
+            setIsNewProfile(true)
+          }
+          setAuthChecked(true)
+        })
     })
-  }, [router])
+  }, [router, postParam])
 
   // Profile markdown preview
   useEffect(() => {
@@ -260,16 +292,17 @@ export default function EditorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           display_name: profileDisplayName,
+          title: profileTitle || undefined,
+          location: profileLocation || undefined,
+          website: profileWebsite || undefined,
           bio: profileBio,
-          content: profileContent,
+          markdown_content: profileContent,
           slug: profileSlug,
         }),
       })
       if (res.ok) {
-        setProfileStatus({
-          type: 'success',
-          message: `Saved. View → /profile/${profileSlug}`,
-        })
+        router.push(`/profile/${profileSlug}`)
+        router.refresh()
       } else {
         const data = await res.json()
         setProfileStatus({
@@ -293,7 +326,8 @@ export default function EditorPage() {
         body: JSON.stringify({
           title: postTitle || undefined,
           slug: postSlug,
-          content: postContent,
+          markdown_content: postContent,
+          tags: postTags.split(',').map((t) => t.trim()).filter(Boolean),
         }),
       })
       const data = await res.json()
@@ -332,6 +366,28 @@ export default function EditorPage() {
 
   return (
     <div style={{ paddingTop: 'var(--space-lg)', paddingBottom: 'var(--space-3xl)' }}>
+      {isNewProfile && (
+        <div
+          style={{
+            marginBottom: 'var(--space-lg)',
+            padding: 'var(--space-md) var(--space-lg)',
+            background: 'var(--color-primary-light)',
+            border: '1px solid var(--color-primary)',
+            borderRadius: 'var(--radius-md)',
+          }}
+        >
+          <p style={{ fontWeight: 600, color: 'var(--color-ink)', marginBottom: '2px' }}>
+            Welcome to linked.md!
+          </p>
+          <p style={{ fontSize: '14px', color: 'var(--color-secondary)' }}>
+            Fill in your display name and slug to create your profile. Your profile will be
+            publicly visible at{' '}
+            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-primary)' }}>
+              /profile/your-slug.md
+            </span>
+          </p>
+        </div>
+      )}
       {/* Mode tabs */}
       <div
         style={{
@@ -370,6 +426,9 @@ export default function EditorPage() {
       {mode === 'profile' ? (
         <ProfileEditor
           displayName={profileDisplayName}
+          title={profileTitle}
+          location={profileLocation}
+          website={profileWebsite}
           bio={profileBio}
           content={profileContent}
           slug={profileSlug}
@@ -379,6 +438,9 @@ export default function EditorPage() {
           textareaRef={profileTextareaRef}
           autocomplete={profileAutocomplete}
           onDisplayNameChange={setProfileDisplayName}
+          onTitleChange={setProfileTitle}
+          onLocationChange={setProfileLocation}
+          onWebsiteChange={setProfileWebsite}
           onBioChange={setProfileBio}
           onContentChange={(v) => {
             setProfileContent(v)
@@ -392,6 +454,7 @@ export default function EditorPage() {
           title={postTitle}
           slug={postSlug}
           content={postContent}
+          tags={postTags}
           previewHtml={postPreviewHtml}
           status={postStatus}
           isPending={isPending}
@@ -409,6 +472,7 @@ export default function EditorPage() {
             setPostContent(v)
           }}
           onContentCursorChange={setPostContentCursor}
+          onTagsChange={setPostTags}
           onSave={handleSavePost}
         />
       )}
@@ -416,10 +480,36 @@ export default function EditorPage() {
   )
 }
 
+export default function EditorPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 'calc(100vh - 56px)',
+            color: 'var(--color-muted)',
+            fontSize: '15px',
+          }}
+        >
+          Loading…
+        </div>
+      }
+    >
+      <EditorPageInner />
+    </Suspense>
+  )
+}
+
 // ── Profile editor subcomponent ────────────────────────────────────────────
 
 interface ProfileEditorProps {
   displayName: string
+  title: string
+  location: string
+  website: string
   bio: string
   content: string
   slug: string
@@ -429,6 +519,9 @@ interface ProfileEditorProps {
   textareaRef: React.RefObject<HTMLTextAreaElement>
   autocomplete: ReturnType<typeof useWikilinkAutocomplete>
   onDisplayNameChange: (v: string) => void
+  onTitleChange: (v: string) => void
+  onLocationChange: (v: string) => void
+  onWebsiteChange: (v: string) => void
   onBioChange: (v: string) => void
   onContentChange: (v: string) => void
   onContentCursorChange: (pos: number) => void
@@ -438,6 +531,9 @@ interface ProfileEditorProps {
 
 function ProfileEditor({
   displayName,
+  title,
+  location,
+  website,
   bio,
   content,
   slug,
@@ -447,6 +543,9 @@ function ProfileEditor({
   textareaRef,
   autocomplete,
   onDisplayNameChange,
+  onTitleChange,
+  onLocationChange,
+  onWebsiteChange,
   onBioChange,
   onContentChange,
   onContentCursorChange,
@@ -471,6 +570,33 @@ function ProfileEditor({
               value={displayName}
               onChange={onDisplayNameChange}
               placeholder="Jane Doe"
+            />
+          </FieldGroup>
+
+          <FieldGroup label="Title / role" htmlFor="profile-title">
+            <Input
+              id="profile-title"
+              value={title}
+              onChange={onTitleChange}
+              placeholder="Software Engineer at Acme"
+            />
+          </FieldGroup>
+
+          <FieldGroup label="Location" htmlFor="profile-location">
+            <Input
+              id="profile-location"
+              value={location}
+              onChange={onLocationChange}
+              placeholder="San Francisco, CA"
+            />
+          </FieldGroup>
+
+          <FieldGroup label="Website" htmlFor="profile-website">
+            <Input
+              id="profile-website"
+              value={website}
+              onChange={onWebsiteChange}
+              placeholder="https://yoursite.com"
             />
           </FieldGroup>
 
@@ -552,6 +678,7 @@ interface PostEditorProps {
   title: string
   slug: string
   content: string
+  tags: string
   previewHtml: string
   status: { type: 'success' | 'error'; message: string; url?: string } | null
   isPending: boolean
@@ -561,6 +688,7 @@ interface PostEditorProps {
   onSlugChange: (v: string) => void
   onContentChange: (v: string) => void
   onContentCursorChange: (pos: number) => void
+  onTagsChange: (v: string) => void
   onSave: () => void
 }
 
@@ -568,6 +696,7 @@ function PostEditor({
   title,
   slug,
   content,
+  tags,
   previewHtml,
   status,
   isPending,
@@ -577,6 +706,7 @@ function PostEditor({
   onSlugChange,
   onContentChange,
   onContentCursorChange,
+  onTagsChange,
   onSave,
 }: PostEditorProps) {
   return (
@@ -653,6 +783,15 @@ function PostEditor({
             >
               Tip: Use [[Name]] to link people
             </p>
+          </FieldGroup>
+
+          <FieldGroup label="Tags (comma-separated)" htmlFor="post-tags">
+            <Input
+              id="post-tags"
+              value={tags}
+              onChange={onTagsChange}
+              placeholder="engineering, product, open-source"
+            />
           </FieldGroup>
 
           <StatusMessage status={status} />

@@ -7,8 +7,13 @@ const mockProfile: Profile = {
   user_id: 'u1',
   slug: 'jane-doe',
   display_name: 'Jane Doe',
+  title: null,
+  location: null,
+  website: null,
   bio: 'Engineer at Acme.',
-  content: 'I write about systems.',
+  markdown_content: 'I write about systems.',
+  outbound_links: [],
+  company_links: [],
   created_at: '2026-03-20T00:00:00Z',
   updated_at: '2026-03-20T00:00:00Z',
 }
@@ -18,7 +23,8 @@ const mockPost: Post = {
   profile_id: 'p1',
   slug: 'hello-world',
   title: 'Hello World',
-  content: 'This is my first post.',
+  markdown_content: 'This is my first post.',
+  tags: [],
   created_at: '2026-03-20T00:00:00Z',
   updated_at: '2026-03-20T00:00:00Z',
 }
@@ -45,8 +51,8 @@ describe('buildProfileMarkdown', () => {
     expect(md).not.toContain('null')
   })
 
-  it('handles null content', () => {
-    const md = buildProfileMarkdown({ ...mockProfile, content: null })
+  it('handles empty content', () => {
+    const md = buildProfileMarkdown({ ...mockProfile, markdown_content: '' })
     expect(md).toContain('# Jane Doe')
     expect(md).not.toContain('null')
   })

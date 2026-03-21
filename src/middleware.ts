@@ -31,6 +31,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.rewrite(new URL(`/api/graph/${graphMatch[1]}`, request.url))
   }
 
+  // --- Company URL rewrites ---
+
+  const companyMdMatch = pathname.match(/^\/company\/([^/]+)\.md$/)
+  if (companyMdMatch) {
+    return NextResponse.rewrite(new URL(`/api/raw/company/${companyMdMatch[1]}`, request.url))
+  }
+
+  const companyLlmMatch = pathname.match(/^\/company\/([^/]+)\/llm\.txt$/)
+  if (companyLlmMatch) {
+    return NextResponse.rewrite(new URL(`/api/llm/company/${companyLlmMatch[1]}`, request.url))
+  }
+
   // --- Refresh Supabase session on every non-rewrite request ---
   // Required by @supabase/ssr — keeps auth cookies fresh so server
   // components always see the correct auth state.

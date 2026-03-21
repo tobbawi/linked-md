@@ -44,7 +44,14 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" className={geistMono.variable}>
+    <html lang="en" className={geistMono.variable} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.setAttribute('data-theme','dark');}})()`,
+          }}
+        />
+      </head>
       <body>
         <Nav user={user} profileSlug={profileSlug} />
         <main

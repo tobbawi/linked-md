@@ -4,6 +4,8 @@ import Link from 'next/link'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
+import { NotificationBell } from './NotificationBell'
+import { DarkModeToggle } from './DarkModeToggle'
 
 interface NavProps {
   user: User | null
@@ -54,8 +56,25 @@ export function Nav({ user, profileSlug }: NavProps) {
           linked.md
         </Link>
 
+        {/* Center nav */}
+        <div className="nav-center" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-lg)' }}>
+          <Link href="/people" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+            People
+          </Link>
+          <Link href="/companies" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+            Companies
+          </Link>
+          <Link href="/explore" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+            Explore
+          </Link>
+          <Link href="/search" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+            Search
+          </Link>
+        </div>
+
         {/* Right side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+          <DarkModeToggle />
           {user ? (
             <>
               <Link
@@ -78,6 +97,10 @@ export function Nav({ user, profileSlug }: NavProps) {
               >
                 New post
               </Link>
+
+              {profileSlug && (
+                <NotificationBell mySlug={profileSlug} />
+              )}
 
               {profileSlug && (
                 <Link

@@ -1,6 +1,8 @@
 import Link from 'next/link'
-import { createServerClient } from '@/lib/supabase'
+import type { Metadata } from 'next'
+import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks, extractWikilinks, toSlug } from '@/lib/wikilinks'
+import { FollowButton } from '@/components/FollowButton'
 import type { Profile, Post } from '@/types'
 
 interface PageProps {
@@ -21,8 +23,7 @@ function truncate(text: string, maxLen: number): string {
 }
 
 function postPreview(post: Post): string {
-  const raw = post.title ?? post.content
-  // Strip markdown syntax for preview
+  const raw = post.title ?? post.markdown_content
   const stripped = raw
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\*\*?([^*]+)\*\*?/g, '$1')
@@ -32,12 +33,32 @@ function postPreview(post: Post): string {
   return truncate(stripped, 140)
 }
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const supabase = createServerClient()
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('slug, display_name, bio')
+    .eq('slug', params.name)
+    .single<Pick<Profile, 'slug' | 'display_name' | 'bio'>>()
+
+  if (!profile) return { title: 'Profile not found — linked.md' }
+
+  return {
+    title: `${profile.display_name} — linked.md`,
+    description: profile.bio ?? `${profile.display_name}'s profile on linked.md`,
+    openGraph: {
+      title: profile.display_name,
+      description: profile.bio ?? `${profile.display_name}'s profile on linked.md`,
+      url: `https://linked.md/profile/${profile.slug}`,
+      type: 'profile',
+    },
+  }
+}
+
 export default async function ProfilePage({ params }: PageProps) {
   const { name } = params
-
   const supabase = createServerClient()
 
-  // Fetch profile
   const { data: profile } = await supabase
     .from('profiles')
     .select('*')
@@ -46,12 +67,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
   if (!profile) {
     return (
-      <div
-        style={{
-          padding: 'var(--space-3xl) var(--space-md)',
-          textAlign: 'center',
-        }}
-      >
+      <div style={{ padding: 'var(--space-3xl) var(--space-md)', textAlign: 'center' }}>
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
@@ -63,16 +79,31 @@ export default async function ProfilePage({ params }: PageProps) {
           Profile not found.
         </h1>
         <p style={{ color: 'var(--color-secondary)', fontSize: '15px' }}>
-          Search for someone?{' '}
-          <Link
-            href="/"
-            style={{ color: 'var(--color-primary)', fontWeight: 500 }}
-          >
+          <Link href="/" style={{ color: 'var(--color-primary)', fontWeight: 500 }}>
             Go to feed →
           </Link>
         </p>
       </div>
     )
+  }
+
+  // Check ownership + viewer identity
+  let isOwner = false
+  let viewerProfileId: string | null = null
+  try {
+    const authClient = createAuthServerClient()
+    const { data: { user } } = await authClient.auth.getUser()
+    isOwner = !!user && user.id === profile.user_id
+    if (user && !isOwner) {
+      const { data: vp } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single<Pick<Profile, 'id'>>()
+      viewerProfileId = vp?.id ?? null
+    }
+  } catch {
+    // not logged in
   }
 
   // Fetch posts (newest first)
@@ -85,38 +116,51 @@ export default async function ProfilePage({ params }: PageProps) {
 
   const allPosts = posts ?? []
 
-  // Fetch all profile slugs for wikilink resolution
-  const { data: profileSlugs } = await supabase
-    .from('profiles')
-    .select('slug')
+  // Fetch all profile + company slugs for wikilink resolution
+  const [{ data: profileSlugs }, { data: companySlugsData }] = await Promise.all([
+    supabase.from('profiles').select('slug'),
+    supabase.from('companies').select('slug'),
+  ])
   const resolvedSlugs = new Set<string>(
     (profileSlugs ?? []).map((p: { slug: string }) => p.slug)
   )
+  const resolvedCompanySlugs = new Set<string>(
+    (companySlugsData ?? []).map((c: { slug: string }) => c.slug)
+  )
 
   // Collect outbound wikilinks from profile content
-  const profileWikilinks = profile.content
-    ? extractWikilinks(profile.content)
+  const profileWikilinks = profile.markdown_content
+    ? extractWikilinks(profile.markdown_content)
     : []
   const outboundLinks = Array.from(
     new Set(profileWikilinks.map((n) => JSON.stringify({ name: n, slug: toSlug(n) })))
   ).map((s) => JSON.parse(s) as { name: string; slug: string })
 
+  // Fetch backlinks — profiles that mention this profile via wikilinks
+  const { data: backlinkProfiles } = await supabase
+    .from('profiles')
+    .select('slug, display_name')
+    .contains('outbound_links', [profile.slug])
+    .neq('slug', profile.slug)
+
+  const backlinks = backlinkProfiles ?? []
+
+  // Social counts + follow state
+  const [{ count: followerCount }, { count: followingCount }, followRow] = await Promise.all([
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('followee_id', profile.id),
+    supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profile.id),
+    viewerProfileId
+      ? supabase.from('follows').select('id').eq('follower_id', viewerProfileId).eq('followee_id', profile.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ])
+
+  const isFollowing = !!followRow.data
+
   return (
     <div style={{ padding: 'var(--space-xl) 0' }}>
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--space-xl)',
-          alignItems: 'flex-start',
-        }}
-      >
+      <div className="sidebar-layout" style={{ display: 'flex', gap: 'var(--space-xl)', alignItems: 'flex-start' }}>
         {/* Left column — profile card */}
-        <aside
-          style={{
-            width: '240px',
-            flexShrink: 0,
-          }}
-        >
+        <aside className="sidebar" style={{ width: '240px', flexShrink: 0 }}>
           <div
             style={{
               background: 'var(--color-card)',
@@ -127,7 +171,7 @@ export default async function ProfilePage({ params }: PageProps) {
               top: '72px',
             }}
           >
-            {/* Avatar placeholder */}
+            {/* Avatar */}
             <div
               style={{
                 width: '64px',
@@ -148,18 +192,91 @@ export default async function ProfilePage({ params }: PageProps) {
               {profile.display_name.charAt(0).toUpperCase()}
             </div>
 
-            {/* Display name */}
-            <h1
+            {/* Display name + edit button */}
+            <div
               style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: '1.125rem',
-                color: 'var(--color-ink)',
-                lineHeight: 1.3,
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                gap: 'var(--space-sm)',
                 marginBottom: profile.bio ? 'var(--space-sm)' : 'var(--space-md)',
               }}
             >
-              {profile.display_name}
-            </h1>
+              <h1
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: '1.125rem',
+                  color: 'var(--color-ink)',
+                  lineHeight: 1.3,
+                }}
+              >
+                {profile.display_name}
+              </h1>
+              {isOwner && (
+                <Link
+                  href="/editor"
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: 'var(--color-secondary)',
+                    padding: '3px 8px',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--color-border)',
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Edit
+                </Link>
+              )}
+            </div>
+
+            {/* Title */}
+            {profile.title && (
+              <p
+                style={{
+                  fontSize: '13px',
+                  color: 'var(--color-text)',
+                  fontWeight: 500,
+                  marginBottom: 'var(--space-xs)',
+                }}
+              >
+                {profile.title}
+              </p>
+            )}
+
+            {/* Location */}
+            {profile.location && (
+              <p
+                style={{
+                  fontSize: '12px',
+                  color: 'var(--color-muted)',
+                  marginBottom: profile.website || profile.bio ? 'var(--space-xs)' : 'var(--space-md)',
+                }}
+              >
+                {profile.location}
+              </p>
+            )}
+
+            {/* Website */}
+            {profile.website && (
+              <a
+                href={profile.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  color: 'var(--color-primary)',
+                  marginBottom: profile.bio ? 'var(--space-xs)' : 'var(--space-md)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {profile.website.replace(/^https?:\/\//, '')}
+              </a>
+            )}
 
             {/* Bio */}
             {profile.bio && (
@@ -175,13 +292,39 @@ export default async function ProfilePage({ params }: PageProps) {
               </p>
             )}
 
+            {/* Follow button (non-owners) + follower/following counts */}
+            <div style={{ marginBottom: 'var(--space-md)' }}>
+              {!isOwner && viewerProfileId && (
+                <div style={{ marginBottom: 'var(--space-sm)' }}>
+                  <FollowButton
+                    followeeSlug={name}
+                    initialFollowing={isFollowing}
+                    followerCount={followerCount ?? 0}
+                  />
+                </div>
+              )}
+              {(isOwner || !viewerProfileId) && (
+                <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
+                  <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                    <strong style={{ color: 'var(--color-text)' }}>{followerCount ?? 0}</strong>{' '}
+                    {(followerCount ?? 0) === 1 ? 'follower' : 'followers'}
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                    <strong style={{ color: 'var(--color-text)' }}>{followingCount ?? 0}</strong>{' '}
+                    following
+                  </span>
+                </div>
+              )}
+            </div>
+
             {/* Badges */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 'var(--space-xs)',
-                marginBottom: outboundLinks.length > 0 ? 'var(--space-md)' : 0,
+                marginBottom:
+                  outboundLinks.length > 0 || backlinks.length > 0 ? 'var(--space-md)' : 0,
               }}
             >
               <a
@@ -198,8 +341,8 @@ export default async function ProfilePage({ params }: PageProps) {
             </div>
 
             {/* Outbound wikilinks */}
-            {outboundLinks.length > 0 && (
-              <div>
+            {(outboundLinks.length > 0 || (profile.company_links ?? []).length > 0) && (
+              <div style={{ marginBottom: backlinks.length > 0 ? 'var(--space-md)' : 0 }}>
                 <p
                   style={{
                     fontSize: '11px',
@@ -216,7 +359,7 @@ export default async function ProfilePage({ params }: PageProps) {
                   {outboundLinks.map(({ name: linkName, slug: linkSlug }) =>
                     resolvedSlugs.has(linkSlug) ? (
                       <Link
-                        key={linkSlug}
+                        key={`p:${linkSlug}`}
                         href={`/profile/${linkSlug}`}
                         className="wikilink-resolved"
                         style={{ fontSize: '12px' }}
@@ -225,7 +368,7 @@ export default async function ProfilePage({ params }: PageProps) {
                       </Link>
                     ) : (
                       <span
-                        key={linkSlug}
+                        key={`p:${linkSlug}`}
                         className="wikilink-unresolved"
                         style={{ fontSize: '12px' }}
                         title="Profile not found"
@@ -234,6 +377,46 @@ export default async function ProfilePage({ params }: PageProps) {
                       </span>
                     )
                   )}
+                  {(profile.company_links ?? []).map((companySlug) => (
+                    <Link
+                      key={`c:${companySlug}`}
+                      href={`/company/${companySlug}`}
+                      className="wikilink-resolved"
+                      style={{ fontSize: '12px' }}
+                    >
+                      {companySlug}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Backlinks */}
+            {backlinks.length > 0 && (
+              <div>
+                <p
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: 'var(--color-muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: 'var(--space-xs)',
+                  }}
+                >
+                  Mentioned by
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
+                  {backlinks.map((b) => (
+                    <Link
+                      key={b.slug}
+                      href={`/profile/${b.slug}`}
+                      className="wikilink-resolved"
+                      style={{ fontSize: '12px' }}
+                    >
+                      {b.display_name}
+                    </Link>
+                  ))}
                 </div>
               </div>
             )}
@@ -242,23 +425,37 @@ export default async function ProfilePage({ params }: PageProps) {
 
         {/* Right column — posts */}
         <main style={{ flex: 1, minWidth: 0 }}>
+          {isOwner && (
+            <div style={{ marginBottom: 'var(--space-md)', textAlign: 'right' }}>
+              <Link
+                href="/editor?mode=post"
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: 'var(--color-primary)',
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--color-primary-light)',
+                  border: '1px solid var(--color-primary)',
+                }}
+              >
+                + New post
+              </Link>
+            </div>
+          )}
+
           {allPosts.length === 0 ? (
-            <p
-              style={{
-                color: 'var(--color-muted)',
-                fontSize: '15px',
-                paddingTop: 'var(--space-lg)',
-              }}
-            >
-              No posts yet.
+            <p style={{ color: 'var(--color-muted)', fontSize: '15px', paddingTop: 'var(--space-lg)' }}>
+              {isOwner ? (
+                <>No posts yet. <Link href="/editor?mode=post" style={{ color: 'var(--color-primary)' }}>Write your first post →</Link></>
+              ) : (
+                'No posts yet.'
+              )}
             </p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
               {allPosts.map((post) => {
-                const postWikilinksHtml = renderWikilinks(
-                  postPreview(post),
-                  resolvedSlugs
-                )
+                const postWikilinksHtml = renderWikilinks(postPreview(post), resolvedSlugs, resolvedCompanySlugs)
                 return (
                   <article
                     key={post.id}
@@ -269,19 +466,20 @@ export default async function ProfilePage({ params }: PageProps) {
                       padding: 'var(--space-lg)',
                     }}
                   >
-                    {/* Post title or preview */}
                     {post.title && (
-                      <h2
-                        style={{
-                          fontFamily: 'var(--font-serif)',
-                          fontSize: '1.125rem',
-                          color: 'var(--color-ink)',
-                          marginBottom: 'var(--space-xs)',
-                          lineHeight: 1.35,
-                        }}
-                      >
-                        {post.title}
-                      </h2>
+                      <Link href={`/profile/${name}/post/${post.slug}`}>
+                        <h2
+                          style={{
+                            fontFamily: 'var(--font-serif)',
+                            fontSize: '1.125rem',
+                            color: 'var(--color-ink)',
+                            marginBottom: 'var(--space-xs)',
+                            lineHeight: 1.35,
+                          }}
+                        >
+                          {post.title}
+                        </h2>
+                      </Link>
                     )}
 
                     <p
@@ -295,7 +493,26 @@ export default async function ProfilePage({ params }: PageProps) {
                       dangerouslySetInnerHTML={{ __html: postWikilinksHtml }}
                     />
 
-                    {/* Footer */}
+                    {(post.tags ?? []).length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: 'var(--space-sm)' }}>
+                        {post.tags.map((tag) => (
+                          <a
+                            key={tag}
+                            href={`/tag/${tag}`}
+                            style={{
+                              fontSize: '11px',
+                              padding: '2px 8px',
+                              background: 'var(--color-primary-light)',
+                              color: 'var(--color-primary)',
+                              borderRadius: 'var(--radius-full)',
+                              fontWeight: 500,
+                            }}
+                          >
+                            {tag}
+                          </a>
+                        ))}
+                      </div>
+                    )}
                     <div
                       style={{
                         display: 'flex',
@@ -305,15 +522,20 @@ export default async function ProfilePage({ params }: PageProps) {
                         gap: 'var(--space-sm)',
                       }}
                     >
-                      <time
-                        dateTime={post.created_at}
-                        style={{
-                          fontSize: '13px',
-                          color: 'var(--color-muted)',
-                        }}
-                      >
-                        {formatDate(post.created_at)}
-                      </time>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                        <time
+                          dateTime={post.created_at}
+                          style={{ fontSize: '13px', color: 'var(--color-muted)' }}
+                        >
+                          {formatDate(post.created_at)}
+                        </time>
+                        <Link
+                          href={`/profile/${name}/post/${post.slug}`}
+                          style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-primary)' }}
+                        >
+                          Read →
+                        </Link>
+                      </div>
                       <span className="md-url">
                         /profile/{name}/post/{post.slug}.md
                       </span>
@@ -325,14 +547,6 @@ export default async function ProfilePage({ params }: PageProps) {
           )}
         </main>
       </div>
-
-      {/* Responsive styles */}
-      <style>{`
-        @media (max-width: 767px) {
-          .profile-layout { flex-direction: column !important; }
-          .profile-sidebar { width: 100% !important; position: static !important; }
-        }
-      `}</style>
     </div>
   )
 }
