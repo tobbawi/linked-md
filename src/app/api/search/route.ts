@@ -14,6 +14,20 @@ export async function GET(request: NextRequest) {
 
   const supabase = createServerClient()
 
+  if (type === 'company') {
+    const { data, error } = await supabase
+      .from('companies')
+      .select('slug, name')
+      .or(`slug.ilike.%${safeQ}%,name.ilike.%${safeQ}%`)
+      .limit(10)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    // Return same shape as profile search: { slug, display_name }
+    return NextResponse.json((data ?? []).map((c: { slug: string; name: string }) => ({
+      slug: c.slug,
+      display_name: c.name,
+    })))
+  }
+
   if (type !== 'all') {
     // Backward-compat: plain profile search used by editor autocomplete
     const { data, error } = await supabase

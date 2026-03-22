@@ -3,7 +3,9 @@ import type { Metadata } from 'next'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks, extractWikilinks, toSlug } from '@/lib/wikilinks'
 import { FollowButton } from '@/components/FollowButton'
-import type { Profile, Post } from '@/types'
+import ExperienceSection from '@/components/ExperienceSection'
+import ProfileViewTracker from '@/components/ProfileViewTracker'
+import type { Profile, Post, ExperienceEntry } from '@/types'
 
 interface PageProps {
   params: { name: string }
@@ -106,15 +108,24 @@ export default async function ProfilePage({ params }: PageProps) {
     // not logged in
   }
 
-  // Fetch posts (newest first)
-  const { data: posts } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('profile_id', profile.id)
-    .order('created_at', { ascending: false })
-    .returns<Post[]>()
+  // Fetch posts (newest first) + experience (user-defined sort order)
+  const [{ data: posts }, { data: experienceRows }] = await Promise.all([
+    supabase
+      .from('posts')
+      .select('*')
+      .eq('profile_id', profile.id)
+      .order('created_at', { ascending: false })
+      .returns<Post[]>(),
+    supabase
+      .from('experience')
+      .select('*')
+      .eq('profile_id', profile.id)
+      .order('sort_order', { ascending: true })
+      .returns<ExperienceEntry[]>(),
+  ])
 
   const allPosts = posts ?? []
+  const experience = experienceRows ?? []
 
   // Fetch all profile + company slugs for wikilink resolution
   const [{ data: profileSlugs }, { data: companySlugsData }] = await Promise.all([
@@ -158,6 +169,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
   return (
     <div style={{ padding: 'var(--space-xl) 0' }}>
+      <ProfileViewTracker profileSlug={name} />
       <div className="sidebar-layout" style={{ display: 'flex', gap: 'var(--space-xl)', alignItems: 'flex-start' }}>
         {/* Left column — profile card */}
         <aside className="sidebar" style={{ width: '240px', flexShrink: 0 }}>
@@ -331,9 +343,17 @@ export default async function ProfilePage({ params }: PageProps) {
                 href={`/profile/${name}/llm.txt`}
                 className="llm-badge"
                 style={{ alignSelf: 'flex-start' }}
-                title="AI-readable profile"
+                title="AI-readable profile summary"
               >
                 llm.txt available
+              </a>
+              <a
+                href={`/profile/${name}/llm-full.txt`}
+                className="llm-badge"
+                style={{ alignSelf: 'flex-start' }}
+                title="Full AI-readable profile with experience + posts"
+              >
+                llm-full.txt
               </a>
               <span className="md-url" style={{ alignSelf: 'flex-start' }}>
                 /profile/{name}.md
@@ -423,8 +443,10 @@ export default async function ProfilePage({ params }: PageProps) {
           </div>
         </aside>
 
-        {/* Right column — posts */}
+        {/* Right column — experience + posts */}
         <main style={{ flex: 1, minWidth: 0 }}>
+          <ExperienceSection experience={experience} />
+
           {isOwner && (
             <div style={{ marginBottom: 'var(--space-md)', textAlign: 'right' }}>
               <Link

@@ -115,49 +115,264 @@ function LandingHero() {
   )
 }
 
-// ── Feed ───────────────────────────────────────────────────────────────────
+// ── User sidebar (logged-in) ────────────────────────────────────────────────
 
-function FeedHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
+function UserSidebar({
+  profile,
+  profileViews,
+  postImpressions,
+}: {
+  profile: Profile
+  profileViews: number
+  postImpressions: number
+}) {
+  const initial = profile.display_name.charAt(0).toUpperCase()
+
   return (
     <div
       style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: 'var(--space-xl)',
-        paddingBottom: 'var(--space-lg)',
-        borderBottom: '1px solid var(--color-border)',
-        marginBottom: 'var(--space-lg)',
+        background: 'var(--color-card)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-lg)',
+        overflow: 'hidden',
+        position: 'sticky',
+        top: '72px',
       }}
     >
-      <h2
+      {/* Emerald header strip */}
+      <div
         style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '1.25rem',
-          color: 'var(--color-ink)',
+          height: '48px',
+          background: 'linear-gradient(135deg, var(--color-primary) 0%, #0B7D62 100%)',
         }}
-      >
-        Recent posts
-      </h2>
-      {isLoggedIn && (
+      />
+
+      {/* Avatar + info */}
+      <div style={{ padding: '0 var(--space-lg) var(--space-lg)', marginTop: '-24px' }}>
+        {/* Avatar */}
+        <Link href={`/profile/${profile.slug}`}>
+          <div
+            style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--color-primary-light)',
+              border: '3px solid var(--color-card)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '20px',
+              fontWeight: 700,
+              color: 'var(--color-primary)',
+              fontFamily: 'var(--font-serif)',
+              marginBottom: 'var(--space-sm)',
+            }}
+          >
+            {initial}
+          </div>
+        </Link>
+
+        {/* Name */}
         <Link
-          href="/editor?mode=post"
+          href={`/profile/${profile.slug}`}
+          style={{ textDecoration: 'none' }}
+        >
+          <span
+            style={{
+              display: 'block',
+              fontFamily: 'var(--font-serif)',
+              fontSize: '1.0625rem',
+              fontWeight: 400,
+              color: 'var(--color-ink)',
+              lineHeight: 1.3,
+              marginBottom: '2px',
+            }}
+          >
+            {profile.display_name}
+          </span>
+        </Link>
+
+        {/* Title */}
+        {profile.title && (
+          <p
+            style={{
+              fontSize: '12px',
+              color: 'var(--color-secondary)',
+              lineHeight: 1.4,
+              marginBottom: profile.location ? '1px' : 'var(--space-sm)',
+            }}
+          >
+            {profile.title}
+          </p>
+        )}
+
+        {/* Location */}
+        {profile.location && (
+          <p
+            style={{
+              fontSize: '12px',
+              color: 'var(--color-muted)',
+              marginBottom: 'var(--space-sm)',
+            }}
+          >
+            {profile.location}
+          </p>
+        )}
+
+        {/* View profile link */}
+        <Link
+          href={`/profile/${profile.slug}`}
           style={{
-            fontSize: '13px',
+            display: 'block',
+            fontSize: '12px',
             fontWeight: 500,
             color: 'var(--color-primary)',
-            padding: '6px 14px',
+            marginBottom: 'var(--space-md)',
+          }}
+        >
+          View profile →
+        </Link>
+
+        {/* Divider */}
+        <div style={{ borderTop: '1px solid var(--color-border)', marginBottom: 'var(--space-md)' }} />
+
+        {/* Stats — profile views + post impressions */}
+        <div
+          style={{
+            background: 'var(--color-bg)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)',
+            padding: 'var(--space-md)',
+            marginBottom: 'var(--space-md)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-sm)',
+          }}
+        >
+          {/* Profile views */}
+          <div>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: 'var(--color-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '2px',
+              }}
+            >
+              Profile views
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: '1.5rem',
+                  fontWeight: 400,
+                  color: 'var(--color-primary)',
+                  lineHeight: 1,
+                }}
+              >
+                {profileViews}
+              </span>
+              <span
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--color-muted)',
+                }}
+              >
+                last 7 days
+              </span>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div style={{ borderTop: '1px solid var(--color-border)' }} />
+
+          {/* Post impressions */}
+          <div>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: 'var(--color-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                marginBottom: '2px',
+              }}
+            >
+              Post impressions
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: '1.5rem',
+                  fontWeight: 400,
+                  color: 'var(--color-primary)',
+                  lineHeight: 1,
+                }}
+              >
+                {postImpressions}
+              </span>
+              <span
+                style={{
+                  fontSize: '11px',
+                  color: 'var(--color-muted)',
+                }}
+              >
+                last 7 days
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Badges */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-xs)',
+            marginBottom: 'var(--space-md)',
+          }}
+        >
+          <a
+            href={`/profile/${profile.slug}/llm.txt`}
+            className="llm-badge"
+            style={{ alignSelf: 'flex-start' }}
+            title="AI-readable profile summary"
+          >
+            llm.txt available
+          </a>
+          <span className="md-url" style={{ alignSelf: 'flex-start', fontSize: '11px' }}>
+            /profile/{profile.slug}.md
+          </span>
+        </div>
+
+        {/* Write a post CTA */}
+        <Link
+          href="/post/new"
+          style={{
+            display: 'block',
+            textAlign: 'center',
+            padding: '8px 0',
+            background: 'var(--color-primary)',
+            color: '#fff',
             borderRadius: 'var(--radius-sm)',
-            background: 'var(--color-primary-light)',
-            border: '1px solid var(--color-primary)',
+            fontWeight: 600,
+            fontSize: '13px',
           }}
         >
           + Write a post
         </Link>
-      )}
+      </div>
     </div>
   )
 }
+
+// ── Post card ───────────────────────────────────────────────────────────────
 
 function PostCard({ post }: { post: FeedPost }) {
   const mdUrl = `/profile/${post.profile.slug}/post/${post.slug}.md`
@@ -302,7 +517,7 @@ function EmptyFeed({ isLoggedIn }: { isLoggedIn: boolean }) {
       </p>
       {isLoggedIn && (
         <Link
-          href="/editor?mode=post"
+          href="/post/new"
           style={{
             display: 'inline-block',
             padding: '10px 24px',
@@ -326,6 +541,9 @@ export default async function HomePage() {
   let isLoggedIn = false
   let hasProfile = true // assume true to avoid flash
   let myProfileId: string | null = null
+  let currentProfile: Profile | null = null
+  let profileViews = 0
+  let postImpressions = 0
 
   try {
     const authClient = createAuthServerClient()
@@ -335,11 +553,45 @@ export default async function HomePage() {
       const supabase = createServerClient()
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id')
+        .select('*')
         .eq('user_id', user.id)
-        .single()
+        .single<Profile>()
       hasProfile = !!profile
       myProfileId = profile?.id ?? null
+      currentProfile = profile ?? null
+
+      if (profile) {
+        const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+        // Profile view count: distinct viewer hashes in last 7 days
+        const { data: pvRows } = await supabase
+          .from('profile_views')
+          .select('viewer_hash')
+          .eq('profile_id', profile.id)
+          .gte('created_at', since)
+        if (pvRows) {
+          profileViews = new Set(pvRows.map((r: { viewer_hash: string }) => r.viewer_hash)).size
+        }
+
+        // Post impressions: sum of distinct views across all posts in last 7 days
+        const { data: myPosts } = await supabase
+          .from('posts')
+          .select('id')
+          .eq('profile_id', profile.id)
+        if (myPosts && myPosts.length > 0) {
+          const postIds = myPosts.map((p: { id: string }) => p.id)
+          const { data: postViewRows } = await supabase
+            .from('post_views')
+            .select('post_id, viewer_hash')
+            .in('post_id', postIds)
+            .gte('created_at', since)
+          if (postViewRows) {
+            // Count distinct (post_id, viewer_hash) pairs for total impressions
+            const seen = new Set(postViewRows.map((r: { post_id: string; viewer_hash: string }) => `${r.post_id}::${r.viewer_hash}`))
+            postImpressions = seen.size
+          }
+        }
+      }
     }
   } catch {
     // Supabase not configured
@@ -460,17 +712,75 @@ export default async function HomePage() {
         </div>
       )}
 
-      <FeedHeader isLoggedIn={isLoggedIn} />
+      {/* Feed layout: sidebar + posts for logged-in, full-width for logged-out */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 'var(--space-xl)',
+          alignItems: 'flex-start',
+          paddingTop: isLoggedIn ? 'var(--space-xl)' : 0,
+        }}
+      >
+        {/* Left sidebar — only for logged-in users with a profile */}
+        {isLoggedIn && currentProfile && (
+          <aside
+            style={{
+              width: '220px',
+              flexShrink: 0,
+              display: 'none', // hidden on mobile via CSS; override in layout
+            }}
+            className="home-sidebar"
+          >
+            <UserSidebar
+              profile={currentProfile}
+              profileViews={profileViews}
+              postImpressions={postImpressions}
+            />
+          </aside>
+        )}
 
-      {feedPosts.length === 0 ? (
-        <EmptyFeed isLoggedIn={isLoggedIn} />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-          {feedPosts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
-      )}
+        {/* Main feed */}
+        <main style={{ flex: 1, minWidth: 0 }}>
+          {/* Write a post button — visible on mobile or when no sidebar */}
+          {isLoggedIn && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginBottom: 'var(--space-lg)',
+                borderBottom: '1px solid var(--color-border)',
+                paddingBottom: 'var(--space-lg)',
+              }}
+              className="feed-write-btn"
+            >
+              <Link
+                href="/post/new"
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: 'var(--color-primary)',
+                  padding: '6px 14px',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--color-primary-light)',
+                  border: '1px solid var(--color-primary)',
+                }}
+              >
+                + Write a post
+              </Link>
+            </div>
+          )}
+
+          {feedPosts.length === 0 ? (
+            <EmptyFeed isLoggedIn={isLoggedIn} />
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+              {feedPosts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }

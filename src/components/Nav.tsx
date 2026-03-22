@@ -78,7 +78,7 @@ export function Nav({ user, profileSlug }: NavProps) {
           {user ? (
             <>
               <Link
-                href="/editor"
+                href="/post/new"
                 style={{
                   fontSize: '13px',
                   fontWeight: 500,

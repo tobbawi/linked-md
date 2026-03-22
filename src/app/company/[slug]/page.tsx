@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks } from '@/lib/wikilinks'
-import type { Company, Profile } from '@/types'
+import type { Company, Profile, ExperienceEntry } from '@/types'
 
 interface PageProps {
   params: { slug: string }
@@ -52,12 +52,18 @@ export default async function CompanyPage({ params }: PageProps) {
     // not logged in
   }
 
-  // Employees: profiles whose company_links includes this slug
-  const { data: employees } = await supabase
-    .from('profiles')
-    .select('slug, display_name, bio')
-    .contains('company_links', [company.slug])
-    .returns<Pick<Profile, 'slug' | 'display_name' | 'bio'>[]>()
+  // People: experience entries pointing at this company (with profile info)
+  const { data: experienceRows } = await supabase
+    .from('experience')
+    .select('*, profile:profiles!profile_id(slug, display_name)')
+    .eq('company_slug', company.slug)
+    .order('is_current', { ascending: false })
+    .order('end_year', { ascending: false, nullsFirst: true })
+
+  type ExperienceWithProfile = ExperienceEntry & {
+    profile: Pick<Profile, 'slug' | 'display_name'>
+  }
+  const people = (experienceRows ?? []) as ExperienceWithProfile[]
 
   // Resolve profile slugs for wikilink rendering in company content
   const { data: profileSlugs } = await supabase.from('profiles').select('slug')
@@ -192,24 +198,32 @@ export default async function CompanyPage({ params }: PageProps) {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: 'var(--space-xs)',
-                marginBottom: (employees ?? []).length > 0 ? 'var(--space-md)' : 0,
+                marginBottom: people.length > 0 ? 'var(--space-md)' : 0,
               }}
             >
               <a
                 href={`/company/${company.slug}/llm.txt`}
                 className="llm-badge"
                 style={{ alignSelf: 'flex-start' }}
-                title="AI-readable company profile"
+                title="AI-readable company profile summary"
               >
                 llm.txt available
+              </a>
+              <a
+                href={`/company/${company.slug}/llm-full.txt`}
+                className="llm-badge"
+                style={{ alignSelf: 'flex-start' }}
+                title="Full AI-readable company profile with all people"
+              >
+                llm-full.txt
               </a>
               <span className="md-url" style={{ alignSelf: 'flex-start' }}>
                 /company/{company.slug}.md
               </span>
             </div>
 
-            {/* Employees */}
-            {(employees ?? []).length > 0 && (
+            {/* People */}
+            {people.length > 0 && (
               <div>
                 <p
                   style={{
@@ -218,24 +232,27 @@ export default async function CompanyPage({ params }: PageProps) {
                     color: 'var(--color-muted)',
                     textTransform: 'uppercase',
                     letterSpacing: '0.05em',
-                    marginBottom: 'var(--space-xs)',
+                    marginBottom: 'var(--space-sm)',
                   }}
                 >
-                  People ({employees!.length})
+                  People ({people.length})
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
-                  {employees!.map((e) => (
-                    <Link
-                      key={e.slug}
-                      href={`/profile/${e.slug}`}
-                      style={{
-                        fontSize: '13px',
-                        color: 'var(--color-text)',
-                        fontWeight: 500,
-                      }}
-                    >
-                      {e.display_name}
-                    </Link>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                  {people.map((e) => (
+                    <div key={e.id}>
+                      <Link
+                        href={`/profile/${e.profile.slug}`}
+                        style={{ fontSize: '13px', color: 'var(--color-text)', fontWeight: 500 }}
+                      >
+                        {e.profile.display_name}
+                      </Link>
+                      <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '1px' }}>
+                        {e.title}
+                        {e.is_current && (
+                          <span style={{ marginLeft: '4px', color: 'var(--color-primary)', fontWeight: 500 }}>· now</span>
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

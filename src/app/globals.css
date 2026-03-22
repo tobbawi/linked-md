@@ -215,6 +215,29 @@ a {
   }
 }
 
+/* Home page sidebar — shown on desktop, hidden on mobile */
+.home-sidebar {
+  display: block !important;
+}
+
+/* On mobile, hide the sidebar and show the write button in the feed */
+@media (max-width: 767px) {
+  .home-sidebar {
+    display: none !important;
+  }
+
+  .feed-write-btn {
+    display: flex !important;
+  }
+}
+
+/* On desktop, hide the inline write button (it's in the sidebar) */
+@media (min-width: 768px) {
+  .feed-write-btn {
+    display: none !important;
+  }
+}
+
 .company-card {
   background: var(--color-card);
   border: 1px solid var(--color-border);

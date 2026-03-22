@@ -6,6 +6,7 @@ import { renderWikilinks } from '@/lib/wikilinks'
 import { PostActions } from '@/components/PostActions'
 import { LikeButton } from '@/components/LikeButton'
 import { CommentsSection } from '@/components/CommentsSection'
+import PostViewTracker from '@/components/PostViewTracker'
 import type { Profile, Post, Comment } from '@/types'
 
 interface PageProps {
@@ -143,6 +144,7 @@ export default async function PostPage({ params }: PageProps) {
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+      <PostViewTracker postId={post.id} />
       <div style={{ maxWidth: '680px' }}>
         {/* Back to profile */}
         <div
