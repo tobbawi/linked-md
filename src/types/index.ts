@@ -90,3 +90,20 @@ export interface SearchResult {
   slug: string
   display_name: string
 }
+
+export interface ExperienceEntry {
+  id: string
+  profile_id: string
+  company_name: string
+  company_slug: string | null
+  title: string
+  start_year: number
+  start_month: number | null
+  end_year: number | null
+  end_month: number | null
+  is_current: boolean
+  description: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
