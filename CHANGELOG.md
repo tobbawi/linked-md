@@ -6,6 +6,25 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [0.1.3.0] - 2026-03-22
+
+### Added
+- **View tracking:** Privacy-preserving view counts for profiles and posts — `profile_views` and `post_views` tables with SHA-256(IP+UserAgent) hashing (no raw IPs stored), self-view suppression, and 7-day distinct-viewer stats live on the home page dashboard.
+- **Experience entries:** `experience` table with per-profile timeline entries — migration, `ExperienceSection` component, and profile page integration.
+- **Company llm-full endpoint:** `/api/llm-full/company/[slug]` serving structured company profiles for LLM consumption, matching the profile llm-full pattern.
+- **Post creation shortcut:** `/post/new` direct route for quick post creation.
+- **Shared editor component:** `editor-shared.tsx` extracts common editor logic for reuse across profile and company editors.
+
+### Changed
+- **DESIGN.md:** Added Agent Gateway section with badge copy and AI-facing voice guidelines.
+- **Home page stats:** Profile views and post impressions now show live 7-day counts instead of stub zeros.
+- **Exports:** `buildLlmCompanyTxt` and `buildLlmCompanyFullTxt` builder functions added and tested (15 new tests, 44 → 59 total).
+
+### Fixed
+- **Build:** Resolved `tailwindcss` PostCSS plugin conflict and implicit `any` in `cookiesToSet` params.
+
+---
+
 ## [0.1.2.1] - 2026-03-21
 
 ### Fixed
