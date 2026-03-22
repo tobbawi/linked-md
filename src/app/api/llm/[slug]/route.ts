@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { buildLlmTxt } from '@/lib/exports'
-import type { Post, Profile } from '@/types'
+import type { Profile, ExperienceEntry } from '@/types'
 
 export async function GET(
   _request: NextRequest,
@@ -22,14 +22,32 @@ export async function GET(
     })
   }
 
-  const { data: posts } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('profile_id', profile.id)
-    .order('created_at', { ascending: false })
-    .returns<Post[]>()
+  const [{ data: experienceRows }, { count: followerCount }, { count: followingCount }] =
+    await Promise.all([
+      supabase
+        .from('experience')
+        .select('*')
+        .eq('profile_id', profile.id)
+        .order('sort_order', { ascending: true })
+        .returns<ExperienceEntry[]>(),
+      supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('followee_id', profile.id),
+      supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', profile.id),
+    ])
 
-  const txt = buildLlmTxt(profile, posts ?? [])
+  const txt = buildLlmTxt(
+    profile,
+    experienceRows ?? [],
+    {
+      followerCount: followerCount ?? undefined,
+      followingCount: followingCount ?? undefined,
+    }
+  )
 
   return new NextResponse(txt, {
     headers: {
