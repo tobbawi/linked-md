@@ -6,6 +6,13 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [0.1.3.1] - 2026-03-22
+
+### Changed
+- **TODOS.md:** Full Social MVP roadmap — M2 (network feed, avatars, company following, reposts), M3 (education, skills + endorsements, recommendations, profile completeness score), M4 (job listings, direct messaging with Supabase Realtime, analytics dashboard), plus tech debt items and architectural constraints for each feature.
+
+---
+
 ## [0.1.3.0] - 2026-03-22
 
 ### Added
