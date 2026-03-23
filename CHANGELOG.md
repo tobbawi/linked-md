@@ -6,6 +6,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [0.2.0.0] - 2026-03-23
+
+### Added
+- **Direct messaging (M4):** Full conversation system — `conversations`, `conversation_members`, and `messages` tables with Supabase Realtime subscription for live message delivery. Includes `/messages` list page, `/messages/[id]` thread page with optimistic UI, `MessageButton` on profile pages, and `/api/messages/[id]/read` PATCH endpoint for marking messages read.
+- **Job listings (M4):** `job_listings` table with company ownership, `active` flag for soft-delete, `/jobs` page listing active postings, and `/api/jobs/save` POST endpoint with company ownership verification.
+- **Skills & endorsements (M3):** `profile_skills` table with per-profile skill list, `skill_endorsements` for peer endorsements (self-endorse blocked), and `/api/skills/endorse` POST/DELETE endpoint. Skills section rendered on profile pages.
+- **Recommendations (M3):** `recommendations` table with 20–500 char body validation, self-recommendation blocked, `/api/recommendations` POST and `/api/recommendations/[id]/hide` PATCH for owner hiding. Recommendations rendered on profile pages.
+- **Profile completeness score (M3):** Computed completeness percentage (avatar, bio, experience, education, skills, posts, followers) rendered as a progress bar with contextual hints on profile pages.
+- **Education entries (M3):** `education_entries` table with school, degree, field, date range, and `replace_education` atomic RPC. Education section on profile pages.
+- **Message validation helper:** `src/lib/messageValidation.ts` — pure `validateMessageBody` function with `MESSAGE_MAX_LENGTH = 2000` constant, shared between API route and test suite.
+- **Supabase RPC helpers (migration 013):** `create_conversation_with_members` (advisory-locked, deduplication-safe), `last_messages_for_conversations`, `unread_counts_for_conversations`, `replace_skills` (transactional, matches `replace_education` pattern).
+
+### Fixed
+- **Message read-before-fetch ordering:** Mark messages read _before_ fetching to prevent a message arriving in the gap from being silently consumed without being shown to the user.
+- **Job field length guards:** `title` capped at 200 chars, `description_md` at 20,000 chars in `/api/jobs/save` to prevent unbounded DB writes.
+- **Skills save atomicity:** `/api/skills/save` now calls `replace_skills` RPC (delete + insert in one transaction) instead of a non-atomic two-step that could lose data on insertion failure.
+- **Duplicate conversation prevention:** `create_conversation_with_members` RPC uses `pg_advisory_xact_lock` on the sorted member pair and returns the existing conversation ID if one already exists, preventing duplicate conversations under concurrent requests.
+
+---
+
 ## [0.1.3.1] - 2026-03-22
 
 ### Changed
