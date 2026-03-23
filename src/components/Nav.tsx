@@ -59,19 +59,19 @@ export function Nav({ user, profileSlug }: NavProps) {
 
         {/* Center nav */}
         <div className="nav-center">
-          <Link href="/people" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+          <Link href="/people" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             People
           </Link>
-          <Link href="/companies" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+          <Link href="/companies" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             Companies
           </Link>
-          <Link href="/jobs" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+          <Link href="/jobs" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             Jobs
           </Link>
-          <Link href="/explore" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+          <Link href="/explore" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             Explore
           </Link>
-          <Link href="/search" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+          <Link href="/search" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             Search
           </Link>
         </div>

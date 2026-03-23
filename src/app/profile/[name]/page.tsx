@@ -30,7 +30,7 @@ function truncate(text: string, maxLen: number): string {
 }
 
 function postPreview(post: Post): string {
-  const raw = post.title ?? post.markdown_content
+  const raw = post.markdown_content
   const stripped = raw
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\*\*?([^*]+)\*\*?/g, '$1')
@@ -320,7 +320,7 @@ export default async function ProfilePage({ params }: PageProps) {
             {profile.location && (
               <p
                 style={{
-                  fontSize: '12px',
+                  fontSize: '13px',
                   color: 'var(--color-muted)',
                   marginBottom: profile.website || profile.bio ? 'var(--space-xs)' : 'var(--space-md)',
                 }}
@@ -337,7 +337,7 @@ export default async function ProfilePage({ params }: PageProps) {
                 rel="noopener noreferrer"
                 style={{
                   display: 'block',
-                  fontSize: '12px',
+                  fontSize: '13px',
                   color: 'var(--color-primary)',
                   marginBottom: profile.bio ? 'var(--space-xs)' : 'var(--space-md)',
                   overflow: 'hidden',
@@ -377,11 +377,11 @@ export default async function ProfilePage({ params }: PageProps) {
               )}
               {(isOwner || !viewerProfileId) && (
                 <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
                     <strong style={{ color: 'var(--color-text)' }}>{followerCount ?? 0}</strong>{' '}
                     {(followerCount ?? 0) === 1 ? 'follower' : 'followers'}
                   </span>
-                  <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
                     <strong style={{ color: 'var(--color-text)' }}>{followingCount ?? 0}</strong>{' '}
                     following
                   </span>
@@ -442,7 +442,7 @@ export default async function ProfilePage({ params }: PageProps) {
                         key={`p:${linkSlug}`}
                         href={`/profile/${linkSlug}`}
                         className="wikilink-resolved"
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: '13px' }}
                       >
                         {linkName}
                       </Link>
@@ -450,7 +450,7 @@ export default async function ProfilePage({ params }: PageProps) {
                       <span
                         key={`p:${linkSlug}`}
                         className="wikilink-unresolved"
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: '13px' }}
                         title="Profile not found"
                       >
                         {linkName}

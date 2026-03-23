@@ -86,9 +86,9 @@ export default function MessageThreadPage() {
             if (prev.some(m => m.id === newMsg.id)) return prev
             return [...prev, newMsg]
           })
-          // Mark as read if not our own message
+          // Mark as read — dedicated endpoint, no full re-fetch
           if (newMsg.sender_id !== myProfileId) {
-            fetch(`/api/messages/${conversationId}`, { method: 'GET' }).catch(() => {})
+            fetch(`/api/messages/${conversationId}/read`, { method: 'PATCH' }).catch(() => {})
           }
         }
       )

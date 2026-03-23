@@ -37,7 +37,7 @@ export function PostActions({ postSlug, profileSlug }: PostActionsProps) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
       <Link
-        href={`/editor?mode=post&post=${postSlug}`}
+        href={`/post/new?post=${postSlug}`}
         style={{
           fontSize: '13px',
           fontWeight: 500,

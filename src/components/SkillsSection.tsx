@@ -50,8 +50,8 @@ export default function SkillsSection({ skills: initialSkills, isOwner, isLogged
       <h2
         style={{
           fontFamily: 'var(--font-serif)',
-          fontSize: '1.125rem',
-          fontWeight: 400,
+          fontSize: '1.25rem',
+          fontWeight: 600,
           color: 'var(--color-ink)',
           marginBottom: '1rem',
           letterSpacing: '-0.01em',

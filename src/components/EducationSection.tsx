@@ -8,15 +8,16 @@ interface Props {
 }
 
 export default function EducationSection({ education }: Props) {
-  if (education.length === 0) return null
+  const validEntries = education.filter(e => e.school)
+  if (validEntries.length === 0) return null
 
   return (
     <section style={{ marginBottom: '2rem' }}>
       <h2
         style={{
           fontFamily: 'var(--font-serif)',
-          fontSize: '1.125rem',
-          fontWeight: 400,
+          fontSize: '1.25rem',
+          fontWeight: 600,
           color: 'var(--color-ink)',
           marginBottom: '1.25rem',
           letterSpacing: '-0.01em',
@@ -40,9 +41,9 @@ export default function EducationSection({ education }: Props) {
           }}
         />
 
-        {education.map((entry, idx) => {
+        {validEntries.map((entry, idx) => {
           const duration = getDuration(entry)
-          const isLast = idx === education.length - 1
+          const isLast = idx === validEntries.length - 1
 
           return (
             <div
