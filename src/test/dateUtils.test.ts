@@ -79,10 +79,21 @@ describe('getDuration', () => {
     expect(result).toMatch(/y|mo/)
   })
 
-  it('returns empty string when start_year is missing', () => {
+  it('returns empty string when start_year is 0 (sentinel for missing)', () => {
+    // totalMonths will be negative → getDuration must return ''
     const entry: DateEntry = { start_year: 0, start_month: null, end_year: null, end_month: null, is_current: false }
-    const result = getDuration(entry)
-    // Should not crash — may return empty or a string
-    expect(typeof result).toBe('string')
+    expect(getDuration(entry)).toBe('')
+  })
+
+  it('returns empty string when duration is less than 1 month', () => {
+    const now = new Date()
+    const entry: DateEntry = {
+      start_year: now.getFullYear(),
+      start_month: now.getMonth() + 1,
+      end_year: now.getFullYear(),
+      end_month: now.getMonth() + 1,
+      is_current: false,
+    }
+    expect(getDuration(entry)).toBe('')
   })
 })
