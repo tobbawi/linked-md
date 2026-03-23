@@ -3,9 +3,14 @@ import type { Metadata } from 'next'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks, extractWikilinks, toSlug } from '@/lib/wikilinks'
 import { FollowButton } from '@/components/FollowButton'
+import { MessageButton } from '@/components/MessageButton'
 import ExperienceSection from '@/components/ExperienceSection'
+import EducationSection from '@/components/EducationSection'
+import SkillsSection from '@/components/SkillsSection'
+import RecommendationsSection from '@/components/RecommendationsSection'
+import WriteRecommendationButton from '@/components/WriteRecommendationButton'
 import ProfileViewTracker from '@/components/ProfileViewTracker'
-import type { Profile, Post, ExperienceEntry } from '@/types'
+import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation } from '@/types'
 
 interface PageProps {
   params: { name: string }
@@ -108,8 +113,14 @@ export default async function ProfilePage({ params }: PageProps) {
     // not logged in
   }
 
-  // Fetch posts (newest first) + experience (user-defined sort order)
-  const [{ data: posts }, { data: experienceRows }] = await Promise.all([
+  // Fetch posts, experience, education, skills, recommendations in parallel
+  const [
+    { data: posts },
+    { data: experienceRows },
+    { data: educationRows },
+    { data: skillRows },
+    { data: recommendationRows },
+  ] = await Promise.all([
     supabase
       .from('posts')
       .select('*')
@@ -122,10 +133,58 @@ export default async function ProfilePage({ params }: PageProps) {
       .eq('profile_id', profile.id)
       .order('sort_order', { ascending: true })
       .returns<ExperienceEntry[]>(),
+    supabase
+      .from('education_entries')
+      .select('*')
+      .eq('profile_id', profile.id)
+      .order('sort_order', { ascending: true })
+      .returns<EducationEntry[]>(),
+    supabase
+      .from('profile_skills')
+      .select('*, endorsement_count:skill_endorsements(count)')
+      .eq('profile_id', profile.id)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('recommendations')
+      .select('*, author:profiles!author_id(slug, display_name)')
+      .eq('recipient_id', profile.id)
+      .eq('visible', true)
+      .order('created_at', { ascending: false })
+      .returns<Recommendation[]>(),
   ])
 
   const allPosts = posts ?? []
   const experience = experienceRows ?? []
+  const education = educationRows ?? []
+  const recommendations = recommendationRows ?? []
+
+  // Build skills with endorsement counts + viewer endorsement state
+  const rawSkills = (skillRows ?? []) as Array<{
+    id: string
+    name: string
+    sort_order: number
+    endorsement_count: Array<{ count: number }>
+  }>
+
+  // Fetch viewer's endorsements if logged in and not owner
+  let viewerEndorsedSkillIds = new Set<string>()
+  if (viewerProfileId) {
+    const { data: endorsements } = await supabase
+      .from('skill_endorsements')
+      .select('skill_id')
+      .eq('endorser_id', viewerProfileId)
+      .in('skill_id', rawSkills.map(s => s.id))
+    viewerEndorsedSkillIds = new Set((endorsements ?? []).map(e => e.skill_id))
+  }
+
+  const skills: ProfileSkill[] = rawSkills.map(s => ({
+    id: s.id,
+    profile_id: profile.id,
+    name: s.name,
+    sort_order: s.sort_order,
+    endorsement_count: s.endorsement_count[0]?.count ?? 0,
+    viewer_has_endorsed: viewerEndorsedSkillIds.has(s.id),
+  }))
 
   // Fetch all profile + company slugs for wikilink resolution
   const [{ data: profileSlugs }, { data: companySlugsData }] = await Promise.all([
@@ -307,12 +366,13 @@ export default async function ProfilePage({ params }: PageProps) {
             {/* Follow button (non-owners) + follower/following counts */}
             <div style={{ marginBottom: 'var(--space-md)' }}>
               {!isOwner && viewerProfileId && (
-                <div style={{ marginBottom: 'var(--space-sm)' }}>
+                <div style={{ marginBottom: 'var(--space-sm)', display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
                   <FollowButton
                     followeeSlug={name}
                     initialFollowing={isFollowing}
                     followerCount={followerCount ?? 0}
                   />
+                  <MessageButton recipientSlug={name} />
                 </div>
               )}
               {(isOwner || !viewerProfileId) && (
@@ -443,9 +503,27 @@ export default async function ProfilePage({ params }: PageProps) {
           </div>
         </aside>
 
-        {/* Right column — experience + posts */}
+        {/* Right column — experience, education, skills, recommendations, posts */}
         <main style={{ flex: 1, minWidth: 0 }}>
           <ExperienceSection experience={experience} />
+          <EducationSection education={education} />
+          <SkillsSection
+            skills={skills}
+            isOwner={isOwner}
+            isLoggedIn={isOwner || !!viewerProfileId}
+          />
+          <RecommendationsSection
+            recommendations={recommendations}
+            isOwner={isOwner}
+          />
+
+          {/* Write recommendation — visible to logged-in non-owners */}
+          {!isOwner && viewerProfileId && (
+            <WriteRecommendationButton
+              recipientId={profile.id}
+              recipientName={profile.display_name}
+            />
+          )}
 
           {isOwner && (
             <div style={{ marginBottom: 'var(--space-md)', textAlign: 'right' }}>

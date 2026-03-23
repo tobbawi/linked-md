@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks } from '@/lib/wikilinks'
-import type { Company, Profile, ExperienceEntry } from '@/types'
+import type { Company, Profile, ExperienceEntry, JobListing } from '@/types'
 
 interface PageProps {
   params: { slug: string }
@@ -31,6 +31,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
+const JOB_TYPE_LABELS: Record<string, string> = {
+  'full-time': 'Full-time',
+  'part-time': 'Part-time',
+  'contract': 'Contract',
+  'internship': 'Internship',
+}
+
 export default async function CompanyPage({ params }: PageProps) {
   const supabase = createServerClient()
 
@@ -52,22 +59,34 @@ export default async function CompanyPage({ params }: PageProps) {
     // not logged in
   }
 
-  // People: experience entries pointing at this company (with profile info)
-  const { data: experienceRows } = await supabase
-    .from('experience')
-    .select('*, profile:profiles!profile_id(slug, display_name)')
-    .eq('company_slug', company.slug)
-    .order('is_current', { ascending: false })
-    .order('end_year', { ascending: false, nullsFirst: true })
+  // People + jobs in parallel
+  const [{ data: experienceRows }, { data: jobRows }] = await Promise.all([
+    supabase
+      .from('experience')
+      .select('*, profile:profiles!profile_id(slug, display_name)')
+      .eq('company_slug', company.slug)
+      .order('is_current', { ascending: false })
+      .order('end_year', { ascending: false, nullsFirst: true }),
+    supabase
+      .from('job_listings')
+      .select('*')
+      .eq('company_id', company.id)
+      .eq('active', true)
+      .order('created_at', { ascending: false })
+      .returns<JobListing[]>(),
+  ])
 
   type ExperienceWithProfile = ExperienceEntry & {
     profile: Pick<Profile, 'slug' | 'display_name'>
   }
   const people = (experienceRows ?? []) as ExperienceWithProfile[]
+  const jobs = (jobRows ?? []) as JobListing[]
 
-  // Resolve profile slugs for wikilink rendering in company content
-  const { data: profileSlugs } = await supabase.from('profiles').select('slug')
-  const { data: companySlugs } = await supabase.from('companies').select('slug')
+  // Wikilink resolution
+  const [{ data: profileSlugs }, { data: companySlugs }] = await Promise.all([
+    supabase.from('profiles').select('slug'),
+    supabase.from('companies').select('slug'),
+  ])
   const resolvedProfiles = new Set<string>((profileSlugs ?? []).map((p: { slug: string }) => p.slug))
   const resolvedCompanies = new Set<string>((companySlugs ?? []).map((c: { slug: string }) => c.slug))
 
@@ -192,6 +211,28 @@ export default async function CompanyPage({ params }: PageProps) {
               </a>
             )}
 
+            {/* Jobs badge */}
+            {jobs.length > 0 && (
+              <div style={{ marginBottom: 'var(--space-sm)' }}>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: 'var(--color-primary)',
+                    background: 'var(--color-primary-light)',
+                    border: '1px solid var(--color-primary)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '2px 8px',
+                  }}
+                >
+                  {jobs.length} open role{jobs.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
+
             {/* Badges */}
             <div
               style={{
@@ -271,7 +312,7 @@ export default async function CompanyPage({ params }: PageProps) {
                 lineHeight: 1.6,
                 marginBottom: 'var(--space-xl)',
                 paddingBottom: 'var(--space-lg)',
-                borderBottom: company.markdown_content ? '1px solid var(--color-border)' : 'none',
+                borderBottom: (company.markdown_content || jobs.length > 0) ? '1px solid var(--color-border)' : 'none',
               }}
             >
               {company.bio}
@@ -282,12 +323,99 @@ export default async function CompanyPage({ params }: PageProps) {
           {company.markdown_content && (
             <article
               className="prose"
-              style={{ fontSize: '16px', lineHeight: 1.75, color: 'var(--color-text)' }}
+              style={{ fontSize: '16px', lineHeight: 1.75, color: 'var(--color-text)', marginBottom: jobs.length > 0 ? 'var(--space-3xl)' : 0 }}
               dangerouslySetInnerHTML={{ __html: contentHtml }}
             />
           )}
 
-          {!company.bio && !company.markdown_content && (
+          {/* Open Roles */}
+          {jobs.length > 0 && (
+            <section>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: 'var(--space-lg)',
+                paddingBottom: 'var(--space-md)',
+                borderBottom: '1px solid var(--color-border)',
+              }}>
+                <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: 'var(--color-ink)' }}>
+                  Open Roles
+                </h2>
+                {isOwner && (
+                  <Link
+                    href={`/editor/jobs?company=${company.slug}`}
+                    style={{
+                      fontSize: '12px',
+                      color: 'var(--color-secondary)',
+                      padding: '4px 10px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--color-border)',
+                    }}
+                  >
+                    Manage jobs
+                  </Link>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+                {jobs.map((job) => (
+                  <div
+                    key={job.id}
+                    style={{
+                      padding: 'var(--space-lg)',
+                      background: 'var(--color-card)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--space-md)', marginBottom: 'var(--space-sm)' }}>
+                      <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-ink)' }}>
+                        {job.title}
+                      </h3>
+                      <div style={{ display: 'flex', gap: 'var(--space-xs)', flexShrink: 0 }}>
+                        <span style={{
+                          fontSize: '11px',
+                          fontWeight: 500,
+                          color: 'var(--color-secondary)',
+                          background: 'var(--color-bg)',
+                          border: '1px solid var(--color-border)',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '2px 8px',
+                        }}>
+                          {JOB_TYPE_LABELS[job.type] ?? job.type}
+                        </span>
+                      </div>
+                    </div>
+                    {job.location && (
+                      <p style={{ fontSize: '13px', color: 'var(--color-secondary)', marginBottom: 'var(--space-sm)' }}>
+                        📍 {job.location}
+                      </p>
+                    )}
+                    {job.description_md && (
+                      <p style={{ fontSize: '14px', color: 'var(--color-text)', lineHeight: 1.6, marginTop: 'var(--space-sm)' }}>
+                        {job.description_md.length > 300
+                          ? job.description_md.slice(0, 300) + '…'
+                          : job.description_md}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {isOwner && jobs.length === 0 && (
+            <div style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)', background: 'var(--color-card)', border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+              <p style={{ fontSize: '14px', color: 'var(--color-muted)', marginBottom: 'var(--space-sm)' }}>
+                No open roles yet.
+              </p>
+              <Link href={`/editor/jobs?company=${company.slug}`} style={{ fontSize: '13px', color: 'var(--color-primary)' }}>
+                Post your first role →
+              </Link>
+            </div>
+          )}
+
+          {!company.bio && !company.markdown_content && jobs.length === 0 && (
             <p style={{ color: 'var(--color-muted)', fontSize: '15px', paddingTop: 'var(--space-lg)' }}>
               No description yet.
               {isOwner && (
@@ -309,10 +437,7 @@ export default async function CompanyPage({ params }: PageProps) {
               gap: 'var(--space-sm)',
             }}
           >
-            <Link
-              href="/companies"
-              style={{ fontSize: '13px', color: 'var(--color-secondary)' }}
-            >
+            <Link href="/companies" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
               ← All companies
             </Link>
             <a href={mdUrl} className="llm-badge" title="Raw markdown source">

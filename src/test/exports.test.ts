@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildProfileMarkdown, buildPostMarkdown, buildLlmTxt, buildLlmFullTxt, buildLlmCompanyTxt, buildLlmCompanyFullTxt } from '@/lib/exports'
-import type { Profile, Post, ExperienceEntry, Company } from '@/types'
+import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation, Company } from '@/types'
 
 const mockProfile: Profile = {
   id: 'p1',
@@ -168,35 +168,103 @@ describe('buildLlmTxt (summary)', () => {
   })
 })
 
+const mockEducation: EducationEntry = {
+  id: 'edu1',
+  profile_id: 'p1',
+  school: 'MIT',
+  degree: 'BS',
+  field_of_study: 'Computer Science',
+  start_year: 2014,
+  start_month: 9,
+  end_year: 2018,
+  end_month: 5,
+  is_current: false,
+  sort_order: 0,
+  created_at: '2026-03-20T00:00:00Z',
+  updated_at: '2026-03-20T00:00:00Z',
+}
+
+const mockSkill: ProfileSkill = {
+  id: 'sk1',
+  profile_id: 'p1',
+  name: 'TypeScript',
+  sort_order: 0,
+}
+
+const mockRecommendation: Recommendation = {
+  id: 'rec1',
+  author_id: 'p2',
+  recipient_id: 'p1',
+  body: 'Jane is an exceptional engineer with a strong system design background.',
+  visible: true,
+  created_at: '2026-03-20T00:00:00Z',
+  author: { slug: 'bob-smith', display_name: 'Bob Smith' },
+}
+
 describe('buildLlmFullTxt (full)', () => {
   it('starts with full heading', () => {
-    const txt = buildLlmFullTxt(mockProfile, [mockPost])
+    const txt = buildLlmFullTxt(mockProfile, { posts: [mockPost] })
     expect(txt).toContain('# Jane Doe')
     expect(txt).toContain('(full)')
   })
 
   it('includes all experience entries', () => {
-    const txt = buildLlmFullTxt(mockProfile, [], [mockExperience, mockPastExperience])
+    const txt = buildLlmFullTxt(mockProfile, { experience: [mockExperience, mockPastExperience] })
     expect(txt).toContain('## Experience')
     expect(txt).toContain('Staff Engineer at Acme Corp')
     expect(txt).toContain('Engineer at Beta Inc')
   })
 
   it('includes posts section when posts exist', () => {
-    const txt = buildLlmFullTxt(mockProfile, [mockPost])
+    const txt = buildLlmFullTxt(mockProfile, { posts: [mockPost] })
     expect(txt).toContain('## Posts')
     expect(txt).toContain('### Hello World')
     expect(txt).toContain('This is my first post.')
   })
 
   it('omits posts section when no posts', () => {
-    const txt = buildLlmFullTxt(mockProfile, [])
+    const txt = buildLlmFullTxt(mockProfile, {})
     expect(txt).not.toContain('## Posts')
   })
 
   it('includes source pointer', () => {
-    const txt = buildLlmFullTxt(mockProfile, [])
+    const txt = buildLlmFullTxt(mockProfile, {})
     expect(txt).toContain('/profile/jane-doe/llm-full.txt')
+  })
+
+  it('includes education section when education provided', () => {
+    const txt = buildLlmFullTxt(mockProfile, { education: [mockEducation] })
+    expect(txt).toContain('## Education')
+    expect(txt).toContain('MIT')
+    expect(txt).toContain('BS, Computer Science')
+  })
+
+  it('omits education section when empty', () => {
+    const txt = buildLlmFullTxt(mockProfile, {})
+    expect(txt).not.toContain('## Education')
+  })
+
+  it('includes skills section when skills provided', () => {
+    const txt = buildLlmFullTxt(mockProfile, { skills: [mockSkill] })
+    expect(txt).toContain('## Skills')
+    expect(txt).toContain('TypeScript')
+  })
+
+  it('omits skills section when empty', () => {
+    const txt = buildLlmFullTxt(mockProfile, {})
+    expect(txt).not.toContain('## Skills')
+  })
+
+  it('includes recommendations section when provided', () => {
+    const txt = buildLlmFullTxt(mockProfile, { recommendations: [mockRecommendation] })
+    expect(txt).toContain('## Recommendations')
+    expect(txt).toContain('Bob Smith')
+    expect(txt).toContain('exceptional engineer')
+  })
+
+  it('omits recommendations section when empty', () => {
+    const txt = buildLlmFullTxt(mockProfile, {})
+    expect(txt).not.toContain('## Recommendations')
   })
 })
 
@@ -315,5 +383,51 @@ describe('buildLlmCompanyFullTxt (company full)', () => {
   it('includes markdown content', () => {
     const txt = buildLlmCompanyFullTxt(mockCompany, [])
     expect(txt).toContain('## Our story')
+  })
+
+  it('omits Open Roles section when no jobs passed', () => {
+    const txt = buildLlmCompanyFullTxt(mockCompany, [])
+    expect(txt).not.toContain('## Open Roles')
+  })
+
+  it('includes Open Roles section with job details', () => {
+    const jobs = [
+      {
+        id: 'job-1',
+        company_id: 'co-1',
+        title: 'Senior Engineer',
+        location: 'Remote',
+        type: 'full-time' as const,
+        description_md: 'We are looking for a senior engineer.',
+        active: true,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      },
+    ]
+    const txt = buildLlmCompanyFullTxt(mockCompany, [], jobs)
+    expect(txt).toContain('## Open Roles')
+    expect(txt).toContain('### Senior Engineer')
+    expect(txt).toContain('location: Remote')
+    expect(txt).toContain('type: full-time')
+    expect(txt).toContain('We are looking for a senior engineer.')
+  })
+
+  it('omits location line when job has no location', () => {
+    const jobs = [
+      {
+        id: 'job-2',
+        company_id: 'co-1',
+        title: 'Part-time Contractor',
+        location: null,
+        type: 'contract' as const,
+        description_md: '',
+        active: true,
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      },
+    ]
+    const txt = buildLlmCompanyFullTxt(mockCompany, [], jobs)
+    expect(txt).toContain('### Part-time Contractor')
+    expect(txt).not.toContain('location:')
   })
 })

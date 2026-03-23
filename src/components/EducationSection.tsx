@@ -1,11 +1,14 @@
 'use client'
 
-import Link from 'next/link'
-import type { ExperienceEntry } from '@/types'
+import type { EducationEntry } from '@/types'
 import { formatPeriod, getDuration } from '@/lib/dateUtils'
 
-export default function ExperienceSection({ experience }: Props) {
-  if (experience.length === 0) return null
+interface Props {
+  education: EducationEntry[]
+}
+
+export default function EducationSection({ education }: Props) {
+  if (education.length === 0) return null
 
   return (
     <section style={{ marginBottom: '2rem' }}>
@@ -19,7 +22,7 @@ export default function ExperienceSection({ experience }: Props) {
           letterSpacing: '-0.01em',
         }}
       >
-        Experience
+        Education
       </h2>
 
       {/* Timeline */}
@@ -37,9 +40,9 @@ export default function ExperienceSection({ experience }: Props) {
           }}
         />
 
-        {experience.map((entry, idx) => {
+        {education.map((entry, idx) => {
           const duration = getDuration(entry)
-          const isLast = idx === experience.length - 1
+          const isLast = idx === education.length - 1
 
           return (
             <div
@@ -82,7 +85,7 @@ export default function ExperienceSection({ experience }: Props) {
                   ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--color-border)'
                 }}
               >
-                {/* Top row: title + current badge */}
+                {/* Top row: school + current badge */}
                 <div
                   style={{
                     display: 'flex',
@@ -100,7 +103,7 @@ export default function ExperienceSection({ experience }: Props) {
                       lineHeight: 1.3,
                     }}
                   >
-                    {entry.title}
+                    {entry.school}
                   </span>
                   {entry.is_current && (
                     <span
@@ -123,33 +126,16 @@ export default function ExperienceSection({ experience }: Props) {
                   )}
                 </div>
 
-                {/* Company + period row */}
+                {/* Degree + field + period row */}
                 <div
                   style={{
                     display: 'flex',
                     alignItems: 'baseline',
                     gap: '8px',
                     flexWrap: 'wrap',
-                    marginBottom: entry.description ? '10px' : 0,
                   }}
                 >
-                  {entry.company_slug ? (
-                    <Link
-                      href={`/company/${entry.company_slug}`}
-                      style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontStyle: 'italic',
-                        fontSize: '0.9375rem',
-                        color: 'var(--color-primary)',
-                        textDecoration: 'none',
-                        lineHeight: 1.3,
-                      }}
-                      onMouseEnter={e => { ;(e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline' }}
-                      onMouseLeave={e => { ;(e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none' }}
-                    >
-                      {entry.company_name}
-                    </Link>
-                  ) : (
+                  {(entry.degree || entry.field_of_study) && (
                     <span
                       style={{
                         fontFamily: 'var(--font-serif)',
@@ -159,7 +145,7 @@ export default function ExperienceSection({ experience }: Props) {
                         lineHeight: 1.3,
                       }}
                     >
-                      {entry.company_name}
+                      {[entry.degree, entry.field_of_study].filter(Boolean).join(', ')}
                     </span>
                   )}
 
@@ -187,20 +173,6 @@ export default function ExperienceSection({ experience }: Props) {
                     )}
                   </span>
                 </div>
-
-                {/* Description */}
-                {entry.description && (
-                  <p
-                    style={{
-                      fontSize: '13px',
-                      color: 'var(--color-secondary)',
-                      lineHeight: 1.6,
-                      margin: 0,
-                    }}
-                  >
-                    {entry.description}
-                  </p>
-                )}
               </div>
             </div>
           )

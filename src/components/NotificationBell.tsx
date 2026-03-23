@@ -24,6 +24,8 @@ function notificationText(n: Notification): string {
     case 'follow': return `${actor} followed you`
     case 'like': return `${actor} liked your post${n.post?.title ? ` "${n.post.title}"` : ''}`
     case 'comment': return `${actor} commented on your post${n.post?.title ? ` "${n.post.title}"` : ''}`
+    case 'endorse': return `${actor} endorsed your skill${n.skill_name ? ` "${n.skill_name}"` : ''}`
+    case 'recommendation': return `${actor} wrote you a recommendation`
     default: return 'New notification'
   }
 }

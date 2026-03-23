@@ -62,7 +62,7 @@
 **What:** `education_entries` table (mirrors `experience`: school, degree, field_of_study, start/end year, is_current) + `EducationSection` component + editor UI.
 **Why:** Education is a core LinkedIn profile element — without it, profiles feel incomplete.
 **Pros:** The `experience` table pattern is proven — this is a straight copy with different field names.
-**Context:** `EducationSection` component mirrors `ExperienceSection`. Migration mirrors `008_experience.sql`. Education entries appear in `llm-full.txt`.
+**Context:** `EducationSection` component mirrors `ExperienceSection`. Migration mirrors `008_experience.sql`. Education entries appear in `llm-full.txt`. `formatPeriod` extracted to `src/lib/dateUtils.ts` (shared with ExperienceSection + exports.ts). `buildLlmFullTxt` refactored to options object.
 **Depends on:** Nothing.
 
 ### M3.2: Skills and endorsements
@@ -71,7 +71,7 @@
 **Why:** Skills are a core signal on professional networks — they summarize what someone is known for.
 **Pros:** Simple toggle pattern (same as reactions). Endorsement count = social proof.
 **Cons:** Must prevent self-endorsement in API (server-side check).
-**Context:** Skills appear in `llm-full.txt`: `## Skills\n- TypeScript (endorsed by 12)`. Notification to skill owner when endorsed. Cannot endorse own skill, cannot endorse same skill twice (UNIQUE constraint).
+**Context:** Skills appear in `llm-full.txt`: `## Skills\n- TypeScript (endorsed by 12)`. Notification to skill owner when endorsed (`type: 'endorse'`). Cannot endorse own skill, cannot endorse same skill twice (UNIQUE constraint). Toggle via `POST /api/skills/endorse` + `DELETE /api/skills/endorse`.
 **Depends on:** Nothing.
 
 ### M3.3: Recommendations
@@ -80,16 +80,33 @@
 **Why:** LinkedIn recommendations are high-signal social proof — harder to fake than endorsements.
 **Pros:** Simple CRUD. Visible=false for recipient control.
 **Cons:** No approval workflow — keep it simple (recipient can only hide, not reject).
-**Context:** Recommendations appear in `llm-full.txt` under `## Recommendations`. Notification to recipient when written.
+**Context:** Recommendations appear in `llm-full.txt` under `## Recommendations`. Notification to recipient when written (`type: 'recommendation'`). Write button on recipient's profile page (inline expand for logged-in non-owners).
 **Depends on:** Nothing.
 
 ### M3.4: Profile completeness score
 **Priority:** P3
 **What:** Server-computed score (0-100) shown in the profile editor: "Your profile is 70% complete. Add skills (+10) and a photo (+10) to reach All-Star."
 **Why:** LinkedIn's completeness prompt is highly effective at driving profile quality.
-**Pros:** Pure computation — no DB changes, just a function over profile fields.
-**Context:** Score weights: has_avatar(20) + has_bio(15) + has_experience(15) + has_education(15) + has_skills(15) + has_2+_posts(10) + has_website(10). Show in editor sidebar only (not public-facing).
-**Depends on:** M2.2, M3.1, M3.2 (needs those fields to exist).
+**Pros:** Pure computation — no DB changes beyond avatar_url column (added in this milestone).
+**Context:** Score weights: has_avatar(20) + has_bio(15) + has_experience(15) + has_education(15) + has_skills(15) + has_2+_posts(10) + has_website(10). Show in editor sidebar only (not public-facing). `avatar_url text` column added to `profiles` in migration 012 (upload UI comes with M2.2).
+**Depends on:** M3.1, M3.2 (needs those tables). M2.2 column now included here.
+
+### Skill reorder UI
+**Priority:** P3
+**What:** Drag-to-reorder for skills in the editor. `sort_order` column exists in `profile_skills` but no UI to reorder.
+**Why:** Users with many skills want to control which appear first.
+**Pros:** Clean UX; `sort_order` already in schema.
+**Cons:** Requires DnD library or custom drag logic.
+**Context:** `sort_order` is re-indexed on every save (same as `experience` sort_order pattern). Add after M3.2 ships.
+**Depends on:** M3.2.
+
+### Education in buildLlmTxt summary
+**Priority:** P3
+**What:** Add a brief education section to `buildLlmTxt` (the short llm.txt file). Currently only shows current experience roles.
+**Why:** AI agents reading the concise llm.txt would benefit from seeing highest degree or current school.
+**Pros:** One additional `## Education` line in the summary — small diff.
+**Context:** Currently education only appears in `llm-full.txt`. Consider showing only `is_current` or most recent entry in summary.
+**Depends on:** M3.1.
 
 ---
 

@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
-import type { Profile, Post, ExperienceEntry, Company } from '@/types'
+import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation, Company, JobListing } from '@/types'
+import { formatPeriod } from '@/lib/dateUtils'
 
 const EXPORT_ROOT = path.join(process.cwd(), 'exports')
 
@@ -8,19 +9,6 @@ function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true })
   }
-}
-
-function formatExperiencePeriod(entry: ExperienceEntry): string {
-  const start = entry.start_month
-    ? `${entry.start_month}/${entry.start_year}`
-    : `${entry.start_year}`
-  if (entry.is_current) return `${start} – present`
-  const end = entry.end_year
-    ? entry.end_month
-      ? `${entry.end_month}/${entry.end_year}`
-      : `${entry.end_year}`
-    : ''
-  return end ? `${start} – ${end}` : start
 }
 
 export function buildProfileMarkdown(profile: Profile, experience: ExperienceEntry[] = []): string {
@@ -43,7 +31,7 @@ export function buildProfileMarkdown(profile: Profile, experience: ExperienceEnt
     lines.push(`## Experience`)
     lines.push('')
     for (const entry of experience) {
-      const period = formatExperiencePeriod(entry)
+      const period = formatPeriod(entry)
       lines.push(`### ${entry.title} at ${entry.company_name}`)
       lines.push(`_${period}_`)
       if (entry.description) {
@@ -108,7 +96,7 @@ export function buildLlmTxt(
   if (currentRoles.length > 0) {
     lines.push(`## Current`)
     for (const entry of currentRoles) {
-      const period = formatExperiencePeriod(entry)
+      const period = formatPeriod(entry)
       lines.push(`- ${entry.title} at ${entry.company_name} (${period})`)
     }
     lines.push('')
@@ -125,13 +113,26 @@ export function buildLlmTxt(
   return lines.join('\n')
 }
 
-// Full: all experience history, all posts, stats
-export function buildLlmFullTxt(
-  profile: Profile,
-  posts: Post[],
-  experience: ExperienceEntry[] = [],
+export interface LlmFullOptions {
+  posts?: Post[]
+  experience?: ExperienceEntry[]
+  education?: EducationEntry[]
+  skills?: ProfileSkill[]
+  recommendations?: Recommendation[]
   stats?: ProfileStats
-): string {
+}
+
+// Full: all experience history, education, skills, recommendations, posts, stats
+export function buildLlmFullTxt(profile: Profile, options: LlmFullOptions = {}): string {
+  const {
+    posts = [],
+    experience = [],
+    education = [],
+    skills = [],
+    recommendations = [],
+    stats,
+  } = options
+
   const lines: string[] = []
   lines.push(`# ${profile.display_name} — linked.md profile (full)`)
   lines.push(`> Source: /profile/${profile.slug}/llm-full.txt`)
@@ -154,9 +155,39 @@ export function buildLlmFullTxt(
   if (experience.length > 0) {
     lines.push(`## Experience`)
     for (const entry of experience) {
-      const period = formatExperiencePeriod(entry)
+      const period = formatPeriod(entry)
       lines.push(`### ${entry.title} at ${entry.company_name} (${period})`)
       if (entry.description) lines.push(entry.description)
+      lines.push('')
+    }
+  }
+
+  if (education.length > 0) {
+    lines.push(`## Education`)
+    for (const entry of education) {
+      const period = formatPeriod(entry)
+      const label = [entry.degree, entry.field_of_study].filter(Boolean).join(', ')
+      const heading = label ? `${label} — ${entry.school}` : entry.school
+      lines.push(`### ${heading} (${period})`)
+      lines.push('')
+    }
+  }
+
+  if (skills.length > 0) {
+    lines.push(`## Skills`)
+    for (const skill of skills) {
+      const count = skill.endorsement_count ?? 0
+      lines.push(`- ${skill.name}${count > 0 ? ` (endorsed by ${count})` : ''}`)
+    }
+    lines.push('')
+  }
+
+  if (recommendations.length > 0) {
+    lines.push(`## Recommendations`)
+    for (const rec of recommendations) {
+      const authorName = rec.author?.display_name ?? 'Unknown'
+      lines.push(`> "${rec.body}"`)
+      lines.push(`> — ${authorName}`)
       lines.push('')
     }
   }
@@ -234,10 +265,11 @@ interface PersonEntry {
   period: string
 }
 
-// Company full: bio, all content, all people with roles
+// Company full: bio, all content, all people with roles, open roles
 export function buildLlmCompanyFullTxt(
   company: Company,
-  people: PersonEntry[]
+  people: PersonEntry[],
+  jobs: JobListing[] = []
 ): string {
   const lines: string[] = []
   lines.push(`# ${company.name} — linked.md company profile (full)`)
@@ -280,6 +312,19 @@ export function buildLlmCompanyFullTxt(
       lines.push('')
     }
   }
+  if (jobs.length > 0) {
+    lines.push(`## Open Roles`)
+    for (const job of jobs) {
+      lines.push(`### ${job.title}`)
+      if (job.location) lines.push(`location: ${job.location}`)
+      lines.push(`type: ${job.type}`)
+      if (job.description_md) {
+        lines.push('')
+        lines.push(job.description_md)
+      }
+      lines.push('')
+    }
+  }
   return lines.join('\n')
 }
 
@@ -298,7 +343,7 @@ export function buildGraphJson(profile: Profile, experience: ExperienceEntry[]):
       source: profile.slug,
       target: entry.company_slug,
       label: entry.title,
-      period: formatExperiencePeriod(entry),
+      period: formatPeriod(entry),
     })
   }
 
@@ -330,15 +375,10 @@ export function exportLlmTxt(
   fs.writeFileSync(path.join(dir, 'llm.txt'), txt, 'utf-8')
 }
 
-export function exportLlmFullTxt(
-  profile: Profile,
-  posts: Post[],
-  experience: ExperienceEntry[] = [],
-  stats?: { followerCount?: number; followingCount?: number }
-): void {
+export function exportLlmFullTxt(profile: Profile, options: LlmFullOptions = {}): void {
   const dir = path.join(EXPORT_ROOT, 'profile', profile.slug)
   ensureDir(dir)
-  const txt = buildLlmFullTxt(profile, posts, experience, stats)
+  const txt = buildLlmFullTxt(profile, options)
   fs.writeFileSync(path.join(dir, 'llm-full.txt'), txt, 'utf-8')
 }
 
@@ -352,12 +392,12 @@ export function exportGraphJson(profile: Profile, experience: ExperienceEntry[])
 export async function exportAllProfileFiles(
   profile: Profile,
   posts: Post[],
-  experience: ExperienceEntry[] = [],
-  stats?: { followerCount?: number; followingCount?: number }
+  options: Omit<LlmFullOptions, 'posts'> = {}
 ): Promise<void> {
+  const experience = options.experience ?? []
   exportProfileMarkdown(profile, experience)
-  exportLlmTxt(profile, experience, stats)
-  exportLlmFullTxt(profile, posts, experience, stats)
+  exportLlmTxt(profile, experience, options.stats)
+  exportLlmFullTxt(profile, { ...options, posts })
   exportGraphJson(profile, experience)
   for (const post of posts) {
     exportPostMarkdown(post, profile.slug)

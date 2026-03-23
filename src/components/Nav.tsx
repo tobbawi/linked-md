@@ -5,6 +5,7 @@ import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
 import { NotificationBell } from './NotificationBell'
+import { MessagesBadge } from './MessagesBadge'
 import { DarkModeToggle } from './DarkModeToggle'
 
 interface NavProps {
@@ -64,6 +65,9 @@ export function Nav({ user, profileSlug }: NavProps) {
           <Link href="/companies" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
             Companies
           </Link>
+          <Link href="/jobs" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+            Jobs
+          </Link>
           <Link href="/explore" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
             Explore
           </Link>
@@ -100,6 +104,24 @@ export function Nav({ user, profileSlug }: NavProps) {
 
               {profileSlug && (
                 <NotificationBell mySlug={profileSlug} />
+              )}
+
+              {profileSlug && (
+                <MessagesBadge />
+              )}
+
+              {profileSlug && (
+                <Link
+                  href="/analytics"
+                  style={{
+                    fontSize: '13px',
+                    color: 'var(--color-secondary)',
+                    padding: '6px 0',
+                  }}
+                  title="Analytics"
+                >
+                  Analytics
+                </Link>
               )}
 
               {profileSlug && (

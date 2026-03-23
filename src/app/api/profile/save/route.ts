@@ -102,9 +102,9 @@ export async function POST(request: NextRequest) {
         serviceClient.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profile.id),
       ])
 
-    await exportAllProfileFiles(profile, posts ?? [], experienceRows ?? [], {
-      followerCount: followerCount ?? 0,
-      followingCount: followingCount ?? 0,
+    await exportAllProfileFiles(profile, posts ?? [], {
+      experience: experienceRows ?? [],
+      stats: { followerCount: followerCount ?? 0, followingCount: followingCount ?? 0 },
     })
   } catch (exportErr) {
     console.warn('Export failed:', exportErr)

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { buildLlmCompanyFullTxt } from '@/lib/exports'
-import type { Company, ExperienceEntry, Profile } from '@/types'
+import type { Company, ExperienceEntry, Profile, JobListing } from '@/types'
 
 export async function GET(
   _request: NextRequest,
@@ -53,7 +53,15 @@ export async function GET(
     }
   })
 
-  const txt = buildLlmCompanyFullTxt(company, people)
+  const { data: jobRows } = await supabase
+    .from('job_listings')
+    .select('*')
+    .eq('company_id', company.id)
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+    .returns<JobListing[]>()
+
+  const txt = buildLlmCompanyFullTxt(company, people, jobRows ?? [])
 
   return new NextResponse(txt, {
     headers: {
