@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { buildLlmFullTxt } from '@/lib/exports'
-import type { Post, Profile, ExperienceEntry } from '@/types'
+import type { Post, Profile, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation } from '@/types'
 
 export async function GET(
   _request: NextRequest,
@@ -25,6 +25,9 @@ export async function GET(
   const [
     { data: posts },
     { data: experienceRows },
+    { data: educationRows },
+    { data: skillRows },
+    { data: recommendationRows },
     { count: followerCount },
     { count: followingCount },
   ] = await Promise.all([
@@ -41,6 +44,25 @@ export async function GET(
       .order('sort_order', { ascending: true })
       .returns<ExperienceEntry[]>(),
     supabase
+      .from('education_entries')
+      .select('*')
+      .eq('profile_id', profile.id)
+      .order('sort_order', { ascending: true })
+      .returns<EducationEntry[]>(),
+    supabase
+      .from('profile_skills')
+      .select('id, profile_id, name, sort_order')
+      .eq('profile_id', profile.id)
+      .order('sort_order', { ascending: true })
+      .returns<ProfileSkill[]>(),
+    supabase
+      .from('recommendations')
+      .select('*, author:profiles!recommendations_author_id_fkey(slug, display_name)')
+      .eq('recipient_id', profile.id)
+      .eq('visible', true)
+      .order('created_at', { ascending: false })
+      .returns<Recommendation[]>(),
+    supabase
       .from('follows')
       .select('*', { count: 'exact', head: true })
       .eq('followee_id', profile.id),
@@ -50,15 +72,17 @@ export async function GET(
       .eq('follower_id', profile.id),
   ])
 
-  const txt = buildLlmFullTxt(
-    profile,
-    posts ?? [],
-    experienceRows ?? [],
-    {
+  const txt = buildLlmFullTxt(profile, {
+    posts: posts ?? [],
+    experience: experienceRows ?? [],
+    education: educationRows ?? [],
+    skills: skillRows ?? [],
+    recommendations: recommendationRows ?? [],
+    stats: {
       followerCount: followerCount ?? undefined,
       followingCount: followingCount ?? undefined,
-    }
-  )
+    },
+  })
 
   return new NextResponse(txt, {
     headers: {
