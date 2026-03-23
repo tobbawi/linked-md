@@ -5,8 +5,8 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = 'https://afyafeugoflxfwxrrhnn.supabase.co'
-const SERVICE_KEY = 'REDACTED_SERVICE_KEY'
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY
 
 const sb = createClient(SUPABASE_URL, SERVICE_KEY)
 
