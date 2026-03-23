@@ -37,6 +37,13 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - Notifications: follow, like, comment events — real-time badge in nav
 - View tracking: `profile_views` + `post_views` tables with SHA-256(IP+UA) hashing, self-view suppression, RLS
 - Experience entries: per-profile work history with company, title, date range, is_current flag
+- Education entries: `education_entries` table with school, degree, field, date range; atomic `replace_education` RPC
+- Skills & endorsements: `profile_skills` + `skill_endorsements` tables; atomic `replace_skills` RPC; self-endorse blocked
+- Recommendations: `recommendations` table with 20–500 char validation; owner can hide; self-recommendation blocked
+- Profile completeness score: `src/lib/completeness.ts` — computed percentage (avatar, bio, experience, education, skills, posts, followers); rendered as progress bar with hints on profile pages
+- Direct messaging: `conversations`, `conversation_members`, `messages` tables; Supabase Realtime subscription; advisory-locked `create_conversation_with_members` RPC prevents duplicate conversations under concurrent requests; `/messages` list + `/messages/[id]` thread pages; `MessageButton` on profiles
+- Message validation: `src/lib/messageValidation.ts` — pure `validateMessageBody` + `MESSAGE_MAX_LENGTH = 2000` constant, shared between API and tests
+- Job listings: `job_listings` table with company ownership + `active` flag for soft-delete; `/jobs` listing page; `/api/jobs/save` with company ownership verification
 - Company llm-full: `/api/llm-full/company/[slug]` mirrors profile llm-full for AI agents
 - `createServerClient` (server components/routes) vs `createBrowserClient` (client components)
 - Dark mode via CSS custom properties `[data-theme="dark"]` with localStorage persistence
