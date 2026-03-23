@@ -21,27 +21,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'skills must be an array of strings' }, { status: 400 })
   }
 
-  // Atomic replace: delete all existing skills, then re-insert
-  const { error: delError } = await supabase
-    .from('profile_skills')
-    .delete()
-    .eq('profile_id', profile.id)
+  // Atomic replace via transactional RPC (delete + insert in one txn, no data-loss window)
+  const { error } = await supabase.rpc('replace_skills', {
+    p_profile_id: profile.id,
+    p_skills: JSON.stringify(skills),
+  })
 
-  if (delError) return NextResponse.json({ error: delError.message }, { status: 500 })
-
-  if (skills.length > 0) {
-    const rows = skills.map((name, i) => ({
-      profile_id: profile.id,
-      name: name.trim(),
-      sort_order: i,
-    })).filter(r => r.name.length > 0)
-
-    const { error: insError } = await supabase
-      .from('profile_skills')
-      .insert(rows)
-
-    if (insError) return NextResponse.json({ error: insError.message }, { status: 500 })
-  }
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   return NextResponse.json({ ok: true })
 }

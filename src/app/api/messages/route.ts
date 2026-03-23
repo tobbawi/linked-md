@@ -39,23 +39,20 @@ export async function GET() {
     .in('conversation_id', conversationIds)
     .neq('profile_id', myProfile.id)
 
+  // One row per conversation via DISTINCT ON — O(conversations), not O(all messages)
   const { data: lastMessages } = await supabase
-    .from('messages')
-    .select('conversation_id, body, created_at, sender_id')
-    .in('conversation_id', conversationIds)
-    .order('created_at', { ascending: false })
+    .rpc('last_messages_for_conversations', { conv_ids: conversationIds })
 
-  // Unread count per conversation
+  // Unread counts aggregated in Postgres — avoids fetching individual rows
   const { data: unreadRows } = await supabase
-    .from('messages')
-    .select('conversation_id')
-    .in('conversation_id', conversationIds)
-    .is('read_at', null)
-    .neq('sender_id', myProfile.id)
+    .rpc('unread_counts_for_conversations', {
+      conv_ids: conversationIds,
+      reader_profile_id: myProfile.id,
+    })
 
   const unreadCounts: Record<string, number> = {}
-  for (const row of (unreadRows ?? []) as { conversation_id: string }[]) {
-    unreadCounts[row.conversation_id] = (unreadCounts[row.conversation_id] ?? 0) + 1
+  for (const row of (unreadRows ?? []) as { conversation_id: string; unread_count: number }[]) {
+    unreadCounts[row.conversation_id] = row.unread_count
   }
 
   const lastMsgByConv: Record<string, { body: string; created_at: string }> = {}
@@ -134,24 +131,14 @@ export async function POST(req: Request) {
     }
   }
 
-  // Create new conversation
-  const { data: conv, error: convErr } = await supabase
-    .from('conversations')
-    .insert({})
-    .select('id')
-    .single()
+  // Create conversation + members atomically (single transaction via RPC)
+  const { data: newConvId, error: createErr } = await supabase
+    .rpc('create_conversation_with_members', {
+      member_a: myProfile.id,
+      member_b: recipient.id,
+    })
 
-  if (convErr || !conv) return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500 })
+  if (createErr || !newConvId) return NextResponse.json({ error: 'Failed to create conversation' }, { status: 500 })
 
-  // Add both members
-  const { error: memberErr } = await supabase
-    .from('conversation_members')
-    .insert([
-      { conversation_id: conv.id, profile_id: myProfile.id },
-      { conversation_id: conv.id, profile_id: recipient.id },
-    ])
-
-  if (memberErr) return NextResponse.json({ error: 'Failed to add members' }, { status: 500 })
-
-  return NextResponse.json({ conversation_id: conv.id, existing: false })
+  return NextResponse.json({ conversation_id: newConvId, existing: false })
 }

@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import type { Message } from '@/types'
+import { validateMessageBody } from '@/lib/messageValidation'
 
 export async function GET(
   _req: Request,
@@ -33,20 +34,21 @@ export async function GET(
 
   if (!membership) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { data: messages } = await supabase
-    .from('messages')
-    .select('*, sender:profiles!sender_id(id, slug, display_name)')
-    .eq('conversation_id', params.id)
-    .order('created_at', { ascending: true })
-    .returns<Message[]>()
-
-  // Mark unread messages as read
+  // Mark unread messages as read BEFORE fetching — prevents a message arriving
+  // between fetch and mark-read from being silently consumed without being shown.
   await supabase
     .from('messages')
     .update({ read_at: new Date().toISOString() })
     .eq('conversation_id', params.id)
     .neq('sender_id', myProfile.id)
     .is('read_at', null)
+
+  const { data: messages } = await supabase
+    .from('messages')
+    .select('*, sender:profiles!sender_id(id, slug, display_name)')
+    .eq('conversation_id', params.id)
+    .order('created_at', { ascending: true })
+    .returns<Message[]>()
 
   // Get other member info
   const { data: members } = await supabase
@@ -76,7 +78,8 @@ export async function POST(
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { body } = await req.json()
-  if (!body?.trim()) return NextResponse.json({ error: 'body required' }, { status: 400 })
+  const bodyError = validateMessageBody(body)
+  if (bodyError) return NextResponse.json({ error: bodyError }, { status: 400 })
 
   const supabase = createServerClient()
 

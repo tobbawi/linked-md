@@ -12,6 +12,12 @@ export async function POST(req: Request) {
   if (!company_slug || !title) {
     return NextResponse.json({ error: 'company_slug and title required' }, { status: 400 })
   }
+  if (typeof title === 'string' && title.length > 200) {
+    return NextResponse.json({ error: 'title must be 200 characters or fewer' }, { status: 400 })
+  }
+  if (typeof description_md === 'string' && description_md.length > 20000) {
+    return NextResponse.json({ error: 'description_md must be 20,000 characters or fewer' }, { status: 400 })
+  }
 
   const supabase = createServerClient()
 
