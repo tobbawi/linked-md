@@ -33,13 +33,12 @@ export default async function JobsPage() {
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
         {/* Header */}
         <div style={{ marginBottom: 'var(--space-xl)' }}>
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: '1.75rem',
+              fontSize: '1.25rem',
               color: 'var(--color-ink)',
               marginBottom: 'var(--space-xs)',
             }}
@@ -73,7 +72,7 @@ export default async function JobsPage() {
                     background: 'var(--color-card)',
                     border: '1px solid var(--color-border)',
                     borderRadius: 'var(--radius-md)',
-                    transition: 'border-color 0.15s',
+                    transition: 'border-color 150ms ease',
                   }}
                 >
                   <div
@@ -111,7 +110,7 @@ export default async function JobsPage() {
 
                   {job.location && (
                     <p style={{ fontSize: '13px', color: 'var(--color-secondary)', marginBottom: job.description_md ? 'var(--space-sm)' : 0 }}>
-                      📍 {job.location}
+                      {job.location}
                     </p>
                   )}
 
@@ -134,7 +133,6 @@ export default async function JobsPage() {
             ))}
           </div>
         )}
-      </div>
     </div>
   )
 }

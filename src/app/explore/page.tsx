@@ -155,7 +155,7 @@ export default async function ExplorePage() {
                           color: 'var(--color-primary)',
                           background: 'var(--color-primary-light)',
                           padding: '2px 8px',
-                          borderRadius: 'var(--radius-full)',
+                          borderRadius: 'var(--radius-sm)',
                         }}
                       >
                         #{tag}
