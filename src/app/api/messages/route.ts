@@ -62,10 +62,11 @@ export async function GET() {
     }
   }
 
-  type MemberRow = { conversation_id: string; profile: { id: string; slug: string; display_name: string } }
+  type MemberRow = { conversation_id: string; profile: { id: string; slug: string; display_name: string } | { id: string; slug: string; display_name: string }[] }
   const otherByConv: Record<string, { id: string; slug: string; display_name: string }> = {}
-  for (const m of (allMembers ?? []) as MemberRow[]) {
-    otherByConv[m.conversation_id] = m.profile
+  for (const m of (allMembers ?? []) as unknown as MemberRow[]) {
+    const p = m.profile
+    otherByConv[m.conversation_id] = Array.isArray(p) ? p[0] : p
   }
 
   const conversations = conversationIds.map((cid) => ({

@@ -182,6 +182,7 @@ export default async function ProfilePage({ params }: PageProps) {
     profile_id: profile.id,
     name: s.name,
     sort_order: s.sort_order,
+    created_at: '',
     endorsement_count: s.endorsement_count[0]?.count ?? 0,
     viewer_has_endorsed: viewerEndorsedSkillIds.has(s.id),
   }))

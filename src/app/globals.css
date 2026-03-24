@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital,wght@0,400;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
 
 :root {
   /* Colors */
@@ -11,13 +11,13 @@
   --color-ink: #1A1A1A;
   --color-text: #333330;
   --color-secondary: #666660;
-  --color-muted: #999990;
+  --color-muted: #76766E;
   --color-error: #DC2626;
   --color-warning: #D97706;
 
   /* Typography */
-  --font-serif: 'Instrument Serif', Georgia, serif;
-  --font-sans: 'Instrument Sans', system-ui, sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
   --font-mono: 'GeistMono', 'Geist Mono', 'Courier New', monospace;
 
   /* Border radius */
@@ -45,8 +45,8 @@
 
 html, body {
   font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 16px;
+  line-height: 1.7;
   color: var(--color-text);
   background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;

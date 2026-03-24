@@ -8,6 +8,12 @@ interface FeedPost extends Post {
   commentCount?: number
 }
 
+interface SuggestedProfile {
+  slug: string
+  display_name: string
+  title: string | null
+}
+
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
     month: 'short',
@@ -457,11 +463,41 @@ function PostCard({ post }: { post: FeedPost }) {
           fontSize: '14px',
           color: 'var(--color-secondary)',
           lineHeight: 1.6,
-          marginBottom: 'var(--space-md)',
+          marginBottom: post.tags && post.tags.length > 0 ? 'var(--space-sm)' : 'var(--space-md)',
         }}
       >
         {postPreview(post)}
       </p>
+
+      {/* Tags */}
+      {post.tags && post.tags.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 'var(--space-xs)',
+            marginBottom: 'var(--space-md)',
+          }}
+        >
+          {post.tags.slice(0, 4).map((tag) => (
+            <Link
+              key={tag}
+              href={`/tags/${tag}`}
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '11px',
+                color: 'var(--color-muted)',
+                background: 'var(--color-bg)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '2px 7px',
+              }}
+            >
+              #{tag}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Footer */}
       <div
@@ -500,6 +536,178 @@ function PostCard({ post }: { post: FeedPost }) {
         </span>
       </div>
     </article>
+  )
+}
+
+// ── Right widgets ────────────────────────────────────────────────────────────
+
+function RightWidgets({
+  suggestedProfiles,
+  trendingTags,
+}: {
+  suggestedProfiles: SuggestedProfile[]
+  trendingTags: string[]
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+      {/* People to follow */}
+      {suggestedProfiles.length > 0 && (
+        <div
+          style={{
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              padding: 'var(--space-sm) var(--space-md)',
+              borderBottom: '1px solid var(--color-border)',
+            }}
+          >
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: 'var(--color-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+              }}
+            >
+              People to follow
+            </span>
+          </div>
+          <div style={{ padding: 'var(--space-sm) 0' }}>
+            {suggestedProfiles.map((p) => (
+              <div
+                key={p.slug}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-sm)',
+                  padding: 'var(--space-xs) var(--space-md)',
+                }}
+              >
+                <Link
+                  href={`/profile/${p.slug}`}
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: 'var(--radius-full)',
+                    background: 'var(--color-primary-light)',
+                    border: '1px solid var(--color-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: 'var(--color-primary)',
+                    flexShrink: 0,
+                    fontFamily: 'var(--font-serif)',
+                  }}
+                >
+                  {p.display_name.charAt(0).toUpperCase()}
+                </Link>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Link
+                    href={`/profile/${p.slug}`}
+                    style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      fontWeight: 500,
+                      color: 'var(--color-ink)',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {p.display_name}
+                  </Link>
+                  {p.title && (
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        color: 'var(--color-muted)',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: 'block',
+                      }}
+                    >
+                      {p.title}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ padding: 'var(--space-xs) var(--space-md)', borderTop: '1px solid var(--color-border)' }}>
+            <Link
+              href="/people"
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-primary)',
+                fontWeight: 500,
+              }}
+            >
+              See all →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Trending tags */}
+      {trendingTags.length > 0 && (
+        <div
+          style={{
+            background: 'var(--color-card)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              padding: 'var(--space-sm) var(--space-md)',
+              borderBottom: '1px solid var(--color-border)',
+            }}
+          >
+            <span
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: '10px',
+                fontWeight: 600,
+                color: 'var(--color-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+              }}
+            >
+              Trending tags
+            </span>
+          </div>
+          <div style={{ padding: 'var(--space-sm) var(--space-md)', display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
+            {trendingTags.map((tag) => (
+              <Link
+                key={tag}
+                href={`/tags/${tag}`}
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '11px',
+                  color: 'var(--color-primary)',
+                  background: 'var(--color-primary-light)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '2px 7px',
+                }}
+              >
+                #{tag}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -544,6 +752,8 @@ export default async function HomePage() {
   let currentProfile: Profile | null = null
   let profileViews = 0
   let postImpressions = 0
+  let suggestedProfiles: SuggestedProfile[] = []
+  let trendingTags: string[] = []
 
   try {
     const authClient = createAuthServerClient()
@@ -661,6 +871,34 @@ export default async function HomePage() {
     }
 
     feedPosts = posts.slice(0, 30)
+
+    // Trending tags: aggregate from recent posts
+    const tagCounts = new Map<string, number>()
+    for (const post of posts) {
+      if (post.tags) {
+        for (const tag of post.tags) {
+          tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)
+        }
+      }
+    }
+    trendingTags = Array.from(tagCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([tag]) => tag)
+
+    // People to follow: profiles not already followed
+    if (isLoggedIn && myProfileId) {
+      const followedSet = new Set(followedIds) // followedIds are profile IDs
+      const { data: suggRaw } = await supabase
+        .from('profiles')
+        .select('id, slug, display_name, title')
+        .neq('id', myProfileId)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      suggestedProfiles = ((suggRaw ?? []) as (SuggestedProfile & { id: string })[])
+        .filter((p) => !followedSet.has(p.id))
+        .slice(0, 5)
+    }
   } catch {
     // DB not reachable
   }
@@ -712,7 +950,7 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Feed layout: sidebar + posts for logged-in, full-width for logged-out */}
+      {/* Feed layout: sidebar + posts (+ right widgets when logged in) */}
       <div
         style={{
           display: 'flex',
@@ -780,6 +1018,25 @@ export default async function HomePage() {
             </div>
           )}
         </main>
+
+        {/* Right widgets — only for logged-in users on desktop */}
+        {isLoggedIn && (suggestedProfiles.length > 0 || trendingTags.length > 0) && (
+          <aside
+            style={{
+              width: '200px',
+              flexShrink: 0,
+              display: 'none', // hidden on mobile
+              position: 'sticky',
+              top: '72px',
+            }}
+            className="home-sidebar"
+          >
+            <RightWidgets
+              suggestedProfiles={suggestedProfiles}
+              trendingTags={trendingTags}
+            />
+          </aside>
+        )}
       </div>
     </div>
   )

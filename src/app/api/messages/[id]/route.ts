@@ -57,9 +57,9 @@ export async function GET(
     .eq('conversation_id', params.id)
     .neq('profile_id', myProfile.id)
 
-  type MemberRow = { profile: { id: string; slug: string; display_name: string } }
+  type MemberRow = { profile: { id: string; slug: string; display_name: string } | { id: string; slug: string; display_name: string }[] }
   const otherProfile = members && members.length > 0
-    ? (members[0] as MemberRow).profile
+    ? (() => { const p = (members[0] as MemberRow).profile; return Array.isArray(p) ? p[0] : p })()
     : null
 
   return NextResponse.json({

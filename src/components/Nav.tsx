@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase-browser'
-import { useRouter } from 'next/navigation'
 import { NotificationBell } from './NotificationBell'
 import { MessagesBadge } from './MessagesBadge'
 import { DarkModeToggle } from './DarkModeToggle'
@@ -15,11 +16,21 @@ interface NavProps {
 
 export function Nav({ user, profileSlug }: NavProps) {
   const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
 
   async function handleSignOut() {
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
+  }
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault()
+    const q = searchQuery.trim()
+    if (q) {
+      router.push(`/search?q=${encodeURIComponent(q)}`)
+      setSearchQuery('')
+    }
   }
 
   return (
@@ -40,118 +51,164 @@ export function Nav({ user, profileSlug }: NavProps) {
           height: '56px',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
+          gap: 'var(--space-md)',
         }}
       >
         {/* Logo */}
         <Link
           href="/"
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontSize: '15px',
-            fontWeight: 600,
-            color: 'var(--color-primary)',
-            letterSpacing: '-0.01em',
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: '1px',
+            textDecoration: 'none',
+            flexShrink: 0,
           }}
         >
-          linked.md
+          <span
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: '18px',
+              fontStyle: 'italic',
+              fontWeight: 500,
+              color: 'var(--color-ink)',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            linked
+          </span>
+          <span
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '13px',
+              color: 'var(--color-primary)',
+              letterSpacing: '0',
+            }}
+          >
+            .md
+          </span>
         </Link>
 
-        {/* Center nav */}
+        {/* Inline search */}
+        <form onSubmit={handleSearch} style={{ flexShrink: 0 }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search people, topics…"
+            className="search-input"
+            style={{
+              width: '200px',
+              padding: '6px 12px',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-sm)',
+              fontFamily: 'var(--font-sans)',
+              fontSize: '13px',
+              background: 'var(--color-card)',
+              color: 'var(--color-text)',
+              outline: 'none',
+            }}
+          />
+        </form>
+
+        {/* Center nav links */}
         <div className="nav-center">
-          <Link href="/people" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
+          <Link href="/people" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             People
           </Link>
-          <Link href="/companies" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
+          <Link href="/companies" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             Companies
           </Link>
-          <Link href="/jobs" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
+          <Link href="/jobs" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             Jobs
           </Link>
-          <Link href="/explore" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
+          <Link href="/explore" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
             Explore
-          </Link>
-          <Link href="/search" style={{ fontSize: '13px', color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
-            Search
           </Link>
         </div>
 
-        {/* Right side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+        {/* Right side — push to end */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
           <DarkModeToggle />
           {user ? (
             <>
+              {/* Write button */}
               <Link
                 href="/post/new"
                 style={{
                   fontSize: '13px',
                   fontWeight: 500,
                   color: 'var(--color-text)',
-                  padding: '6px 12px',
+                  padding: '5px 12px',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--color-border)',
                   transition: 'border-color 150ms ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  whiteSpace: 'nowrap',
                 }}
                 onMouseEnter={(e) =>
-                  ((e.target as HTMLElement).style.borderColor = 'var(--color-primary)')
+                  ((e.currentTarget as HTMLElement).style.borderColor = 'var(--color-primary)')
                 }
                 onMouseLeave={(e) =>
-                  ((e.target as HTMLElement).style.borderColor = 'var(--color-border)')
+                  ((e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border)')
                 }
               >
-                New post
+                Write
               </Link>
 
-              {profileSlug && (
-                <NotificationBell mySlug={profileSlug} />
-              )}
+              {profileSlug && <NotificationBell mySlug={profileSlug} />}
+              {profileSlug && <MessagesBadge />}
 
-              {profileSlug && (
-                <MessagesBadge />
-              )}
-
-              {profileSlug && (
-                <Link
-                  href="/analytics"
-                  style={{
-                    fontSize: '13px',
-                    color: 'var(--color-secondary)',
-                    padding: '6px 0',
-                  }}
-                  title="Analytics"
-                >
-                  Analytics
-                </Link>
-              )}
-
+              {/* Avatar + handle */}
               {profileSlug && (
                 <Link
                   href={`/profile/${profileSlug}`}
                   style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'var(--color-primary-light)',
-                    border: '1px solid var(--color-primary)',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: 'var(--color-primary)',
-                    flexShrink: 0,
+                    gap: 'var(--space-xs)',
+                    textDecoration: 'none',
                   }}
                   title="My profile"
                 >
-                  {profileSlug.charAt(0).toUpperCase()}
+                  <div
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: 'var(--radius-full)',
+                      background: 'var(--color-primary-light)',
+                      border: '1px solid var(--color-primary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: 'var(--color-primary)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {profileSlug.charAt(0).toUpperCase()}
+                  </div>
+                  <span
+                    className="nav-center"
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '11px',
+                      color: 'var(--color-secondary)',
+                    }}
+                  >
+                    @{profileSlug}
+                  </span>
                 </Link>
               )}
 
+              {/* Sign out */}
               <button
                 onClick={handleSignOut}
                 style={{
-                  fontSize: '13px',
-                  color: 'var(--color-secondary)',
+                  fontSize: '12px',
+                  color: 'var(--color-muted)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
@@ -159,7 +216,7 @@ export function Nav({ user, profileSlug }: NavProps) {
                   fontFamily: 'var(--font-sans)',
                 }}
               >
-                Sign out
+                Out
               </button>
             </>
           ) : (
@@ -176,7 +233,7 @@ export function Nav({ user, profileSlug }: NavProps) {
                 transition: 'background 150ms ease',
                 display: 'inline-flex',
                 alignItems: 'center',
-                height: '44px',
+                height: '34px',
               }}
             >
               Sign in

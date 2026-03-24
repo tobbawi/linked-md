@@ -16,7 +16,7 @@ Do not deviate without explicit user approval.
 In QA mode, flag any code that doesn't match DESIGN.md.
 
 ## Key Design Decisions
-- Instrument Serif for headings, Instrument Sans for body, Geist Mono for .md URLs
+- Fraunces (variable serif) for headings, Outfit for body, Geist Mono for .md URLs
 - Emerald green (#0D9373) is the only accent color — used for primary actions, .md URLs, llm.txt badges, wikilinks
 - Warm neutrals (not cool grays)
 - The .md URL visible below each post is the brand differentiator — never hide it on desktop
