@@ -70,7 +70,7 @@ export default async function NotificationsPage() {
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div style={{ maxWidth: '600px' }}>
+      <div>
         <div
           style={{
             display: 'flex',
@@ -82,7 +82,7 @@ export default async function NotificationsPage() {
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: '1.5rem',
+              fontSize: '1.25rem',
               color: 'var(--color-ink)',
             }}
           >

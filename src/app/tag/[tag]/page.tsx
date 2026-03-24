@@ -158,7 +158,7 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
                           color: t === tag ? 'var(--color-bg)' : 'var(--color-primary)',
                           background: t === tag ? 'var(--color-primary)' : 'var(--color-primary-light)',
                           padding: '2px 8px',
-                          borderRadius: 'var(--radius-full)',
+                          borderRadius: 'var(--radius-sm)',
                         }}
                       >
                         #{t}

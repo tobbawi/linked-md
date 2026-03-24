@@ -54,11 +54,11 @@ export default function MessagesPage() {
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+      <div>
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
-            fontSize: '1.5rem',
+            fontSize: '1.25rem',
             color: 'var(--color-ink)',
             marginBottom: 'var(--space-xl)',
           }}
@@ -112,7 +112,7 @@ export default function MessagesPage() {
                     style={{
                       width: '40px',
                       height: '40px',
-                      borderRadius: '50%',
+                      borderRadius: 'var(--radius-full)',
                       background: 'var(--color-primary-light)',
                       border: '1px solid var(--color-primary)',
                       display: 'flex',
@@ -165,7 +165,7 @@ export default function MessagesPage() {
                       style={{
                         width: '20px',
                         height: '20px',
-                        borderRadius: '50%',
+                        borderRadius: 'var(--radius-full)',
                         background: 'var(--color-primary)',
                         color: '#fff',
                         fontSize: '11px',

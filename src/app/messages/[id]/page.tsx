@@ -210,7 +210,7 @@ export default function MessageThreadPage() {
               style={{
                 width: '36px',
                 height: '36px',
-                borderRadius: '50%',
+                borderRadius: 'var(--radius-full)',
                 background: 'var(--color-primary-light)',
                 border: '1px solid var(--color-primary)',
                 display: 'flex',
@@ -367,7 +367,7 @@ export default function MessageThreadPage() {
             cursor: !body.trim() || sending ? 'not-allowed' : 'pointer',
             opacity: !body.trim() || sending ? 0.5 : 1,
             flexShrink: 0,
-            transition: 'opacity 0.15s',
+            transition: 'opacity 150ms ease',
           }}
         >
           Send
