@@ -1,12 +1,17 @@
 import Link from 'next/link'
 import { createAuthServerClient, createServerClient } from '@/lib/supabase'
 import Avatar from '@/components/Avatar'
-import type { Post, Profile } from '@/types'
+import type { Post, Profile, JobListing } from '@/types'
 
 interface FeedPost extends Post {
   profile: Pick<Profile, 'slug' | 'display_name' | 'avatar_url' | 'bio'>
   likeCount?: number
   commentCount?: number
+}
+
+interface FeedJobListing extends JobListing {
+  company: { id: string; name: string; slug: string }
+  feed_type: 'job'
 }
 
 interface SuggestedProfile {
@@ -505,6 +510,71 @@ function PostCard({ post }: { post: FeedPost }) {
   )
 }
 
+// ── Job card (company following feed) ───────────────────────────────────────
+
+const JOB_TYPE_LABELS: Record<string, string> = {
+  'full-time': 'Full-time',
+  'part-time': 'Part-time',
+  'contract': 'Contract',
+  'internship': 'Internship',
+}
+
+function JobCard({ job }: { job: FeedJobListing }) {
+  return (
+    <article
+      style={{
+        background: 'var(--color-card)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-md)',
+        padding: 'var(--space-lg)',
+        borderLeft: '3px solid var(--color-primary)',
+      }}
+    >
+      {/* Company row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+        <Link href={`/company/${job.company.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+          <Avatar name={job.company.name} size={24} shape="square" />
+        </Link>
+        <Link href={`/company/${job.company.slug}`} style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)' }}>
+          {job.company.name}
+        </Link>
+        <span style={{ color: 'var(--color-border)' }}>·</span>
+        <span style={{ fontSize: '11px', color: 'var(--color-muted)', fontFamily: 'var(--font-mono)' }}>
+          {JOB_TYPE_LABELS[job.type] ?? job.type}
+        </span>
+      </div>
+
+      {/* Title */}
+      <Link href={`/company/${job.company.slug}`}>
+        <h3
+          style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: '1.1rem',
+            color: 'var(--color-ink)',
+            lineHeight: 1.35,
+            marginBottom: job.location ? 'var(--space-xs)' : 'var(--space-md)',
+          }}
+        >
+          {job.title}
+        </h3>
+      </Link>
+
+      {job.location && (
+        <p style={{ fontSize: '13px', color: 'var(--color-muted)', marginBottom: 'var(--space-md)' }}>
+          {job.location}
+        </p>
+      )}
+
+      <Link
+        href={`/company/${job.company.slug}`}
+        style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-primary)' }}
+      >
+        View opening →
+      </Link>
+    </article>
+  )
+}
+
 // ── Right widgets ────────────────────────────────────────────────────────────
 
 function RightWidgets({
@@ -784,6 +854,7 @@ export default async function HomePage() {
 
   // Fetch network feed: posts from followed people + own posts, newest first
   let feedPosts: FeedPost[] = []
+  let feedJobs: FeedJobListing[] = []
   try {
     const supabase = createServerClient()
 
@@ -842,6 +913,26 @@ export default async function HomePage() {
       }
 
       feedPosts = posts
+
+      // Fetch job listings from followed companies (90-day window)
+      const { data: companyFollowRows } = await supabase
+        .from('company_follows')
+        .select('company_id')
+        .eq('follower_id', myProfileId)
+      const followedCompanyIds = (companyFollowRows ?? []).map((r: { company_id: string }) => r.company_id)
+
+      if (followedCompanyIds.length > 0) {
+        const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+        const { data: jobRows } = await supabase
+          .from('job_listings')
+          .select('*, company:companies!company_id(id, name, slug)')
+          .in('company_id', followedCompanyIds)
+          .eq('active', true)
+          .gte('created_at', ninetyDaysAgo)
+          .order('created_at', { ascending: false })
+          .limit(10)
+        feedJobs = ((jobRows ?? []) as FeedJobListing[]).map((j) => ({ ...j, feed_type: 'job' as const }))
+      }
 
       // Trending tags from feed posts
       const tagCounts = new Map<string, number>()
@@ -985,15 +1076,23 @@ export default async function HomePage() {
             </div>
           )}
 
-          {feedPosts.length === 0 ? (
-            <EmptyFeed isLoggedIn={isLoggedIn} />
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-              {feedPosts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))}
-            </div>
-          )}
+          {(() => {
+            const feedItems: Array<FeedPost | FeedJobListing> = [
+              ...feedPosts,
+              ...feedJobs,
+            ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+            return feedItems.length === 0 ? (
+              <EmptyFeed isLoggedIn={isLoggedIn} />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                {feedItems.map((item) =>
+                  'feed_type' in item && item.feed_type === 'job'
+                    ? <JobCard key={`job-${item.id}`} job={item as FeedJobListing} />
+                    : <PostCard key={item.id} post={item as FeedPost} />
+                )}
+              </div>
+            )
+          })()}
         </main>
 
         {/* Right widgets — only for logged-in users on desktop */}
