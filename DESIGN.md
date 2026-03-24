@@ -32,7 +32,7 @@
 
 ## Color
 - **Approach:** Restrained — one accent + warm neutrals. Color is rare and meaningful.
-- **Primary:** `#0D9373` (Emerald) — open, fresh, technical. NOT blue (LinkedIn), NOT purple (GitHub). Green connotes growth and open source. Used for: primary buttons, `.md` URL text, `llm.txt` badges, active states.
+- **Primary:** `#0D9373` (Emerald) — open, fresh, technical. NOT blue, NOT purple (GitHub). Green connotes growth and open source. Used for: primary buttons, `.md` URL text, `llm.txt` badges, active states.
 - **Primary hover:** `#0B7D62`
 - **Primary light:** `#E6F5F0` — wikilink backgrounds, badge backgrounds
 - **Ink:** `#1A1A1A` — highest contrast text (headings, names)
@@ -149,15 +149,15 @@ Unresolved wikilinks: rendered as plain `[[Name]]` in muted text with tooltip.
 ## Decisions Log
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-03-20 | Initial design system created | Created by /design-consultation based on /office-hours product context and competitive research (Linear, GitHub, Bluesky, LinkedIn) |
+| 2026-03-20 | Initial design system created | Created by /design-consultation based on /office-hours product context and competitive research (Linear, GitHub, Bluesky, ...) |
 | 2026-03-20 | Instrument Serif for display | Serif headings signal "publication platform" not "SaaS app" — distinctive in the dev tool space |
-| 2026-03-20 | Emerald green primary | Unclaimed color in professional networking (LinkedIn=blue, GitHub=purple). Connotes growth and open source |
-| 2026-03-20 | Warm neutrals | Cool grays feel corporate (LinkedIn). Warm grays add humanity to a technical product |
+| 2026-03-20 | Emerald green primary | Unclaimed color in professional networking ( GitHub=purple). Connotes growth and open source |
+| 2026-03-20 | Warm neutrals | Cool grays feel corporate. Warm grays add humanity to a technical product |
 | 2026-03-21 | Agent Gateway /llm.txt homepage badge | Two-badge LandingHero row pairs human (/profile/your-name.md) and agent (/llm.txt) entry points using same .md-url class — signals the network speaks both protocols |
 | 2026-03-21 | AI-facing copy voice | text/plain responses are terse, colon-delimited, null-fields-omitted, errors action-oriented — format designed for LLM context windows, not human reading |
 | 2026-03-21 | Dark mode shipped in v0.1.2.0 | Original decision deferred dark mode to M2; shipped alongside mobile responsive (M9) via CSS custom properties `[data-theme="dark"]` with localStorage persistence and flash-prevention inline script |
 | 2026-03-20 | .md URL as design feature | The visible file path below each post is the brand differentiator — styled prominently, not as a footnote |
-| 2026-03-21 | Home page LinkedIn-style left sidebar | Logged-in users see left profile card with avatar, name/title/location, profile-views + post-impressions counters (7-day), llm.txt badge, .md URL, and Write a post CTA. Removed "Recent posts" heading — the feed speaks for itself. Sidebar hidden on mobile (<768px), inline write button shown instead. |
+| 2026-03-21 | Home page left sidebar | Logged-in users see left profile card with avatar, name/title/location, profile-views + post-impressions counters (7-day), llm.txt badge, .md URL, and Write a post CTA. Removed "Recent posts" heading — the feed speaks for itself. Sidebar hidden on mobile (<768px), inline write button shown instead. |
 | 2026-03-23 | Fraunces replaces Instrument Serif | Variable optical-size serif — more personality at large display sizes via `opsz` axis, rarer in dev tools, stronger contrast against Geist Mono accents |
 | 2026-03-23 | Outfit replaces Instrument Sans | Geometric grotesque with warmer apertures, better x-height for long-form post reading, cleaner distinction from body→heading contrast |
 | 2026-03-23 | Body size raised 15px → 16px | Minimum comfortable reading size, WCAG 2.1 recommendation for body text |

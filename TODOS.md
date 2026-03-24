@@ -2,6 +2,17 @@
 
 ---
 
+## M5 — Company Admin & Employee Roster (planned)
+
+### Account deletion + last-admin trigger conflict
+**Priority:** P2
+**What:** If a user ever deletes their account, `profiles DELETE` cascades to `company_members`. If they were the last admin of a company, the `prevent_last_admin_removal` trigger fires and blocks the deletion with an exception. The company becomes permanently unmanageable.
+**Why:** Not a live bug today (no account deletion feature), but will cause a silent failure when account deletion is built.
+**Pros:** Fixing it now (or at account-deletion design time) prevents orphaned unmanageable companies.
+**Cons:** Account deletion is complex; fixing this in isolation may be premature.
+**Context:** The fix needs to either (a) skip the last-admin trigger for account deletions (use a separate deletion path), or (b) require the user to transfer or dissolve their companies before deletion. Capture this when designing account deletion.
+**Depends on:** Account deletion feature.
+
 ---
 
 ## Milestone 3 — Profile Completeness Layer ✓ Shipped v0.2.0.0
