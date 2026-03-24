@@ -1,37 +1,23 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase-browser'
-import { NotificationBell } from './NotificationBell'
-import { MessagesBadge } from './MessagesBadge'
-import { DarkModeToggle } from './DarkModeToggle'
 
 interface NavProps {
   user: User | null
   profileSlug: string | null
 }
 
+const NAV_LINKS = [
+  { href: '/', label: 'Feed' },
+  { href: '/explore', label: 'Explore' },
+  { href: '/people', label: 'People' },
+  { href: '/jobs', label: 'Jobs' },
+]
+
 export function Nav({ user, profileSlug }: NavProps) {
-  const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState('')
-
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
-  }
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault()
-    const q = searchQuery.trim()
-    if (q) {
-      router.push(`/search?q=${encodeURIComponent(q)}`)
-      setSearchQuery('')
-    }
-  }
+  const pathname = usePathname()
 
   return (
     <nav
@@ -47,11 +33,11 @@ export function Nav({ user, profileSlug }: NavProps) {
         style={{
           maxWidth: '960px',
           margin: '0 auto',
-          padding: '0 var(--space-md)',
-          height: '56px',
+          padding: '0 var(--space-lg)',
+          height: '52px',
           display: 'flex',
           alignItems: 'center',
-          gap: 'var(--space-md)',
+          gap: 'var(--space-lg)',
         }}
       >
         {/* Logo */}
@@ -59,8 +45,8 @@ export function Nav({ user, profileSlug }: NavProps) {
           href="/"
           style={{
             display: 'flex',
-            alignItems: 'baseline',
-            gap: '1px',
+            alignItems: 'center',
+            gap: '4px',
             textDecoration: 'none',
             flexShrink: 0,
           }}
@@ -68,9 +54,9 @@ export function Nav({ user, profileSlug }: NavProps) {
           <span
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: '18px',
+              fontSize: '20px',
               fontStyle: 'italic',
-              fontWeight: 500,
+              fontWeight: 600,
               color: 'var(--color-ink)',
               letterSpacing: '-0.02em',
             }}
@@ -82,100 +68,89 @@ export function Nav({ user, profileSlug }: NavProps) {
               fontFamily: 'var(--font-mono)',
               fontSize: '13px',
               color: 'var(--color-primary)',
-              letterSpacing: '0',
+              background: 'var(--color-primary-light)',
+              padding: '2px 5px',
+              borderRadius: 'var(--radius-sm)',
             }}
           >
             .md
           </span>
         </Link>
 
-        {/* Inline search */}
-        <form onSubmit={handleSearch} style={{ flexShrink: 0 }}>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search people, topics…"
-            className="search-input"
-            style={{
-              width: '200px',
-              padding: '6px 12px',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-sm)',
-              fontFamily: 'var(--font-sans)',
-              fontSize: '13px',
-              background: 'var(--color-card)',
-              color: 'var(--color-text)',
-              outline: 'none',
-            }}
-          />
-        </form>
-
-        {/* Center nav links */}
+        {/* Center nav links — hidden on mobile */}
         <div className="nav-center">
-          <Link href="/people" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
-            People
-          </Link>
-          <Link href="/companies" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
-            Companies
-          </Link>
-          <Link href="/jobs" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
-            Jobs
-          </Link>
-          <Link href="/explore" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)', display: 'inline-flex', alignItems: 'center', minHeight: '44px' }}>
-            Explore
-          </Link>
+          {NAV_LINKS.map(({ href, label }) => {
+            const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
+            return (
+              <Link
+                key={href}
+                href={href}
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: isActive ? 'var(--color-ink)' : 'var(--color-secondary)',
+                  textDecoration: 'none',
+                  padding: '4px 0',
+                  borderBottom: `2px solid ${isActive ? 'var(--color-primary)' : 'transparent'}`,
+                  transition: 'color 150ms ease, border-color 150ms ease',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  minHeight: '44px',
+                }}
+              >
+                {label}
+              </Link>
+            )
+          })}
         </div>
 
-        {/* Right side — push to end */}
+        {/* Right side */}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-          <DarkModeToggle />
           {user ? (
             <>
-              {/* Write button */}
+              {/* Write button — ghost style */}
               <Link
                 href="/post/new"
                 style={{
                   fontSize: '13px',
                   fontWeight: 500,
-                  color: 'var(--color-text)',
-                  padding: '5px 12px',
+                  color: 'var(--color-secondary)',
+                  padding: '6px 12px',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--color-border)',
-                  transition: 'border-color 150ms ease',
+                  background: 'transparent',
+                  transition: 'background 150ms ease',
                   display: 'inline-flex',
                   alignItems: 'center',
                   whiteSpace: 'nowrap',
+                  textDecoration: 'none',
                 }}
                 onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.borderColor = 'var(--color-primary)')
+                  ((e.currentTarget as HTMLElement).style.background = 'var(--color-card)')
                 }
                 onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border)')
+                  ((e.currentTarget as HTMLElement).style.background = 'transparent')
                 }
               >
                 Write
               </Link>
 
-              {profileSlug && <NotificationBell mySlug={profileSlug} />}
-              {profileSlug && <MessagesBadge />}
-
-              {/* Avatar */}
+              {/* Avatar — gradient circle */}
               {profileSlug && (
                 <Link
                   href={`/profile/${profileSlug}`}
                   style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '32px',
+                    height: '32px',
                     borderRadius: 'var(--radius-full)',
-                    background: 'var(--color-primary-light)',
-                    border: '1px solid var(--color-primary)',
+                    background: 'linear-gradient(135deg, #0D9373, #0B7D62)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    color: 'var(--color-primary)',
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: 'white',
                     flexShrink: 0,
                     textDecoration: 'none',
                   }}
@@ -184,22 +159,6 @@ export function Nav({ user, profileSlug }: NavProps) {
                   {profileSlug.charAt(0).toUpperCase()}
                 </Link>
               )}
-
-              {/* Sign out */}
-              <button
-                onClick={handleSignOut}
-                style={{
-                  fontSize: '12px',
-                  color: 'var(--color-muted)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '6px 0',
-                  fontFamily: 'var(--font-sans)',
-                }}
-              >
-                Sign out
-              </button>
             </>
           ) : (
             <Link
@@ -216,6 +175,7 @@ export function Nav({ user, profileSlug }: NavProps) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 height: '34px',
+                textDecoration: 'none',
               }}
             >
               Sign in
