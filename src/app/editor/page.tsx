@@ -592,7 +592,8 @@ export default function EditorPage() {
 
       <h1
         style={{
-          fontSize: '20px',
+          fontFamily: 'var(--font-serif)',
+          fontSize: '1.25rem',
           fontWeight: 600,
           color: 'var(--color-ink)',
           marginBottom: 'var(--space-lg)',
