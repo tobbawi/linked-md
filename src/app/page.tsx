@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { createAuthServerClient, createServerClient } from '@/lib/supabase'
+import Avatar from '@/components/Avatar'
 import type { Post, Profile } from '@/types'
 
 interface FeedPost extends Post {
-  profile: Pick<Profile, 'slug' | 'display_name' | 'bio'>
+  profile: Pick<Profile, 'slug' | 'display_name' | 'avatar_url' | 'bio'>
   likeCount?: number
   commentCount?: number
 }
@@ -132,8 +133,6 @@ function UserSidebar({
   profileViews: number
   postImpressions: number
 }) {
-  const initial = profile.display_name.charAt(0).toUpperCase()
-
   return (
     <div
       style={{
@@ -156,25 +155,9 @@ function UserSidebar({
       {/* Avatar + info */}
       <div style={{ padding: '0 var(--space-lg) var(--space-lg)', marginTop: '-24px' }}>
         {/* Avatar */}
-        <Link href={`/profile/${profile.slug}`}>
-          <div
-            style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: 'var(--radius-full)',
-              background: 'var(--color-primary-light)',
-              border: '3px solid var(--color-card)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              fontWeight: 700,
-              color: 'var(--color-primary)',
-              fontFamily: 'var(--font-serif)',
-              marginBottom: 'var(--space-sm)',
-            }}
-          >
-            {initial}
+        <Link href={`/profile/${profile.slug}`} style={{ display: 'inline-block', marginBottom: 'var(--space-sm)' }}>
+          <div style={{ outline: '3px solid var(--color-card)', borderRadius: '50%', display: 'inline-flex' }}>
+            <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={52} />
           </div>
         </Link>
 
@@ -401,25 +384,8 @@ function PostCard({ post }: { post: FeedPost }) {
           marginBottom: 'var(--space-sm)',
         }}
       >
-        <Link
-          href={`/profile/${post.profile.slug}`}
-          style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: 'var(--radius-full)',
-            background: 'var(--color-primary-light)',
-            border: '1px solid var(--color-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '11px',
-            fontWeight: 700,
-            color: 'var(--color-primary)',
-            fontFamily: 'var(--font-serif)',
-            flexShrink: 0,
-          }}
-        >
-          {post.profile.display_name.charAt(0).toUpperCase()}
+        <Link href={`/profile/${post.profile.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+          <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={28} />
         </Link>
         <Link
           href={`/profile/${post.profile.slug}`}
@@ -590,25 +556,8 @@ function RightWidgets({
                   padding: 'var(--space-xs) var(--space-md)',
                 }}
               >
-                <Link
-                  href={`/profile/${p.slug}`}
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'var(--color-primary-light)',
-                    border: '1px solid var(--color-primary)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: 'var(--color-primary)',
-                    flexShrink: 0,
-                    fontFamily: 'var(--font-serif)',
-                  }}
-                >
-                  {p.display_name.charAt(0).toUpperCase()}
+                <Link href={`/profile/${p.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+                  <Avatar name={p.display_name} size={28} />
                 </Link>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <Link
@@ -720,24 +669,49 @@ function EmptyFeed({ isLoggedIn }: { isLoggedIn: boolean }) {
         color: 'var(--color-muted)',
       }}
     >
-      <p style={{ fontSize: '15px', marginBottom: 'var(--space-md)' }}>
-        No posts yet. Be the first.
-      </p>
-      {isLoggedIn && (
-        <Link
-          href="/post/new"
-          style={{
-            display: 'inline-block',
-            padding: '10px 24px',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            borderRadius: 'var(--radius-sm)',
-            fontWeight: 600,
-            fontSize: '14px',
-          }}
-        >
-          Write a post
-        </Link>
+      {isLoggedIn ? (
+        <>
+          <p style={{ fontSize: '15px', marginBottom: 'var(--space-sm)', color: 'var(--color-ink)' }}>
+            Your feed is empty.
+          </p>
+          <p style={{ fontSize: '14px', color: 'var(--color-secondary)', marginBottom: 'var(--space-lg)' }}>
+            Follow people to see their posts here.
+          </p>
+          <Link
+            href="/people"
+            style={{
+              display: 'inline-block',
+              padding: '10px 24px',
+              background: 'var(--color-primary)',
+              color: '#fff',
+              borderRadius: 'var(--radius-sm)',
+              fontWeight: 600,
+              fontSize: '14px',
+            }}
+          >
+            Discover people →
+          </Link>
+        </>
+      ) : (
+        <>
+          <p style={{ fontSize: '15px', marginBottom: 'var(--space-md)' }}>
+            No posts yet. Be the first.
+          </p>
+          <Link
+            href="/auth"
+            style={{
+              display: 'inline-block',
+              padding: '10px 24px',
+              background: 'var(--color-primary)',
+              color: '#fff',
+              borderRadius: 'var(--radius-sm)',
+              fontWeight: 600,
+              fontSize: '14px',
+            }}
+          >
+            Get started
+          </Link>
+        </>
       )}
     </div>
   )
@@ -754,6 +728,7 @@ export default async function HomePage() {
   let postImpressions = 0
   let suggestedProfiles: SuggestedProfile[] = []
   let trendingTags: string[] = []
+  let hasFollows = false
 
   try {
     const authClient = createAuthServerClient()
@@ -807,88 +782,76 @@ export default async function HomePage() {
     // Supabase not configured
   }
 
-  // Fetch recent posts with social counts; personalize feed for logged-in users
+  // Fetch network feed: posts from followed people + own posts, newest first
   let feedPosts: FeedPost[] = []
   try {
     const supabase = createServerClient()
 
-    // Get IDs of profiles the viewer follows (for ordering)
-    let followedIds: string[] = []
+    // Build feed: if logged in, UNION followed posts + own posts; else all recent posts
     if (myProfileId) {
+      // Fetch followee IDs first, then run feed queries in parallel
       const { data: followRows } = await supabase
         .from('follows')
         .select('followee_id')
         .eq('follower_id', myProfileId)
-      followedIds = (followRows ?? []).map((r: { followee_id: string }) => r.followee_id)
-    }
+      const followeeIds = (followRows ?? []).map((r: { followee_id: string }) => r.followee_id)
 
-    const { data: rawPosts } = await supabase
-      .from('posts')
-      .select('*, profile:profiles(slug, display_name, bio)')
-      .order('created_at', { ascending: false })
-      .limit(50)
-
-    // Attach social counts
-    const posts = (rawPosts ?? []) as FeedPost[]
-    if (posts.length > 0) {
-      const postIds = posts.map((p) => p.id)
-
-      const [{ data: reactCounts }, { data: commentCounts }] = await Promise.all([
+      const [{ data: followedPosts }, { data: ownPosts }] = await Promise.all([
+        followeeIds.length > 0
+          ? supabase
+              .from('posts')
+              .select('*, profile:profiles!profile_id(slug, display_name, avatar_url, bio)')
+              .in('profile_id', followeeIds)
+              .order('created_at', { ascending: false })
+              .limit(20)
+          : Promise.resolve({ data: [] }),
         supabase
-          .from('reactions')
-          .select('post_id')
-          .in('post_id', postIds)
-          .eq('type', 'like'),
-        supabase
-          .from('comments')
-          .select('post_id')
-          .in('post_id', postIds),
+          .from('posts')
+          .select('*, profile:profiles!profile_id(slug, display_name, avatar_url, bio)')
+          .eq('profile_id', myProfileId)
+          .order('created_at', { ascending: false })
+          .limit(20),
       ])
 
-      const likeMap = new Map<string, number>()
-      for (const r of reactCounts ?? []) {
-        likeMap.set(r.post_id, (likeMap.get(r.post_id) ?? 0) + 1)
-      }
-      const commentMap = new Map<string, number>()
-      for (const c of commentCounts ?? []) {
-        commentMap.set(c.post_id, (commentMap.get(c.post_id) ?? 0) + 1)
-      }
+      hasFollows = (followedPosts ?? []).length > 0
 
-      for (const post of posts) {
-        post.likeCount = likeMap.get(post.id) ?? 0
-        post.commentCount = commentMap.get(post.id) ?? 0
-      }
-    }
-
-    // Sort: followed authors first, then by date
-    if (followedIds.length > 0) {
-      posts.sort((a, b) => {
-        const aFollowed = followedIds.includes(a.profile_id) ? 1 : 0
-        const bFollowed = followedIds.includes(b.profile_id) ? 1 : 0
-        if (bFollowed !== aFollowed) return bFollowed - aFollowed
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      // Merge, deduplicate by id, sort newest-first, take 20
+      const merged = [...(followedPosts ?? []), ...(ownPosts ?? [])] as FeedPost[]
+      const deduped = Array.from(new Map(merged.map((p) => [p.id, p])).values())
+      deduped.sort((a, b) => {
+        const diff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        if (diff !== 0) return diff
+        return a.id < b.id ? 1 : -1 // composite tie-break by id
       })
-    }
+      const posts = deduped.slice(0, 20)
 
-    feedPosts = posts.slice(0, 30)
-
-    // Trending tags: aggregate from recent posts
-    const tagCounts = new Map<string, number>()
-    for (const post of posts) {
-      if (post.tags) {
-        for (const tag of post.tags) {
-          tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)
+      if (posts.length > 0) {
+        const postIds = posts.map((p) => p.id)
+        const [{ data: reactCounts }, { data: commentCounts }] = await Promise.all([
+          supabase.from('reactions').select('post_id').in('post_id', postIds).eq('type', 'like'),
+          supabase.from('comments').select('post_id').in('post_id', postIds),
+        ])
+        const likeMap = new Map<string, number>()
+        for (const r of reactCounts ?? []) likeMap.set(r.post_id, (likeMap.get(r.post_id) ?? 0) + 1)
+        const commentMap = new Map<string, number>()
+        for (const c of commentCounts ?? []) commentMap.set(c.post_id, (commentMap.get(c.post_id) ?? 0) + 1)
+        for (const post of posts) {
+          post.likeCount = likeMap.get(post.id) ?? 0
+          post.commentCount = commentMap.get(post.id) ?? 0
         }
       }
-    }
-    trendingTags = Array.from(tagCounts.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(([tag]) => tag)
 
-    // People to follow: profiles not already followed
-    if (isLoggedIn && myProfileId) {
-      const followedSet = new Set(followedIds) // followedIds are profile IDs
+      feedPosts = posts
+
+      // Trending tags from feed posts
+      const tagCounts = new Map<string, number>()
+      for (const post of posts) {
+        for (const tag of post.tags ?? []) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)
+      }
+      trendingTags = Array.from(tagCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([tag]) => tag)
+
+      // People to follow: profiles not yet followed (reuse followeeIds from above)
+      const followedSet = new Set(followeeIds)
       const { data: suggRaw } = await supabase
         .from('profiles')
         .select('id, slug, display_name, title')
@@ -898,6 +861,20 @@ export default async function HomePage() {
       suggestedProfiles = ((suggRaw ?? []) as (SuggestedProfile & { id: string })[])
         .filter((p) => !followedSet.has(p.id))
         .slice(0, 5)
+    } else {
+      // Logged-out: show recent posts from everyone
+      const { data: rawPosts } = await supabase
+        .from('posts')
+        .select('*, profile:profiles!profile_id(slug, display_name, avatar_url, bio)')
+        .order('created_at', { ascending: false })
+        .limit(20)
+      feedPosts = (rawPosts ?? []) as FeedPost[]
+
+      const tagCounts = new Map<string, number>()
+      for (const post of feedPosts) {
+        for (const tag of post.tags ?? []) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1)
+      }
+      trendingTags = Array.from(tagCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([tag]) => tag)
     }
   } catch {
     // DB not reachable

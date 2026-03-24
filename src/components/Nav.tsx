@@ -3,10 +3,13 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { User } from '@supabase/supabase-js'
+import Avatar from '@/components/Avatar'
 
 interface NavProps {
   user: User | null
   profileSlug: string | null
+  displayName?: string | null
+  avatarUrl?: string | null
 }
 
 const NAV_LINKS = [
@@ -16,7 +19,7 @@ const NAV_LINKS = [
   { href: '/jobs', label: 'Jobs' },
 ]
 
-export function Nav({ user, profileSlug }: NavProps) {
+export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
   const pathname = usePathname()
 
   return (
@@ -139,24 +142,15 @@ export function Nav({ user, profileSlug }: NavProps) {
               {profileSlug && (
                 <Link
                   href={`/profile/${profileSlug}`}
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'linear-gradient(135deg, #0D9373, #0B7D62)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontFamily: 'var(--font-serif)',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    color: 'white',
-                    flexShrink: 0,
-                    textDecoration: 'none',
-                  }}
+                  style={{ display: 'inline-flex', flexShrink: 0, textDecoration: 'none' }}
                   title={`@${profileSlug}`}
                 >
-                  {profileSlug.charAt(0).toUpperCase()}
+                  <Avatar
+                    name={displayName ?? profileSlug}
+                    avatarUrl={avatarUrl}
+                    size={32}
+                    variant="nav"
+                  />
                 </Link>
               )}
             </>

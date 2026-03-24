@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 
+const CACHE = { headers: { 'Cache-Control': 'private, max-age=60' } }
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const q = (searchParams.get('q') ?? '').trim()
@@ -9,7 +11,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') ?? 'profiles' // profiles | all
 
   if (!q) {
-    return NextResponse.json(type === 'all' ? { profiles: [], companies: [], posts: [] } : [])
+    return NextResponse.json(type === 'all' ? { profiles: [], companies: [], posts: [] } : [], CACHE)
   }
 
   const supabase = createServerClient()
@@ -25,7 +27,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json((data ?? []).map((c: { slug: string; name: string }) => ({
       slug: c.slug,
       display_name: c.name,
-    })))
+    })), CACHE)
   }
 
   if (type !== 'all') {
@@ -37,7 +39,7 @@ export async function GET(request: NextRequest) {
       .limit(10)
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json(data ?? [])
+    return NextResponse.json(data ?? [], CACHE)
   }
 
   // Unified search across profiles, companies, and posts
@@ -63,5 +65,5 @@ export async function GET(request: NextRequest) {
     profiles: profilesRes.data ?? [],
     companies: companiesRes.data ?? [],
     posts: postsRes.data ?? [],
-  })
+  }, CACHE)
 }

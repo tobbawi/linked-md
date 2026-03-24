@@ -12,6 +12,7 @@ const mockProfile: Profile = {
   website: null,
   bio: 'Engineer at Acme.',
   markdown_content: 'I write about systems.',
+  avatar_url: null,
   outbound_links: [],
   company_links: [],
   created_at: '2026-03-20T00:00:00Z',
@@ -189,6 +190,7 @@ const mockSkill: ProfileSkill = {
   profile_id: 'p1',
   name: 'TypeScript',
   sort_order: 0,
+  created_at: '2026-03-20T00:00:00Z',
 }
 
 const mockRecommendation: Recommendation = {
@@ -198,6 +200,7 @@ const mockRecommendation: Recommendation = {
   body: 'Jane is an exceptional engineer with a strong system design background.',
   visible: true,
   created_at: '2026-03-20T00:00:00Z',
+  updated_at: '2026-03-20T00:00:00Z',
   author: { slug: 'bob-smith', display_name: 'Bob Smith' },
 }
 

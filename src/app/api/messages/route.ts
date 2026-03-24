@@ -35,7 +35,7 @@ export async function GET() {
   // For each conversation, get the other member and last message
   const { data: allMembers } = await supabase
     .from('conversation_members')
-    .select('conversation_id, profile:profiles!profile_id(id, slug, display_name)')
+    .select('conversation_id, profile:profiles!profile_id(id, slug, display_name, avatar_url)')
     .in('conversation_id', conversationIds)
     .neq('profile_id', myProfile.id)
 
@@ -62,8 +62,9 @@ export async function GET() {
     }
   }
 
-  type MemberRow = { conversation_id: string; profile: { id: string; slug: string; display_name: string } | { id: string; slug: string; display_name: string }[] }
-  const otherByConv: Record<string, { id: string; slug: string; display_name: string }> = {}
+  type OtherProfile = { id: string; slug: string; display_name: string; avatar_url: string | null }
+  type MemberRow = { conversation_id: string; profile: OtherProfile | OtherProfile[] }
+  const otherByConv: Record<string, OtherProfile> = {}
   for (const m of (allMembers ?? []) as unknown as MemberRow[]) {
     const p = m.profile
     otherByConv[m.conversation_id] = Array.isArray(p) ? p[0] : p

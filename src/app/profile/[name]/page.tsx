@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks, extractWikilinks, toSlug } from '@/lib/wikilinks'
+import Avatar from '@/components/Avatar'
 import { FollowButton } from '@/components/FollowButton'
 import { MessageButton } from '@/components/MessageButton'
 import ExperienceSection from '@/components/ExperienceSection'
@@ -244,24 +245,8 @@ export default async function ProfilePage({ params }: PageProps) {
             }}
           >
             {/* Avatar */}
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--color-primary-light)',
-                border: '2px solid var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                fontWeight: 700,
-                color: 'var(--color-primary)',
-                fontFamily: 'var(--font-serif)',
-                marginBottom: 'var(--space-md)',
-              }}
-            >
-              {profile.display_name.charAt(0).toUpperCase()}
+            <div style={{ marginBottom: 'var(--space-md)' }}>
+              <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={64} />
             </div>
 
             {/* Display name + edit button */}

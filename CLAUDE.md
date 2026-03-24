@@ -49,3 +49,6 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - Dark mode via CSS custom properties `[data-theme="dark"]` with localStorage persistence
 - Flash-prevention: inline `<script>` in `<head>` sets `data-theme` before first paint
 - Client beacons: tiny `'use client'` components rendering `null` + `useEffect` for side effects in server pages
+- Avatar uploads: Supabase Storage bucket `avatars` (public CDN). **Cannot be created via SQL migration** — run `npx tsx scripts/setup-storage.ts` once after deploying. Requires `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
+- Avatar component: `src/components/Avatar.tsx` — initials always as base layer, photo overlays. Pure functions in `src/lib/avatar.ts` (getInitials, getAvatarColor, validateAvatarFile).
+- Network feed: `POST /api/avatar/upload` — MIME + size validation, ownership check, jimp resize (skipped if unavailable), path stored in `profiles.avatar_url`.

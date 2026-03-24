@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { createServerClient } from '@/lib/supabase'
+import Avatar from '@/components/Avatar'
 import type { Post, Profile } from '@/types'
 import { renderWikilinks } from '@/lib/wikilinks'
 
-type PostWithProfile = Post & { profile: Pick<Profile, 'slug' | 'display_name'> | null }
+type PostWithProfile = Post & { profile: Pick<Profile, 'slug' | 'display_name' | 'avatar_url'> | null }
 
 function postPreview(content: string, limit = 280): string {
   const stripped = content.replace(/^#.*$/m, '').replace(/\[\[.*?\]\]/g, '').trim()
@@ -15,7 +16,7 @@ export default async function ExplorePage() {
 
   const { data: posts } = await supabase
     .from('posts')
-    .select('*, profile:profiles!profile_id(slug, display_name)')
+    .select('*, profile:profiles!profile_id(slug, display_name, avatar_url)')
     .order('created_at', { ascending: false })
     .limit(50)
     .returns<PostWithProfile[]>()
@@ -80,24 +81,7 @@ export default async function ExplorePage() {
                       marginBottom: 'var(--space-sm)',
                     }}
                   >
-                    <div
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: 'var(--radius-full)',
-                        background: 'var(--color-primary-light)',
-                        border: '1px solid var(--color-primary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        color: 'var(--color-primary)',
-                        flexShrink: 0,
-                      }}
-                    >
-                      {post.profile.display_name.charAt(0).toUpperCase()}
-                    </div>
+                    <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={24} />
                     <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-ink)' }}>
                       {post.profile.display_name}
                     </span>

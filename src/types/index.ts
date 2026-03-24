@@ -109,7 +109,7 @@ export interface JobListing {
 export interface Conversation {
   id: string
   created_at: string
-  other_profile?: Pick<Profile, 'id' | 'slug' | 'display_name'>
+  other_profile?: Pick<Profile, 'id' | 'slug' | 'display_name' | 'avatar_url'>
   last_message?: Pick<Message, 'body' | 'created_at'>
   unread_count?: number
 }

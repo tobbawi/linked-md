@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
+import Avatar from '@/components/Avatar'
 import { supabase } from '@/lib/supabase-browser'
 import type { Message } from '@/types'
 
@@ -27,7 +28,7 @@ export default function MessageThreadPage() {
 
   const [messages, setMessages] = useState<Message[]>([])
   const [myProfileId, setMyProfileId] = useState<string | null>(null)
-  const [otherProfile, setOtherProfile] = useState<{ id: string; slug: string; display_name: string } | null>(null)
+  const [otherProfile, setOtherProfile] = useState<{ id: string; slug: string; display_name: string; avatar_url?: string | null } | null>(null)
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -206,24 +207,7 @@ export default function MessageThreadPage() {
         </Link>
         {otherProfile && (
           <>
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--color-primary-light)',
-                border: '1px solid var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '15px',
-                fontWeight: 600,
-                color: 'var(--color-primary)',
-                fontFamily: 'var(--font-serif)',
-              }}
-            >
-              {otherProfile.display_name.charAt(0).toUpperCase()}
-            </div>
+            <Avatar name={otherProfile.display_name} avatarUrl={otherProfile.avatar_url} size={36} />
             <Link
               href={`/profile/${otherProfile.slug}`}
               style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-ink)' }}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import Avatar from '@/components/Avatar'
 import { supabase } from '@/lib/supabase-browser'
 import type { Conversation } from '@/types'
 
@@ -107,26 +108,8 @@ export default function MessagesPage() {
                     background: (conv.unread_count ?? 0) > 0 ? 'var(--color-primary-light)' : 'transparent',
                   }}
                 >
-                  {/* Avatar initial */}
-                  <div
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: 'var(--radius-full)',
-                      background: 'var(--color-primary-light)',
-                      border: '1px solid var(--color-primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '16px',
-                      fontWeight: 600,
-                      color: 'var(--color-primary)',
-                      fontFamily: 'var(--font-serif)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {conv.other_profile?.display_name?.charAt(0).toUpperCase() ?? '?'}
-                  </div>
+                  {/* Avatar */}
+                  <Avatar name={conv.other_profile?.display_name} avatarUrl={conv.other_profile?.avatar_url} size={40} />
 
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-sm)' }}>
