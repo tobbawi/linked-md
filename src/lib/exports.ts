@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation, Company, JobListing } from '@/types'
+import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation, Company, JobListing, Repost } from '@/types'
 import { formatPeriod } from '@/lib/dateUtils'
 
 const EXPORT_ROOT = path.join(process.cwd(), 'exports')
@@ -113,12 +113,17 @@ export function buildLlmTxt(
   return lines.join('\n')
 }
 
+interface RepostWithPost extends Repost {
+  post: Pick<Post, 'slug' | 'title'> & { profile: Pick<Profile, 'slug' | 'display_name'> }
+}
+
 export interface LlmFullOptions {
   posts?: Post[]
   experience?: ExperienceEntry[]
   education?: EducationEntry[]
   skills?: ProfileSkill[]
   recommendations?: Recommendation[]
+  reposts?: RepostWithPost[]
   stats?: ProfileStats
 }
 
@@ -130,6 +135,7 @@ export function buildLlmFullTxt(profile: Profile, options: LlmFullOptions = {}):
     education = [],
     skills = [],
     recommendations = [],
+    reposts = [],
     stats,
   } = options
 
@@ -203,6 +209,22 @@ export function buildLlmFullTxt(profile: Profile, options: LlmFullOptions = {}):
     if (stats.followerCount !== undefined) lines.push(`followers: ${stats.followerCount}`)
     if (stats.followingCount !== undefined) lines.push(`following: ${stats.followingCount}`)
     lines.push('')
+  }
+
+  if (reposts.length > 0) {
+    lines.push(`## Reposts (${reposts.length})`)
+    lines.push('')
+    for (const r of reposts) {
+      const postTitle = r.post.title ? `"${r.post.title}"` : `a post by ${r.post.profile.display_name}`
+      lines.push(`### Reposted: ${postTitle}`)
+      lines.push(`> /profile/${r.post.profile.slug}/post/${r.post.slug}.md`)
+      lines.push(`> Reposted: ${r.created_at}`)
+      if (r.comment) {
+        lines.push('')
+        lines.push(`"${r.comment}"`)
+      }
+      lines.push('')
+    }
   }
 
   if (posts.length > 0) {

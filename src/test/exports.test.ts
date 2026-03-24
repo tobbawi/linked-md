@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { buildProfileMarkdown, buildPostMarkdown, buildLlmTxt, buildLlmFullTxt, buildLlmCompanyTxt, buildLlmCompanyFullTxt } from '@/lib/exports'
-import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation, Company } from '@/types'
+import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation, Company, Repost } from '@/types'
 
 const mockProfile: Profile = {
   id: 'p1',
@@ -284,6 +284,67 @@ const mockCompany: Company = {
   created_at: '2026-03-20T00:00:00Z',
   updated_at: '2026-03-20T00:00:00Z',
 }
+
+const mockRepost = {
+  id: 'rp1',
+  profile_id: 'p1',
+  original_post_id: 'post2',
+  comment: 'Great insights here.',
+  created_at: '2026-03-24T10:00:00Z',
+  post: {
+    slug: 'hello-world',
+    title: 'Hello World',
+    profile: { slug: 'bob-smith', display_name: 'Bob Smith' },
+  },
+} as Repost & { post: { slug: string; title: string | null; profile: { slug: string; display_name: string } } }
+
+describe('buildLlmFullTxt — reposts', () => {
+  it('includes Reposts section when reposts provided', () => {
+    const txt = buildLlmFullTxt(mockProfile, { reposts: [mockRepost] })
+    expect(txt).toContain('## Reposts (1)')
+    expect(txt).toContain('Reposted: "Hello World"')
+    expect(txt).toContain('/profile/bob-smith/post/hello-world.md')
+    expect(txt).toContain('Great insights here.')
+  })
+
+  it('omits Reposts section when no reposts', () => {
+    const txt = buildLlmFullTxt(mockProfile, {})
+    expect(txt).not.toContain('## Reposts')
+  })
+
+  it('omits Reposts section when empty array', () => {
+    const txt = buildLlmFullTxt(mockProfile, { reposts: [] })
+    expect(txt).not.toContain('## Reposts')
+  })
+
+  it('handles repost without comment', () => {
+    const noComment = { ...mockRepost, comment: null }
+    const txt = buildLlmFullTxt(mockProfile, { reposts: [noComment] })
+    expect(txt).toContain('## Reposts (1)')
+    expect(txt).not.toContain('null')
+  })
+
+  it('handles repost with null title (untitled post)', () => {
+    const untitled = { ...mockRepost, post: { ...mockRepost.post, title: null } }
+    const txt = buildLlmFullTxt(mockProfile, { reposts: [untitled] })
+    expect(txt).toContain('a post by Bob Smith')
+  })
+
+  it('shows correct count for multiple reposts', () => {
+    const repost2 = { ...mockRepost, id: 'rp2', original_post_id: 'post3' }
+    const txt = buildLlmFullTxt(mockProfile, { reposts: [mockRepost, repost2] })
+    expect(txt).toContain('## Reposts (2)')
+  })
+
+  it('Reposts section appears before Posts section', () => {
+    const txt = buildLlmFullTxt(mockProfile, { posts: [mockPost], reposts: [mockRepost] })
+    const repostsIdx = txt.indexOf('## Reposts')
+    const postsIdx = txt.indexOf('## Posts')
+    expect(repostsIdx).toBeGreaterThan(-1)
+    expect(postsIdx).toBeGreaterThan(-1)
+    expect(repostsIdx).toBeLessThan(postsIdx)
+  })
+})
 
 describe('buildLlmCompanyTxt (company summary)', () => {
   it('includes company name heading', () => {

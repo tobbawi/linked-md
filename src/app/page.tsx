@@ -1,12 +1,25 @@
 import Link from 'next/link'
 import { createAuthServerClient, createServerClient } from '@/lib/supabase'
 import Avatar from '@/components/Avatar'
+import { RepostButton } from '@/components/RepostButton'
+import { mergeFeedItems } from '@/lib/feed'
 import type { Post, Profile, JobListing } from '@/types'
 
 interface FeedPost extends Post {
   profile: Pick<Profile, 'slug' | 'display_name' | 'avatar_url' | 'bio'>
   likeCount?: number
   commentCount?: number
+  repostCount?: number
+  viewerHasReposted?: boolean
+}
+
+interface FeedRepost {
+  id: string
+  created_at: string
+  comment: string | null
+  feed_type: 'repost'
+  reposter: Pick<Profile, 'slug' | 'display_name' | 'avatar_url'>
+  post: Post & { post_author: Pick<Profile, 'slug' | 'display_name' | 'avatar_url' | 'bio'> }
 }
 
 interface FeedJobListing extends JobListing {
@@ -368,7 +381,7 @@ function UserSidebar({
 
 // ── Post card ───────────────────────────────────────────────────────────────
 
-function PostCard({ post }: { post: FeedPost }) {
+function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string | null }) {
   const mdUrl = `/profile/${post.profile.slug}/post/${post.slug}.md`
 
   return (
@@ -501,6 +514,13 @@ function PostCard({ post }: { post: FeedPost }) {
               {post.commentCount} comments
             </span>
           )}
+          <RepostButton
+            postId={post.id}
+            postAuthorProfileId={post.profile_id}
+            myProfileId={myProfileId ?? null}
+            initialReposted={post.viewerHasReposted ?? false}
+            repostCount={post.repostCount ?? 0}
+          />
         </div>
         <span className="md-url" style={{ fontSize: '11px' }}>
           {mdUrl}
@@ -571,6 +591,85 @@ function JobCard({ job }: { job: FeedJobListing }) {
       >
         View opening →
       </Link>
+    </article>
+  )
+}
+
+// ── Repost card ──────────────────────────────────────────────────────────────
+
+function RepostCard({ repost, myProfileId }: { repost: FeedRepost; myProfileId?: string | null }) {
+  const { reposter, post } = repost
+  const author = post.post_author
+  return (
+    <article
+      style={{
+        background: 'var(--color-card)',
+        border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-md)',
+        padding: 'var(--space-lg)',
+      }}
+    >
+      {/* Reshared-by row */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+          stroke="var(--color-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+        >
+          <path d="M17 1l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" />
+          <path d="M7 23l-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
+        </svg>
+        <Link href={`/profile/${reposter.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+          <Avatar name={reposter.display_name} avatarUrl={reposter.avatar_url} size={18} />
+        </Link>
+        <Link href={`/profile/${reposter.slug}`} style={{ fontSize: '12px', color: 'var(--color-secondary)', fontWeight: 500 }}>
+          {reposter.display_name}
+        </Link>
+        <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>reshared</span>
+      </div>
+
+      {/* Optional comment */}
+      {repost.comment && (
+        <p style={{ fontSize: '14px', color: 'var(--color-text)', marginBottom: 'var(--space-md)', fontStyle: 'italic' }}>
+          &ldquo;{repost.comment}&rdquo;
+        </p>
+      )}
+
+      {/* Original post */}
+      <div style={{
+        border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-sm)',
+        padding: 'var(--space-md)',
+        background: 'var(--color-bg)',
+      }}>
+        {/* Original author row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+          <Link href={`/profile/${author.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+            <Avatar name={author.display_name} avatarUrl={author.avatar_url} size={24} />
+          </Link>
+          <Link href={`/profile/${author.slug}`} style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text)' }}>
+            {author.display_name}
+          </Link>
+        </div>
+
+        {post.title && (
+          <Link href={`/profile/${author.slug}/post/${post.slug}`}>
+            <h3 style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: '1.1rem',
+              color: 'var(--color-ink)',
+              lineHeight: 1.35,
+              marginBottom: 'var(--space-xs)',
+            }}>
+              {post.title}
+            </h3>
+          </Link>
+        )}
+        <p style={{ fontSize: '13px', color: 'var(--color-secondary)', lineHeight: 1.5, marginBottom: 'var(--space-sm)' }}>
+          {post.markdown_content.replace(/^#{1,6}\s+/gm, '').replace(/\*\*?([^*]+)\*\*?/g, '$1').trim().slice(0, 120).trimEnd()}…
+        </p>
+        <Link href={`/profile/${author.slug}/post/${post.slug}`} style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-primary)' }}>
+          Read →
+        </Link>
+      </div>
     </article>
   )
 }
@@ -855,6 +954,7 @@ export default async function HomePage() {
   // Fetch network feed: posts from followed people + own posts, newest first
   let feedPosts: FeedPost[] = []
   let feedJobs: FeedJobListing[] = []
+  let feedReposts: FeedRepost[] = []
   try {
     const supabase = createServerClient()
 
@@ -887,28 +987,31 @@ export default async function HomePage() {
       hasFollows = (followedPosts ?? []).length > 0
 
       // Merge, deduplicate by id, sort newest-first, take 20
-      const merged = [...(followedPosts ?? []), ...(ownPosts ?? [])] as FeedPost[]
-      const deduped = Array.from(new Map(merged.map((p) => [p.id, p])).values())
-      deduped.sort((a, b) => {
-        const diff = new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        if (diff !== 0) return diff
-        return a.id < b.id ? 1 : -1 // composite tie-break by id
-      })
-      const posts = deduped.slice(0, 20)
+      const posts = mergeFeedItems(
+        (followedPosts ?? []) as FeedPost[],
+        (ownPosts ?? []) as FeedPost[],
+      ).slice(0, 20)
 
       if (posts.length > 0) {
         const postIds = posts.map((p) => p.id)
-        const [{ data: reactCounts }, { data: commentCounts }] = await Promise.all([
+        const [{ data: reactCounts }, { data: commentCounts }, { data: repostCounts }, { data: myRepostRows }] = await Promise.all([
           supabase.from('reactions').select('post_id').in('post_id', postIds).eq('type', 'like'),
           supabase.from('comments').select('post_id').in('post_id', postIds),
+          supabase.from('reposts').select('original_post_id').in('original_post_id', postIds),
+          supabase.from('reposts').select('original_post_id').eq('profile_id', myProfileId).in('original_post_id', postIds),
         ])
         const likeMap = new Map<string, number>()
         for (const r of reactCounts ?? []) likeMap.set(r.post_id, (likeMap.get(r.post_id) ?? 0) + 1)
         const commentMap = new Map<string, number>()
         for (const c of commentCounts ?? []) commentMap.set(c.post_id, (commentMap.get(c.post_id) ?? 0) + 1)
+        const repostMap = new Map<string, number>()
+        for (const r of repostCounts ?? []) repostMap.set(r.original_post_id, (repostMap.get(r.original_post_id) ?? 0) + 1)
+        const myRepostSet = new Set((myRepostRows ?? []).map((r: { original_post_id: string }) => r.original_post_id))
         for (const post of posts) {
           post.likeCount = likeMap.get(post.id) ?? 0
           post.commentCount = commentMap.get(post.id) ?? 0
+          post.repostCount = repostMap.get(post.id) ?? 0
+          post.viewerHasReposted = myRepostSet.has(post.id)
         }
       }
 
@@ -932,6 +1035,21 @@ export default async function HomePage() {
           .order('created_at', { ascending: false })
           .limit(10)
         feedJobs = ((jobRows ?? []) as FeedJobListing[]).map((j) => ({ ...j, feed_type: 'job' as const }))
+      }
+
+      // Fetch reposts from followed profiles
+      if (followeeIds.length > 0) {
+        const { data: repostRows } = await supabase
+          .from('reposts')
+          .select(`
+            *,
+            reposter:profiles!profile_id(slug, display_name, avatar_url),
+            post:posts!original_post_id(*, post_author:profiles!profile_id(slug, display_name, avatar_url, bio))
+          `)
+          .in('profile_id', followeeIds)
+          .order('created_at', { ascending: false })
+          .limit(20)
+        feedReposts = ((repostRows ?? []) as FeedRepost[]).map((r) => ({ ...r, feed_type: 'repost' as const }))
       }
 
       // Trending tags from feed posts
@@ -1077,19 +1195,22 @@ export default async function HomePage() {
           )}
 
           {(() => {
-            const feedItems: Array<FeedPost | FeedJobListing> = [
+            const feedItems: Array<FeedPost | FeedJobListing | FeedRepost> = [
               ...feedPosts,
               ...feedJobs,
+              ...feedReposts,
             ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
             return feedItems.length === 0 ? (
               <EmptyFeed isLoggedIn={isLoggedIn} />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                {feedItems.map((item) =>
-                  'feed_type' in item && item.feed_type === 'job'
-                    ? <JobCard key={`job-${item.id}`} job={item as FeedJobListing} />
-                    : <PostCard key={item.id} post={item as FeedPost} />
-                )}
+                {feedItems.map((item) => {
+                  if ('feed_type' in item) {
+                    if (item.feed_type === 'job') return <JobCard key={`job-${item.id}`} job={item as FeedJobListing} />
+                    if (item.feed_type === 'repost') return <RepostCard key={`repost-${item.id}`} repost={item as FeedRepost} myProfileId={myProfileId} />
+                  }
+                  return <PostCard key={item.id} post={item as FeedPost} myProfileId={myProfileId} />
+                })}
               </div>
             )
           })()}

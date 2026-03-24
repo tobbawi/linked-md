@@ -1,6 +1,17 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { createAuthServerClient, createServerClient } from '@/lib/supabase'
 import { validateAvatarFile } from '@/lib/avatar'
+
+// Plain service-role client — bypasses RLS for Storage operations.
+// @supabase/ssr's createServerClient layers cookie auth on top of the key,
+// which causes Storage RLS to reject uploads even with the service role key.
+function createAdminStorageClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
 
 export async function POST(req: Request) {
   const authClient = createAuthServerClient()
@@ -20,6 +31,17 @@ export async function POST(req: Request) {
   }
 
   const supabase = createServerClient()
+  const adminStorage = createAdminStorageClient()
+
+  // Ensure the avatars bucket exists (idempotent — ignore "already exists" error)
+  const { error: bucketError } = await adminStorage.storage.createBucket('avatars', {
+    public: true,
+    fileSizeLimit: 2 * 1024 * 1024,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
+  })
+  if (bucketError && !bucketError.message.includes('already exists')) {
+    console.error('[avatar/upload] bucket create error:', bucketError)
+  }
 
   // SECURITY: verify session user owns the profile before writing to Storage
   const { data: profile } = await supabase
@@ -33,40 +55,30 @@ export async function POST(req: Request) {
   const profileId = profile.id
   const storagePath = `avatars/${profileId}`
 
-  // Optionally resize with jimp — skip if unavailable or too slow
-  let uploadBytes: ArrayBuffer
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { Jimp } = require('jimp') as { Jimp: { read: (b: Buffer) => Promise<{ cover: (o: {w:number,h:number}) => void, getBuffer: (t: string) => Promise<ArrayBuffer> }> } }
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const image = await Jimp.read(buffer)
-    image.cover({ w: 400, h: 400 })
-    uploadBytes = await image.getBuffer('image/jpeg')
-  } catch {
-    // jimp unavailable or resize failed — upload original as-is
-    // CSS object-fit: cover handles display; this is storage-only optimization
-    uploadBytes = await file.arrayBuffer()
-  }
+  // Upload original — CSS object-fit: cover handles display cropping
+  const uploadBytes = await file.arrayBuffer()
+  const uploadMime = file.type
 
   // Delete old avatar before uploading new one (no orphan files)
   if (profile.avatar_url) {
-    await supabase.storage.from('avatars').remove([storagePath])
+    await adminStorage.storage.from('avatars').remove([storagePath])
   }
 
   // Upload to Supabase Storage
-  const { error: uploadError } = await supabase.storage
+  const { error: uploadError } = await adminStorage.storage
     .from('avatars')
     .upload(storagePath, uploadBytes, {
-      contentType: 'image/jpeg',
+      contentType: uploadMime,
       upsert: true,
     })
 
   if (uploadError) {
-    return NextResponse.json({ error: 'Upload failed — try again' }, { status: 500 })
+    console.error('[avatar/upload] storage error:', uploadError)
+    return NextResponse.json({ error: uploadError.message }, { status: 500 })
   }
 
-  // Construct CDN URL at render time (store path only, not full URL)
-  const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(storagePath)
+  // Construct CDN URL
+  const { data: { publicUrl } } = adminStorage.storage.from('avatars').getPublicUrl(storagePath)
 
   // Update profile — only if Storage write succeeded
   const { error: updateError } = await supabase

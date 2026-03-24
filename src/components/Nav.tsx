@@ -36,6 +36,7 @@ function notificationLabel(n: Notification): string {
     case 'comment': return `${actor} commented on ${postTitle}`
     case 'endorse': return `${actor} endorsed a skill`
     case 'recommendation': return `${actor} wrote you a recommendation`
+    case 'repost': return `${actor} reposted ${postTitle}`
     default: return `${actor} interacted with you`
   }
 }

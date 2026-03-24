@@ -65,10 +65,18 @@ export interface Comment {
   profile?: Pick<Profile, 'slug' | 'display_name'>
 }
 
+export interface Repost {
+  id: string
+  profile_id: string
+  original_post_id: string
+  comment: string | null
+  created_at: string
+}
+
 export interface Notification {
   id: string
   recipient_id: string
-  type: 'follow' | 'like' | 'comment' | 'endorse' | 'recommendation'
+  type: 'follow' | 'like' | 'comment' | 'endorse' | 'recommendation' | 'repost'
   actor_id: string | null
   post_id: string | null
   comment_id: string | null
