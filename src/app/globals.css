@@ -200,9 +200,18 @@ a {
   gap: var(--space-lg);
 }
 
+/* Nav search — desktop only */
+.nav-search-desktop {
+  display: block;
+}
+
 /* Mobile responsive */
 @media (max-width: 640px) {
   .nav-center {
+    display: none;
+  }
+
+  .nav-search-desktop {
     display: none;
   }
 
