@@ -152,13 +152,13 @@ export default async function AnalyticsPage() {
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+      <div>
         {/* Header */}
         <div style={{ marginBottom: 'var(--space-xl)' }}>
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: '1.75rem',
+              fontSize: '1.25rem',
               color: 'var(--color-ink)',
               marginBottom: 'var(--space-xs)',
             }}
