@@ -388,7 +388,7 @@ export default async function CompanyPage({ params }: PageProps) {
                     </div>
                     {job.location && (
                       <p style={{ fontSize: '13px', color: 'var(--color-secondary)', marginBottom: 'var(--space-sm)' }}>
-                        📍 {job.location}
+                        {job.location}
                       </p>
                     )}
                     {job.description_md && (

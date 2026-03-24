@@ -606,7 +606,7 @@ export default async function ProfilePage({ params }: PageProps) {
                               padding: '2px 8px',
                               background: 'var(--color-primary-light)',
                               color: 'var(--color-primary)',
-                              borderRadius: 'var(--radius-full)',
+                              borderRadius: 'var(--radius-sm)',
                               fontWeight: 500,
                             }}
                           >
