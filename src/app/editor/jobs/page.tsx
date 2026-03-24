@@ -193,13 +193,13 @@ function JobsEditorInner() {
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+      <div>
         {/* Header */}
         <div style={{ marginBottom: 'var(--space-xl)' }}>
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: '1.5rem',
+              fontSize: '1.25rem',
               color: 'var(--color-ink)',
               marginBottom: 'var(--space-xs)',
             }}
