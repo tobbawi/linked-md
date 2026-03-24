@@ -32,6 +32,7 @@ function notificationLabel(n: Notification): string {
   const postTitle = n.post?.title ? `"${n.post.title}"` : 'your post'
   switch (n.type) {
     case 'follow': return `${actor} followed you`
+    case 'company_follow': return `${actor} followed your company`
     case 'like': return `${actor} liked ${postTitle}`
     case 'comment': return `${actor} commented on ${postTitle}`
     case 'endorse': return `${actor} endorsed a skill`
@@ -49,6 +50,8 @@ function notificationHref(n: Notification): string {
     if (n.post?.slug) {
       return `/profile/${n.actor.slug}/post/${n.post.slug}`
     }
+    // Repost/like/comment where post was deleted — fall back to actor profile
+    return `/profile/${n.actor.slug}`
   }
   return '/'
 }

@@ -24,7 +24,7 @@ export function CompanyFollowButton({ companySlug, initialFollowing, followerCou
       if (res.ok) {
         const newFollowing = !following
         setFollowing(newFollowing)
-        setCount((c) => c + (newFollowing ? 1 : -1))
+        setCount((c) => Math.max(0, c + (newFollowing ? 1 : -1)))
       }
     } finally {
       setLoading(false)

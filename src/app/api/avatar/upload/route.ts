@@ -24,24 +24,26 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No file provided' }, { status: 400 })
   }
 
-  // Validate MIME type and size before any Storage write
+  // Validate MIME type and size (client-provided type) before reading body
   const validation = validateAvatarFile({ type: file.type, size: file.size })
   if (!validation.valid) {
     return NextResponse.json({ error: validation.error }, { status: 400 })
   }
 
+  // SECURITY: magic number check — verify actual file bytes match the declared MIME type
+  const uploadBytes = await file.arrayBuffer()
+  const header = new Uint8Array(uploadBytes.slice(0, 12))
+  const isJpeg = header[0] === 0xFF && header[1] === 0xD8 && header[2] === 0xFF
+  const isPng = header[0] === 0x89 && header[1] === 0x50 && header[2] === 0x4E && header[3] === 0x47
+  const isWebp = header[0] === 0x52 && header[1] === 0x49 && header[2] === 0x46 && header[3] === 0x46 &&
+                 header[8] === 0x57 && header[9] === 0x45 && header[10] === 0x42 && header[11] === 0x50
+  if (!isJpeg && !isPng && !isWebp) {
+    return NextResponse.json({ error: 'Invalid image file' }, { status: 400 })
+  }
+  const uploadMime = isJpeg ? 'image/jpeg' : isPng ? 'image/png' : 'image/webp'
+
   const supabase = createServerClient()
   const adminStorage = createAdminStorageClient()
-
-  // Ensure the avatars bucket exists (idempotent — ignore "already exists" error)
-  const { error: bucketError } = await adminStorage.storage.createBucket('avatars', {
-    public: true,
-    fileSizeLimit: 2 * 1024 * 1024,
-    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  })
-  if (bucketError && !bucketError.message.includes('already exists')) {
-    console.error('[avatar/upload] bucket create error:', bucketError)
-  }
 
   // SECURITY: verify session user owns the profile before writing to Storage
   const { data: profile } = await supabase
@@ -55,16 +57,7 @@ export async function POST(req: Request) {
   const profileId = profile.id
   const storagePath = `avatars/${profileId}`
 
-  // Upload original — CSS object-fit: cover handles display cropping
-  const uploadBytes = await file.arrayBuffer()
-  const uploadMime = file.type
-
-  // Delete old avatar before uploading new one (no orphan files)
-  if (profile.avatar_url) {
-    await adminStorage.storage.from('avatars').remove([storagePath])
-  }
-
-  // Upload to Supabase Storage
+  // Upload to Supabase Storage (upsert: true overwrites existing — no pre-delete needed)
   const { error: uploadError } = await adminStorage.storage
     .from('avatars')
     .upload(storagePath, uploadBytes, {
@@ -74,7 +67,7 @@ export async function POST(req: Request) {
 
   if (uploadError) {
     console.error('[avatar/upload] storage error:', uploadError)
-    return NextResponse.json({ error: uploadError.message }, { status: 500 })
+    return NextResponse.json({ error: 'Upload failed — try again' }, { status: 500 })
   }
 
   // Construct CDN URL

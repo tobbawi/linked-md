@@ -47,15 +47,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  // Notify original post author (different from reposter)
-  if (ids.post.profile_id !== ids.myProfileId) {
-    await supabase.from('notifications').insert({
-      recipient_id: ids.post.profile_id,
-      type: 'repost',
-      actor_id: ids.myProfileId,
-      post_id: post_id,
-    })
-  }
+  // Notify original post author (own-post repost already blocked above)
+  await supabase.from('notifications').insert({
+    recipient_id: ids.post.profile_id,
+    type: 'repost',
+    actor_id: ids.myProfileId,
+    post_id: post_id,
+  })
 
   return NextResponse.json({ reposted: true })
 }

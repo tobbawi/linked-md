@@ -141,12 +141,14 @@ export default async function AnalyticsPage() {
   }
   const totalProfileViews30d = Array.from(pvByDay.values()).reduce((s, set) => s + set.size, 0)
   const sevenDaysAgoStr = sevenDaysAgo.toISOString()
-  const profileViews7d = profileViewsRows.filter(r => r.created_at >= sevenDaysAgoStr).length
+  // Distinct viewer_hash for 7d (same dedup methodology as 30d total)
+  const profileViews7d = new Set(profileViewsRows.filter(r => r.created_at >= sevenDaysAgoStr).map(r => r.viewer_hash as string)).size
 
   // Distinct (post_id, viewer_hash) for post impressions
   const pvPostSet = new Set(postViewRows.map(r => `${r.post_id}::${r.viewer_hash}`))
   const totalPostViews30d = pvPostSet.size
-  const postViews7d = postViewRows.filter(r => r.created_at >= sevenDaysAgoStr).length
+  // Distinct (post_id, viewer_hash) for 7d (same dedup methodology as 30d total)
+  const postViews7d = new Set(postViewRows.filter(r => r.created_at >= sevenDaysAgoStr).map(r => `${r.post_id}::${r.viewer_hash}`)).size
 
   // Daily buckets for charts (use raw rows — buildDailyBuckets counts rows per day)
   const profileViewBuckets = buildDailyBuckets(profileViewsRows, 30)

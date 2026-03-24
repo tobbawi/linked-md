@@ -76,7 +76,7 @@ export interface Repost {
 export interface Notification {
   id: string
   recipient_id: string
-  type: 'follow' | 'like' | 'comment' | 'endorse' | 'recommendation' | 'repost'
+  type: 'follow' | 'company_follow' | 'like' | 'comment' | 'endorse' | 'recommendation' | 'repost'
   actor_id: string | null
   post_id: string | null
   comment_id: string | null

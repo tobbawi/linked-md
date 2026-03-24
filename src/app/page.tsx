@@ -664,7 +664,7 @@ function RepostCard({ repost, myProfileId }: { repost: FeedRepost; myProfileId?:
           </Link>
         )}
         <p style={{ fontSize: '13px', color: 'var(--color-secondary)', lineHeight: 1.5, marginBottom: 'var(--space-sm)' }}>
-          {post.markdown_content.replace(/^#{1,6}\s+/gm, '').replace(/\*\*?([^*]+)\*\*?/g, '$1').trim().slice(0, 120).trimEnd()}…
+          {(post.markdown_content ?? '').replace(/^#{1,6}\s+/gm, '').replace(/\*\*?([^*]+)\*\*?/g, '$1').trim().slice(0, 120).trimEnd()}…
         </p>
         <Link href={`/profile/${author.slug}/post/${post.slug}`} style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-primary)' }}>
           Read →
@@ -984,7 +984,7 @@ export default async function HomePage() {
           .limit(20),
       ])
 
-      hasFollows = (followedPosts ?? []).length > 0
+      hasFollows = followeeIds.length > 0
 
       // Merge, deduplicate by id, sort newest-first, take 20
       const posts = mergeFeedItems(

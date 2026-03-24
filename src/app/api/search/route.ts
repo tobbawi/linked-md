@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type') ?? 'profiles' // profiles | all
 
   if (!q) {
-    return NextResponse.json(type === 'all' ? { profiles: [], companies: [], posts: [] } : [], CACHE)
+    return NextResponse.json(type === 'all' ? { profiles: [], companies: [], posts: [] } : [])
   }
 
   const supabase = createServerClient()

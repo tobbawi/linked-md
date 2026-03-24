@@ -36,7 +36,7 @@ export function RepostButton({
       if (res.ok) {
         const next = !reposted
         setReposted(next)
-        setCount((c) => c + (next ? 1 : -1))
+        setCount((c) => Math.max(0, c + (next ? 1 : -1)))
       }
     } finally {
       setLoading(false)

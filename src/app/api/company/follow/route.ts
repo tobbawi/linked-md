@@ -4,9 +4,13 @@ import { createAuthServerClient, createServerClient } from '@/lib/supabase'
 // POST   /api/company/follow  body: { company_slug }  → follow
 // DELETE /api/company/follow  body: { company_slug }  → unfollow
 
-async function getIds(authClient: ReturnType<typeof createAuthServerClient>, companySlug: string) {
+type GetIdsResult =
+  | { error: string; status: number }
+  | { myProfileId: string; companyId: string; companyOwnerId: string }
+
+async function getIds(authClient: ReturnType<typeof createAuthServerClient>, companySlug: string): Promise<GetIdsResult> {
   const { data: { user } } = await authClient.auth.getUser()
-  if (!user) return null
+  if (!user) return { error: 'Unauthorized', status: 401 }
 
   const supabase = createServerClient()
   const [{ data: myProfile }, { data: company }] = await Promise.all([
@@ -14,7 +18,7 @@ async function getIds(authClient: ReturnType<typeof createAuthServerClient>, com
     supabase.from('companies').select('id, user_id').eq('slug', companySlug).single(),
   ])
 
-  if (!myProfile || !company) return null
+  if (!myProfile || !company) return { error: 'Company not found', status: 404 }
 
   return { myProfileId: myProfile.id as string, companyId: company.id as string, companyOwnerId: company.user_id as string }
 }
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
   if (!company_slug) return NextResponse.json({ error: 'company_slug required' }, { status: 400 })
 
   const ids = await getIds(authClient, company_slug)
-  if (!ids) return NextResponse.json({ error: 'Unauthorized or company not found' }, { status: 401 })
+  if ('error' in ids) return NextResponse.json({ error: ids.error }, { status: ids.status })
 
   const supabase = createServerClient()
 
@@ -45,7 +49,7 @@ export async function POST(request: NextRequest) {
     if (ownerProfile && ownerProfile.id !== ids.myProfileId) {
       await supabase.from('notifications').insert({
         recipient_id: ownerProfile.id,
-        type: 'follow',
+        type: 'company_follow',
         actor_id: ids.myProfileId,
       })
     }
@@ -60,7 +64,7 @@ export async function DELETE(request: NextRequest) {
   if (!company_slug) return NextResponse.json({ error: 'company_slug required' }, { status: 400 })
 
   const ids = await getIds(authClient, company_slug)
-  if (!ids) return NextResponse.json({ error: 'Unauthorized or company not found' }, { status: 401 })
+  if ('error' in ids) return NextResponse.json({ error: ids.error }, { status: ids.status })
 
   const supabase = createServerClient()
 
