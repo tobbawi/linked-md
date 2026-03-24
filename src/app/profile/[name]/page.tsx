@@ -78,7 +78,7 @@ export default async function ProfilePage({ params }: PageProps) {
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
-            fontSize: '1.5rem',
+            fontSize: '1.25rem',
             color: 'var(--color-ink)',
             marginBottom: 'var(--space-sm)',
           }}
