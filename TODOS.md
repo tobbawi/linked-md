@@ -2,56 +2,16 @@
 
 ---
 
-## P0 — Must fix before public launch
+## M5 — Company Admin & Employee Roster (planned)
 
-### Rate limiting for `?format=llm` endpoint
-**Priority:** P0
-**What:** Add `Cache-Control: public, s-maxage=60, stale-while-revalidate=300` to the search/LLM endpoint response.
-**Why:** The endpoint fires a full-table ILIKE query on profiles with no auth. Trivial to abuse — a tight loop would hammer the Supabase free-tier connection pool.
-**Pros:** `Cache-Control` is zero-dependency — one header line. Protects DB before any public post or HN submission.
-**Cons:** In-memory rate limiter doesn't survive serverless cold-starts; `Cache-Control` is less precise but good enough.
-**Context:** Acceptable at current traffic. Critical before any public announcement.
-**Depends on:** Nothing — can ship standalone.
-
----
-
-## Milestone 2 — Network Feed + Avatars + Company Following
-
-### M2.1: Network feed on home page
-**Priority:** P0
-**What:** Replace "your own recent posts" on the home page with a chronological feed of posts from people you follow. Cursor-based pagination (`WHERE created_at < $cursor`).
-**Why:** Without a network feed, linked.md is a blogging tool, not a social network. This is the single highest-impact missing feature.
-**Pros:** Core social loop unlocked. Query-time approach (no materialized table) means zero new infra.
-**Cons:** Empty state for new users who follow nobody — needs a good "Discover people" CTA.
-**Context:** Use query-time JOIN on `follows` table. Add migration with composite index `posts(profile_id, created_at DESC)` and `follows(follower_id)`. Cursor pagination required — offset pagination causes duplicate posts as new ones arrive.
-**Depends on:** Nothing.
-
-### M2.2: Profile avatars
-**Priority:** P1
-**What:** `profiles.avatar_url` column + Supabase Storage bucket (`avatars`, public) + `POST /api/avatar/upload` route + avatar display across all surfaces (profile header, nav, comments, notifications).
-**Why:** No profile photos makes the platform feel like a developer tool, not a social network.
-**Pros:** Supabase Storage = zero new dependencies, CDN-cached public URLs.
-**Cons:** Need server-side validation (2MB limit, image/jpeg|png|webp MIME only). Old avatar must be deleted on re-upload to avoid orphan files.
-**Context:** Migration: `ALTER TABLE profiles ADD COLUMN avatar_url text`. Upload route validates, uploads to `avatars/{profile_id}.webp`, patches profile row. Avatar shows in profile header, nav bar, comment attribution, notification list.
-**Depends on:** Nothing.
-
-### M2.3: Company following
-**Priority:** P1
-**What:** New `company_follows(follower_id, company_id)` table + `CompanyFollowButton` component + company follower count on company page.
-**Why:** Users follow companies on LinkedIn to see job posts and company updates in their feed.
-**Pros:** Clean separation from profile follows. Company posts (if any) can be included in the network feed.
-**Cons:** UI must distinguish "following" state for companies vs people.
-**Context:** Use a dedicated `company_follows` table — do NOT extend the existing `follows` table with a nullable column. RLS mirrors `follows`. Notification sent to company owner on follow.
-**Depends on:** M2.1 (feed should include company content).
-
-### M2.4: Reposts / resharing
+### Account deletion + last-admin trigger conflict
 **Priority:** P2
-**What:** `reposts(profile_id, original_post_id, comment, created_at)` table — rendered in the feed with "reshared by X" attribution.
-**Why:** Reposts are the content virality mechanism — ideas spread through the network.
-**Pros:** Simple UNION in the feed query. Original author gets a notification.
-**Cons:** UNIQUE(profile_id, original_post_id) prevents double-reposting. Cannot repost own post.
-**Context:** Repost button on each post. Optional "add a thought" comment text. Reposts appear in `llm-full.txt` under `## Reposts`.
-**Depends on:** M2.1 (feed must exist first).
+**What:** If a user ever deletes their account, `profiles DELETE` cascades to `company_members`. If they were the last admin of a company, the `prevent_last_admin_removal` trigger fires and blocks the deletion with an exception. The company becomes permanently unmanageable.
+**Why:** Not a live bug today (no account deletion feature), but will cause a silent failure when account deletion is built.
+**Pros:** Fixing it now (or at account-deletion design time) prevents orphaned unmanageable companies.
+**Cons:** Account deletion is complex; fixing this in isolation may be premature.
+**Context:** The fix needs to either (a) skip the last-admin trigger for account deletions (use a separate deletion path), or (b) require the user to transfer or dissolve their companies before deletion. Capture this when designing account deletion.
+**Depends on:** Account deletion feature.
 
 ---
 
@@ -78,25 +38,9 @@
 
 ## Milestone 4 — Career Layer + Messaging ✓ Shipped v0.2.0.0
 
-### M4.3: Analytics dashboard
-**Priority:** P2
-**What:** Dedicated `/analytics` page (owner-only) showing: profile views over 30 days (chart), post impressions per post, top posts by views, follower growth over time.
-**Why:** Creators want to know what's working. Analytics drive engagement.
-**Pros:** All data already in `profile_views` and `post_views`. Pure query work + charting.
-**Cons:** Need a chart library — recharts is the standard React choice (small, no build config).
-**Context:** Group views by day: `date_trunc('day', created_at)`. 30-day window. Add follower count history table if growth chart is needed (or compute from `follows.created_at`).
-**Depends on:** View tracking (shipped v0.1.3.0).
-
 ---
 
 ## Technical Debt
-
-### Add composite DB indexes for feed query
-**Priority:** P1 — must ship alongside M2.1
-**What:** Migration adding: `CREATE INDEX posts_profile_created ON posts(profile_id, created_at DESC)` and `CREATE INDEX follows_follower_id ON follows(follower_id)`.
-**Why:** Without these, the feed JOIN does sequential scans. Slow with >1000 posts.
-**Context:** Ship as part of the M2.1 migration file.
-**Depends on:** M2.1.
 
 ### Migrate file exports to Cloudflare R2
 **Priority:** P2
@@ -124,6 +68,16 @@
 ---
 
 ## Completed
+
+### v0.2.1.0 — 2026-03-24
+- M2.1: Network feed (follows + own posts, `mergeFeedItems<T>()` dedup/sort, reaction/comment counts)
+- M2.2: Profile avatars (Supabase Storage, `Avatar` component, magic number MIME validation)
+- M2.3: Company following (`company_follows` table, `CompanyFollowButton`, feed integration)
+- M2.4: Reposts (`reposts` table, `RepostButton`, `RepostCard` in feed, llm-full.txt section)
+- M4.3: Analytics dashboard (30d sparklines, per-post table, deduplicated view counts)
+- Nav search + notification bell (debounced SearchBox, NotificationBell with bell badge)
+- P0: Search endpoint `Cache-Control: private, max-age=60` (rate limiting)
+- Composite DB indexes: `posts(profile_id, created_at DESC)`, `follows(follower_id)` (migration 014)
 
 ### v0.2.0.0 — 2026-03-23
 - M3: Education entries, skills + endorsements, recommendations, profile completeness score

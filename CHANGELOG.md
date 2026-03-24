@@ -6,6 +6,29 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [0.2.1.0] - 2026-03-24
+
+### Added
+- **Avatar uploads (M2):** Profile photo upload via `POST /api/avatar/upload` with MIME type validation, magic number verification (prevents spoofing), 2MB size limit, and Supabase Storage CDN. `Avatar` component renders initials as base layer with photo overlay. Pure helper functions `getInitials`, `getAvatarColor`, `validateAvatarFile` in `src/lib/avatar.ts`.
+- **Network feed (M2):** Home feed shows posts and reposts from followed profiles. `mergeFeedItems<T>()` pure function deduplicates and sorts by `(created_at DESC, id DESC)`. Feed tracks like/comment/repost counts per post.
+- **Company following (M3):** `company_follows` table with RLS. `CompanyFollowButton` client component with optimistic toggle. `POST`/`DELETE /api/company/follow` with `company_follow` notification type for the owner's bell.
+- **Reposts (M2.4):** `reposts` table with `UNIQUE(profile_id, original_post_id)` constraint. `POST`/`DELETE /api/repost` (409 on duplicate, 403 on own post). `RepostButton` client component. `RepostCard` in feed shows reshared-by header and original post. Repost section added to `llm-full.txt`.
+- **Nav search:** Debounced (300ms) `SearchBox` in the nav bar, fetches `/api/search?type=all&q=` returning grouped `{ profiles, companies, posts }`, grouped dropdown, ESC/outside-click to close.
+- **Notification bell:** `NotificationBell` in nav with emerald badge for unread count, dropdown with actor label and timeAgo, marks all read on open via `POST /api/notifications/read`.
+- **Analytics dashboard (M4.3):** `/analytics` page with 3 stat cards (profile views, post impressions, followers), 30-day sparkline SVG charts, and per-post table (views, likes, comments, reposts). All view counts deduplicated by `viewer_hash`.
+
+### Fixed
+- **Analytics 7d dedup:** `profileViews7d` and `postViews7d` now use distinct `viewer_hash` sets (matching the 30d methodology) instead of raw row counts that could be inflated by repeat visits.
+- **hasFollows logic:** Feed empty-state now correctly detects whether the user follows anyone, independent of whether those users have written posts.
+- **Avatar Storage:** Introduced `createAdminStorageClient()` using plain `@supabase/supabase-js` to bypass `@supabase/ssr`'s cookie session override that caused RLS rejections for Storage even with the service role key.
+- **Avatar magic numbers:** Upload now validates file bytes against JPEG/PNG/WebP magic numbers, preventing MIME type spoofing via crafted multipart Content-Type headers.
+- **Company follow status code:** `getIds()` now returns a discriminated result — 401 for unauthenticated, 404 for missing company (was always 401).
+- **Optimistic count floor:** `RepostButton` and `CompanyFollowButton` clamp optimistic counters at 0, preventing negative display from stale server-rendered counts.
+- **RepostCard null guard:** `post.markdown_content` coerced to `''` before `.replace()` to prevent TypeError crash when post content is null.
+- **notificationHref fallback:** Repost/like/comment notifications where the original post was deleted now fall back to the actor's profile instead of `/`.
+
+---
+
 ## [0.2.0.0] - 2026-03-23
 
 ### Added

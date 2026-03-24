@@ -5,6 +5,7 @@ import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks } from '@/lib/wikilinks'
 import { PostActions } from '@/components/PostActions'
 import { LikeButton } from '@/components/LikeButton'
+import { RepostButton } from '@/components/RepostButton'
 import { CommentsSection } from '@/components/CommentsSection'
 import PostViewTracker from '@/components/PostViewTracker'
 import type { Profile, Post, Comment } from '@/types'
@@ -102,8 +103,8 @@ export default async function PostPage({ params }: PageProps) {
     // not logged in
   }
 
-  // Social data: reactions + comments
-  const [{ count: likeCount }, likedRow, { data: rawComments }] = await Promise.all([
+  // Social data: reactions + comments + reposts
+  const [{ count: likeCount }, likedRow, { data: rawComments }, { count: repostCount }, repostedRow] = await Promise.all([
     supabase.from('reactions').select('*', { count: 'exact', head: true }).eq('post_id', post.id).eq('type', 'like'),
     viewerProfileId
       ? supabase.from('reactions').select('id').eq('post_id', post.id).eq('profile_id', viewerProfileId).eq('type', 'like').maybeSingle()
@@ -114,9 +115,14 @@ export default async function PostPage({ params }: PageProps) {
       .eq('post_id', post.id)
       .order('created_at', { ascending: true })
       .returns<Comment[]>(),
+    supabase.from('reposts').select('*', { count: 'exact', head: true }).eq('original_post_id', post.id),
+    viewerProfileId
+      ? supabase.from('reposts').select('id').eq('original_post_id', post.id).eq('profile_id', viewerProfileId).maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
 
   const isLiked = !!likedRow.data
+  const isReposted = !!repostedRow.data
   const comments = rawComments ?? []
 
   // Resolve wikilinks
@@ -219,9 +225,16 @@ export default async function PostPage({ params }: PageProps) {
           dangerouslySetInnerHTML={{ __html: contentHtml }}
         />
 
-        {/* Like button */}
+        {/* Like + Repost buttons */}
         <div style={{ marginTop: 'var(--space-xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
           <LikeButton postId={post.id} initialLiked={isLiked} likeCount={likeCount ?? 0} />
+          <RepostButton
+            postId={post.id}
+            postAuthorProfileId={profile.id}
+            myProfileId={viewerProfileId}
+            initialReposted={isReposted}
+            repostCount={repostCount ?? 0}
+          />
         </div>
 
         {/* Comments */}

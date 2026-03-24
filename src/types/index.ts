@@ -65,10 +65,18 @@ export interface Comment {
   profile?: Pick<Profile, 'slug' | 'display_name'>
 }
 
+export interface Repost {
+  id: string
+  profile_id: string
+  original_post_id: string
+  comment: string | null
+  created_at: string
+}
+
 export interface Notification {
   id: string
   recipient_id: string
-  type: 'follow' | 'like' | 'comment' | 'endorse' | 'recommendation'
+  type: 'follow' | 'company_follow' | 'like' | 'comment' | 'endorse' | 'recommendation' | 'repost'
   actor_id: string | null
   post_id: string | null
   comment_id: string | null
@@ -109,7 +117,7 @@ export interface JobListing {
 export interface Conversation {
   id: string
   created_at: string
-  other_profile?: Pick<Profile, 'id' | 'slug' | 'display_name'>
+  other_profile?: Pick<Profile, 'id' | 'slug' | 'display_name' | 'avatar_url'>
   last_message?: Pick<Message, 'body' | 'created_at'>
   unread_count?: number
 }

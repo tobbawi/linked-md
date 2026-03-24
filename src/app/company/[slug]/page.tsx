@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks } from '@/lib/wikilinks'
+import Avatar from '@/components/Avatar'
+import { CompanyFollowButton } from '@/components/CompanyFollowButton'
 import type { Company, Profile, ExperienceEntry, JobListing } from '@/types'
 
 interface PageProps {
@@ -49,18 +51,37 @@ export default async function CompanyPage({ params }: PageProps) {
 
   if (!company) notFound()
 
-  // Check ownership
+  // Check ownership + viewer's follow state
   let isOwner = false
+  let myProfileId: string | null = null
+  let viewerFollowing = false
   try {
     const authClient = createAuthServerClient()
     const { data: { user } } = await authClient.auth.getUser()
     isOwner = !!user && user.id === company.user_id
+    if (user) {
+      const { data: myProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+      myProfileId = myProfile?.id ?? null
+      if (myProfileId) {
+        const { data: followRow } = await supabase
+          .from('company_follows')
+          .select('company_id')
+          .eq('follower_id', myProfileId)
+          .eq('company_id', company.id)
+          .maybeSingle()
+        viewerFollowing = !!followRow
+      }
+    }
   } catch {
     // not logged in
   }
 
-  // People + jobs in parallel
-  const [{ data: experienceRows }, { data: jobRows }] = await Promise.all([
+  // People + jobs + follower count in parallel
+  const [{ data: experienceRows }, { data: jobRows }, { count: followerCount }] = await Promise.all([
     supabase
       .from('experience')
       .select('*, profile:profiles!profile_id(slug, display_name)')
@@ -74,6 +95,10 @@ export default async function CompanyPage({ params }: PageProps) {
       .eq('active', true)
       .order('created_at', { ascending: false })
       .returns<JobListing[]>(),
+    supabase
+      .from('company_follows')
+      .select('follower_id', { count: 'exact', head: true })
+      .eq('company_id', company.id),
   ])
 
   type ExperienceWithProfile = ExperienceEntry & {
@@ -81,6 +106,7 @@ export default async function CompanyPage({ params }: PageProps) {
   }
   const people = (experienceRows ?? []) as ExperienceWithProfile[]
   const jobs = (jobRows ?? []) as JobListing[]
+  const companyFollowerCount = followerCount ?? 0
 
   // Wikilink resolution
   const [{ data: profileSlugs }, { data: companySlugs }] = await Promise.all([
@@ -116,25 +142,9 @@ export default async function CompanyPage({ params }: PageProps) {
               top: '72px',
             }}
           >
-            {/* Company initial avatar */}
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--color-primary-light)',
-                border: '2px solid var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                fontWeight: 700,
-                color: 'var(--color-primary)',
-                fontFamily: 'var(--font-serif)',
-                marginBottom: 'var(--space-md)',
-              }}
-            >
-              {company.name.charAt(0).toUpperCase()}
+            {/* Company avatar */}
+            <div style={{ marginBottom: 'var(--space-md)' }}>
+              <Avatar name={company.name} size={64} shape="square" />
             </div>
 
             {/* Name + edit */}
@@ -231,6 +241,24 @@ export default async function CompanyPage({ params }: PageProps) {
                   {jobs.length} open role{jobs.length !== 1 ? 's' : ''}
                 </span>
               </div>
+            )}
+
+            {/* Follow button — shown to non-owners who are logged in */}
+            {myProfileId && !isOwner && (
+              <div style={{ marginBottom: 'var(--space-md)' }}>
+                <CompanyFollowButton
+                  companySlug={company.slug}
+                  initialFollowing={viewerFollowing}
+                  followerCount={companyFollowerCount}
+                />
+              </div>
+            )}
+
+            {/* Follower count — shown to owners instead of button */}
+            {isOwner && companyFollowerCount > 0 && (
+              <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: 'var(--space-md)' }}>
+                {companyFollowerCount} {companyFollowerCount === 1 ? 'follower' : 'followers'}
+              </p>
             )}
 
             {/* Badges */}
@@ -388,7 +416,7 @@ export default async function CompanyPage({ params }: PageProps) {
                     </div>
                     {job.location && (
                       <p style={{ fontSize: '13px', color: 'var(--color-secondary)', marginBottom: 'var(--space-sm)' }}>
-                        📍 {job.location}
+                        {job.location}
                       </p>
                     )}
                     {job.description_md && (

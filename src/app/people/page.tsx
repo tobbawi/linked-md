@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
+import Avatar from '@/components/Avatar'
 import type { Profile } from '@/types'
 
 export default async function PeoplePage() {
@@ -90,24 +91,8 @@ export default async function PeoplePage() {
               >
                 <div className="company-card">
                   {/* Avatar */}
-                  <div
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: 'var(--radius-full)',
-                      background: 'var(--color-primary-light)',
-                      border: '1px solid var(--color-primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '16px',
-                      fontWeight: 700,
-                      color: 'var(--color-primary)',
-                      fontFamily: 'var(--font-serif)',
-                      marginBottom: 'var(--space-sm)',
-                    }}
-                  >
-                    {profile.display_name.charAt(0).toUpperCase()}
+                  <div style={{ marginBottom: 'var(--space-sm)' }}>
+                    <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={40} />
                   </div>
 
                   <h2

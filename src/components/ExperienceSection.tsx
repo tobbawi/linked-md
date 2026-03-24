@@ -4,6 +4,8 @@ import Link from 'next/link'
 import type { ExperienceEntry } from '@/types'
 import { formatPeriod, getDuration } from '@/lib/dateUtils'
 
+type Props = { experience: ExperienceEntry[] }
+
 export default function ExperienceSection({ experience }: Props) {
   if (experience.length === 0) return null
 

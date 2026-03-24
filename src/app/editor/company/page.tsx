@@ -122,7 +122,7 @@ function CompanyEditorInner() {
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div style={{ maxWidth: '640px' }}>
+      <div>
         <div
           style={{
             display: 'flex',
@@ -134,7 +134,7 @@ function CompanyEditorInner() {
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: '1.5rem',
+              fontSize: '1.25rem',
               color: 'var(--color-ink)',
             }}
           >
