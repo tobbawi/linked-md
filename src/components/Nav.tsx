@@ -160,46 +160,28 @@ export function Nav({ user, profileSlug }: NavProps) {
               {profileSlug && <NotificationBell mySlug={profileSlug} />}
               {profileSlug && <MessagesBadge />}
 
-              {/* Avatar + handle */}
+              {/* Avatar */}
               {profileSlug && (
                 <Link
                   href={`/profile/${profileSlug}`}
                   style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: 'var(--radius-full)',
+                    background: 'var(--color-primary-light)',
+                    border: '1px solid var(--color-primary)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 'var(--space-xs)',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: 'var(--color-primary)',
+                    flexShrink: 0,
                     textDecoration: 'none',
                   }}
-                  title="My profile"
+                  title={`@${profileSlug}`}
                 >
-                  <div
-                    style={{
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: 'var(--radius-full)',
-                      background: 'var(--color-primary-light)',
-                      border: '1px solid var(--color-primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: 'var(--color-primary)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {profileSlug.charAt(0).toUpperCase()}
-                  </div>
-                  <span
-                    className="nav-center"
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '11px',
-                      color: 'var(--color-secondary)',
-                    }}
-                  >
-                    @{profileSlug}
-                  </span>
+                  {profileSlug.charAt(0).toUpperCase()}
                 </Link>
               )}
 
@@ -216,7 +198,7 @@ export function Nav({ user, profileSlug }: NavProps) {
                   fontFamily: 'var(--font-sans)',
                 }}
               >
-                Out
+                Sign out
               </button>
             </>
           ) : (
