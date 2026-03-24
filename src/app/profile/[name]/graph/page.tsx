@@ -42,7 +42,7 @@ export default async function GraphPage({ params }: { params: { name: string } }
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
-            fontSize: '1.1rem',
+            fontSize: '1.25rem',
             color: 'var(--color-ink)',
           }}
         >
