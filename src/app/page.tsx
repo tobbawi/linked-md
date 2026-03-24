@@ -522,12 +522,12 @@ function PostCard({ post }: { post: FeedPost }) {
           </Link>
           {(post.likeCount ?? 0) > 0 && (
             <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
-              ♥ {post.likeCount}
+              {post.likeCount} likes
             </span>
           )}
           {(post.commentCount ?? 0) > 0 && (
             <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
-              💬 {post.commentCount}
+              {post.commentCount} comments
             </span>
           )}
         </div>
