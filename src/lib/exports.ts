@@ -1,154 +1,365 @@
-/**
- * File export system — two tiers:
- *
- * Content writes (profile edit, new post):
- *   → immediate synchronous export of .md, llm.txt, llm-full.txt, graph.json
- *
- * Social interactions (likes, follows, comments) — M2:
- *   → queued for batch re-export every 60 seconds
- *
- * M1: writes to local filesystem under /exports/
- * M2: migrate to Cloudflare R2 (see TODOS.md)
- *
- * Failure model:
- *   - If DB write fails → file export does not run
- *   - If file export fails → DB write is NOT rolled back; retry async (max 3, exp backoff)
- */
-
-import fs from 'fs/promises'
+import fs from 'fs'
 import path from 'path'
-import type { Profile, Post } from '@/types'
+import type { Profile, Post, ExperienceEntry, Company } from '@/types'
 
-const EXPORTS_DIR = path.join(process.cwd(), 'exports')
+const EXPORT_ROOT = path.join(process.cwd(), 'exports')
 
-async function ensureDir(dir: string) {
-  await fs.mkdir(dir, { recursive: true })
+function ensureDir(dir: string) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
 }
 
-export async function exportProfileMarkdown(profile: Profile): Promise<void> {
-  const dir = path.join(EXPORTS_DIR, 'profile')
-  await ensureDir(dir)
-  await fs.writeFile(
-    path.join(dir, `${profile.slug}.md`),
-    profile.markdown_content,
-    'utf-8'
-  )
+function formatExperiencePeriod(entry: ExperienceEntry): string {
+  const start = entry.start_month
+    ? `${entry.start_month}/${entry.start_year}`
+    : `${entry.start_year}`
+  if (entry.is_current) return `${start} – present`
+  const end = entry.end_year
+    ? entry.end_month
+      ? `${entry.end_month}/${entry.end_year}`
+      : `${entry.end_year}`
+    : ''
+  return end ? `${start} – ${end}` : start
 }
 
-export async function exportLlmTxt(profile: Profile, posts: Post[]): Promise<string> {
-  /**
-   * llm.txt format — compact, designed to fit in an LLM context window
-   * alongside other profiles. See design doc sample format.
-   */
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'
-  const recentPosts = posts.slice(0, 10)
+export function buildProfileMarkdown(profile: Profile, experience: ExperienceEntry[] = []): string {
+  const lines: string[] = []
+  lines.push(`# ${profile.display_name}`)
+  lines.push('')
+  const meta: string[] = []
+  if (profile.title) meta.push(profile.title)
+  if (profile.location) meta.push(profile.location)
+  if (profile.website) meta.push(profile.website)
+  if (meta.length) {
+    lines.push(meta.join(' · '))
+    lines.push('')
+  }
+  if (profile.bio) {
+    lines.push(profile.bio)
+    lines.push('')
+  }
+  if (experience.length > 0) {
+    lines.push(`## Experience`)
+    lines.push('')
+    for (const entry of experience) {
+      const period = formatExperiencePeriod(entry)
+      lines.push(`### ${entry.title} at ${entry.company_name}`)
+      lines.push(`_${period}_`)
+      if (entry.description) {
+        lines.push('')
+        lines.push(entry.description)
+      }
+      lines.push('')
+    }
+  }
+  if (profile.markdown_content) {
+    lines.push(profile.markdown_content)
+    lines.push('')
+  }
+  return lines.join('\n')
+}
 
-  const lines: string[] = [
-    `# linked.md profile: ${profile.display_name}`,
-    `> ${baseUrl}/profile/${profile.slug}.md`,
-    '',
-    '## Summary',
-    profile.bio || '(no bio)',
-    '',
-  ]
+export function buildPostMarkdown(post: Post, authorSlug: string): string {
+  const lines: string[] = []
+  if (post.title) {
+    lines.push(`# ${post.title}`)
+    lines.push('')
+  }
+  lines.push(post.markdown_content)
+  lines.push('')
+  lines.push(`---`)
+  lines.push(`author: ${authorSlug}`)
+  lines.push(`created: ${post.created_at}`)
+  return lines.join('\n')
+}
 
-  if (recentPosts.length > 0) {
-    lines.push('## Recent posts')
-    for (const post of recentPosts) {
-      lines.push(
-        `- [${post.title || post.slug}](${baseUrl}/profile/${profile.slug}/post/${post.slug}.md) — ${post.created_at.slice(0, 10)}`
-      )
+interface PostWithStats extends Post {
+  likeCount?: number
+  commentCount?: number
+}
+
+interface ProfileStats {
+  followerCount?: number
+  followingCount?: number
+}
+
+// Summary: current roles only, bio, network stats, pointer to full
+export function buildLlmTxt(
+  profile: Profile,
+  experience: ExperienceEntry[] = [],
+  stats?: ProfileStats
+): string {
+  const lines: string[] = []
+  lines.push(`# ${profile.display_name} — linked.md profile`)
+  lines.push('')
+  if (profile.title) lines.push(`title: ${profile.title}`)
+  if (profile.location) lines.push(`location: ${profile.location}`)
+  if (profile.website) lines.push(`website: ${profile.website}`)
+  if (profile.title || profile.location || profile.website) lines.push('')
+
+  if (profile.bio) {
+    lines.push(`## Bio`)
+    lines.push(profile.bio)
+    lines.push('')
+  }
+
+  const currentRoles = experience.filter(e => e.is_current)
+  if (currentRoles.length > 0) {
+    lines.push(`## Current`)
+    for (const entry of currentRoles) {
+      const period = formatExperiencePeriod(entry)
+      lines.push(`- ${entry.title} at ${entry.company_name} (${period})`)
     }
     lines.push('')
   }
 
-  if (profile.outbound_links.length > 0) {
-    lines.push('## Linked entities')
-    lines.push(profile.outbound_links.map(l => `- [[${l}]]`).join('\n'))
+  if (stats?.followerCount !== undefined || stats?.followingCount !== undefined) {
+    lines.push(`## Network`)
+    if (stats.followerCount !== undefined) lines.push(`followers: ${stats.followerCount}`)
+    if (stats.followingCount !== undefined) lines.push(`following: ${stats.followingCount}`)
     lines.push('')
   }
 
-  lines.push(`> Full profile: ${baseUrl}/profile/${profile.slug}/llm-full.txt`)
-  lines.push(`> Graph: ${baseUrl}/profile/${profile.slug}/graph.json`)
-
-  const content = lines.join('\n')
-
-  const dir = path.join(EXPORTS_DIR, 'profile', profile.slug)
-  await ensureDir(dir)
-  await fs.writeFile(path.join(dir, 'llm.txt'), content, 'utf-8')
-
-  return content
+  lines.push(`Full profile (experience history + posts): /profile/${profile.slug}/llm-full.txt`)
+  return lines.join('\n')
 }
 
-export async function exportLlmFullTxt(profile: Profile, posts: Post[]): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'
+// Full: all experience history, all posts, stats
+export function buildLlmFullTxt(
+  profile: Profile,
+  posts: Post[],
+  experience: ExperienceEntry[] = [],
+  stats?: ProfileStats
+): string {
+  const lines: string[] = []
+  lines.push(`# ${profile.display_name} — linked.md profile (full)`)
+  lines.push(`> Source: /profile/${profile.slug}/llm-full.txt`)
+  lines.push(`> Last updated: ${profile.updated_at}`)
+  lines.push('')
 
-  const sections: string[] = [
-    `# linked.md full profile: ${profile.display_name}`,
-    `> ${baseUrl}/profile/${profile.slug}.md`,
-    '',
-    '## Profile',
-    profile.markdown_content,
-    '',
-  ]
+  if (profile.title || profile.location || profile.website) {
+    if (profile.title) lines.push(`title: ${profile.title}`)
+    if (profile.location) lines.push(`location: ${profile.location}`)
+    if (profile.website) lines.push(`website: ${profile.website}`)
+    lines.push('')
+  }
+
+  if (profile.bio) {
+    lines.push(`## Bio`)
+    lines.push(profile.bio)
+    lines.push('')
+  }
+
+  if (experience.length > 0) {
+    lines.push(`## Experience`)
+    for (const entry of experience) {
+      const period = formatExperiencePeriod(entry)
+      lines.push(`### ${entry.title} at ${entry.company_name} (${period})`)
+      if (entry.description) lines.push(entry.description)
+      lines.push('')
+    }
+  }
+
+  if (profile.markdown_content) {
+    lines.push(`## About`)
+    lines.push(profile.markdown_content)
+    lines.push('')
+  }
+
+  if (stats?.followerCount !== undefined || stats?.followingCount !== undefined) {
+    lines.push(`## Network`)
+    if (stats.followerCount !== undefined) lines.push(`followers: ${stats.followerCount}`)
+    if (stats.followingCount !== undefined) lines.push(`following: ${stats.followingCount}`)
+    lines.push('')
+  }
 
   if (posts.length > 0) {
-    sections.push('## Posts')
-    for (const post of posts) {
-      sections.push(`### ${post.title || post.slug}`)
-      sections.push(`> ${baseUrl}/profile/${profile.slug}/post/${post.slug}.md`)
-      sections.push(post.markdown_content)
-      sections.push('')
+    lines.push(`## Posts (${posts.length})`)
+    lines.push('')
+    for (const post of posts as PostWithStats[]) {
+      if (post.title) lines.push(`### ${post.title}`)
+      lines.push(`> /profile/${profile.slug}/post/${post.slug}.md`)
+      lines.push(`> Posted: ${post.created_at}`)
+      lines.push('')
+      lines.push(post.markdown_content)
+      const meta: string[] = []
+      if (post.likeCount) meta.push(`${post.likeCount} likes`)
+      if (post.commentCount) meta.push(`${post.commentCount} comments`)
+      if (meta.length) lines.push(`_${meta.join(' · ')}_`)
+      lines.push('')
+      lines.push('---')
+      lines.push('')
     }
   }
 
-  const content = sections.join('\n')
-  const dir = path.join(EXPORTS_DIR, 'profile', profile.slug)
-  await ensureDir(dir)
-  await fs.writeFile(path.join(dir, 'llm-full.txt'), content, 'utf-8')
+  return lines.join('\n')
 }
 
-export async function exportGraphJson(
-  profile: Profile,
-  inboundLinks: string[]
-): Promise<void> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'
+// Company summary: name, tagline, bio, current people count, pointer to full
+export function buildLlmCompanyTxt(
+  company: Company,
+  currentPeopleCount: number
+): string {
+  const lines: string[] = []
+  lines.push(`# ${company.name} — linked.md company profile`)
+  lines.push('')
+  if (company.tagline) {
+    lines.push(company.tagline)
+    lines.push('')
+  }
+  if (company.website) {
+    lines.push(`website: ${company.website}`)
+    lines.push('')
+  }
+  if (company.bio) {
+    lines.push(`## About`)
+    lines.push(company.bio)
+    lines.push('')
+  }
+  if (currentPeopleCount > 0) {
+    lines.push(`## People`)
+    lines.push(`${currentPeopleCount} current employee${currentPeopleCount === 1 ? '' : 's'} on linked.md`)
+    lines.push('')
+  }
+  lines.push(`Full company profile (all people + history): /company/${company.slug}/llm-full.txt`)
+  return lines.join('\n')
+}
 
-  const graph = {
-    entity: profile.display_name,
-    url: `${baseUrl}/profile/${profile.slug}.md`,
-    outbound: profile.outbound_links,
-    inbound: inboundLinks,
+interface PersonEntry {
+  display_name: string
+  slug: string
+  title: string
+  is_current: boolean
+  period: string
+}
+
+// Company full: bio, all content, all people with roles
+export function buildLlmCompanyFullTxt(
+  company: Company,
+  people: PersonEntry[]
+): string {
+  const lines: string[] = []
+  lines.push(`# ${company.name} — linked.md company profile (full)`)
+  lines.push(`> Source: /company/${company.slug}/llm-full.txt`)
+  lines.push(`> Last updated: ${company.updated_at}`)
+  lines.push('')
+  if (company.tagline) {
+    lines.push(company.tagline)
+    lines.push('')
+  }
+  if (company.website) {
+    lines.push(`website: ${company.website}`)
+    lines.push('')
+  }
+  if (company.bio) {
+    lines.push(`## About`)
+    lines.push(company.bio)
+    lines.push('')
+  }
+  if (company.markdown_content) {
+    lines.push(company.markdown_content)
+    lines.push('')
+  }
+  if (people.length > 0) {
+    lines.push(`## People`)
+    const current = people.filter(p => p.is_current)
+    const past = people.filter(p => !p.is_current)
+    if (current.length > 0) {
+      lines.push(`### Current`)
+      for (const p of current) {
+        lines.push(`- ${p.display_name} — ${p.title} (${p.period}) /profile/${p.slug}`)
+      }
+      lines.push('')
+    }
+    if (past.length > 0) {
+      lines.push(`### Alumni`)
+      for (const p of past) {
+        lines.push(`- ${p.display_name} — ${p.title} (${p.period}) /profile/${p.slug}`)
+      }
+      lines.push('')
+    }
+  }
+  return lines.join('\n')
+}
+
+export function buildGraphJson(profile: Profile, experience: ExperienceEntry[]): object {
+  const nodes: Array<{ id: string; type: string; label: string }> = [
+    { id: profile.slug, type: 'profile', label: profile.display_name },
+  ]
+  const edges: Array<{ source: string; target: string; label: string; period: string }> = []
+
+  for (const entry of experience) {
+    if (!entry.company_slug) continue
+    if (!nodes.find(n => n.id === entry.company_slug)) {
+      nodes.push({ id: entry.company_slug, type: 'company', label: entry.company_name })
+    }
+    edges.push({
+      source: profile.slug,
+      target: entry.company_slug,
+      label: entry.title,
+      period: formatExperiencePeriod(entry),
+    })
   }
 
-  const dir = path.join(EXPORTS_DIR, 'profile', profile.slug)
-  await ensureDir(dir)
-  await fs.writeFile(path.join(dir, 'graph.json'), JSON.stringify(graph, null, 2), 'utf-8')
+  return { nodes, edges }
 }
 
-export async function exportPostMarkdown(profile: Profile, post: Post): Promise<void> {
-  const dir = path.join(EXPORTS_DIR, 'profile', profile.slug, 'post')
-  await ensureDir(dir)
-  await fs.writeFile(
-    path.join(dir, `${post.slug}.md`),
-    post.markdown_content,
-    'utf-8'
-  )
+export function exportProfileMarkdown(profile: Profile, experience: ExperienceEntry[] = []): void {
+  const dir = path.join(EXPORT_ROOT, 'profile', profile.slug)
+  ensureDir(dir)
+  const md = buildProfileMarkdown(profile, experience)
+  fs.writeFileSync(path.join(dir, 'index.md'), md, 'utf-8')
 }
 
-/**
- * Full profile export — called on every content write.
- * Exports .md, llm.txt, llm-full.txt, graph.json atomically.
- */
+export function exportPostMarkdown(post: Post, authorSlug: string): void {
+  const dir = path.join(EXPORT_ROOT, 'profile', authorSlug, 'post')
+  ensureDir(dir)
+  const md = buildPostMarkdown(post, authorSlug)
+  fs.writeFileSync(path.join(dir, `${post.slug}.md`), md, 'utf-8')
+}
+
+export function exportLlmTxt(
+  profile: Profile,
+  experience: ExperienceEntry[] = [],
+  stats?: { followerCount?: number; followingCount?: number }
+): void {
+  const dir = path.join(EXPORT_ROOT, 'profile', profile.slug)
+  ensureDir(dir)
+  const txt = buildLlmTxt(profile, experience, stats)
+  fs.writeFileSync(path.join(dir, 'llm.txt'), txt, 'utf-8')
+}
+
+export function exportLlmFullTxt(
+  profile: Profile,
+  posts: Post[],
+  experience: ExperienceEntry[] = [],
+  stats?: { followerCount?: number; followingCount?: number }
+): void {
+  const dir = path.join(EXPORT_ROOT, 'profile', profile.slug)
+  ensureDir(dir)
+  const txt = buildLlmFullTxt(profile, posts, experience, stats)
+  fs.writeFileSync(path.join(dir, 'llm-full.txt'), txt, 'utf-8')
+}
+
+export function exportGraphJson(profile: Profile, experience: ExperienceEntry[]): void {
+  const dir = path.join(EXPORT_ROOT, 'profile', profile.slug)
+  ensureDir(dir)
+  const graph = buildGraphJson(profile, experience)
+  fs.writeFileSync(path.join(dir, 'graph.json'), JSON.stringify(graph, null, 2), 'utf-8')
+}
+
 export async function exportAllProfileFiles(
   profile: Profile,
   posts: Post[],
-  inboundLinks: string[]
+  experience: ExperienceEntry[] = [],
+  stats?: { followerCount?: number; followingCount?: number }
 ): Promise<void> {
-  await Promise.all([
-    exportProfileMarkdown(profile),
-    exportLlmTxt(profile, posts),
-    exportLlmFullTxt(profile, posts),
-    exportGraphJson(profile, inboundLinks),
-  ])
+  exportProfileMarkdown(profile, experience)
+  exportLlmTxt(profile, experience, stats)
+  exportLlmFullTxt(profile, posts, experience, stats)
+  exportGraphJson(profile, experience)
+  for (const post of posts) {
+    exportPostMarkdown(post, profile.slug)
+  }
 }

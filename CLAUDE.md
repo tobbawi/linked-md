@@ -5,8 +5,8 @@ Open. Portable. AI-readable.
 
 ## Tech Stack
 - Next.js 14 (App Router)
-- Supabase (PostgreSQL + Auth)
-- Local filesystem for .md exports (M1), Cloudflare R2 (M2)
+- Supabase (PostgreSQL + Auth + RLS)
+- Local filesystem for .md exports (R2 migration in TODOS)
 - Middleware for .md URL routing
 
 ## Design System
@@ -29,7 +29,16 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - When fixing a bug, write a regression test
 
 ## Architecture
-- Profiles and posts stored as markdown in PostgreSQL + exported to filesystem
+- Profiles, posts, companies stored as markdown in PostgreSQL + exported to filesystem
 - Junction `links` table for bidirectional wikilink tracking
 - Middleware rewrites .md/llm.txt/graph.json URLs to API routes
-- Content writes trigger immediate export; social interactions (M2) batch every 60s
+- Content writes trigger immediate export; social interactions batch every 60s
+- Social layer: follows, likes/reactions, comments — all with Supabase RLS
+- Notifications: follow, like, comment events — real-time badge in nav
+- View tracking: `profile_views` + `post_views` tables with SHA-256(IP+UA) hashing, self-view suppression, RLS
+- Experience entries: per-profile work history with company, title, date range, is_current flag
+- Company llm-full: `/api/llm-full/company/[slug]` mirrors profile llm-full for AI agents
+- `createServerClient` (server components/routes) vs `createBrowserClient` (client components)
+- Dark mode via CSS custom properties `[data-theme="dark"]` with localStorage persistence
+- Flash-prevention: inline `<script>` in `<head>` sets `data-theme` before first paint
+- Client beacons: tiny `'use client'` components rendering `null` + `useEffect` for side effects in server pages
