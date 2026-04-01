@@ -1,4 +1,39 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
+
+/* Tailwind v4 theme — maps design tokens to utility classes */
+@theme {
+  --color-primary: #0D9373;
+  --color-primary-hover: #0B7D62;
+  --color-primary-light: #E6F5F0;
+  --color-bg: #FAFAF8;
+  --color-card: #F0F0EC;
+  --color-border: #E0E0D8;
+  --color-ink: #1A1A1A;
+  --color-text: #333330;
+  --color-secondary: #666660;
+  --color-muted: #76766E;
+  --color-error: #DC2626;
+  --color-warning: #D97706;
+
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'GeistMono', 'Geist Mono', 'Courier New', monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  --spacing-2xs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+}
 
 :root {
   /* Colors */
