@@ -3,11 +3,16 @@ import { createServerClient } from '@/lib/supabase'
 
 const CACHE = { headers: { 'Cache-Control': 'private, max-age=60' } }
 
+/** Escape markdown-significant chars to prevent injection in LLM-consumed output */
+function escapeMd(s: string): string {
+  return s.replace(/[#\[\]*_`~>|\n\r\\]/g, (c) => (c === '\n' || c === '\r' ? ' ' : `\\${c}`))
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const q = (searchParams.get('q') ?? '').trim()
-  // Strip PostgREST filter-syntax special chars to prevent filter injection
-  const safeQ = q.replace(/[,().]/g, '')
+  // Strip PostgREST filter-syntax special chars + SQL LIKE wildcards to prevent injection
+  const safeQ = q.replace(/[,().%_]/g, '')
   const type = searchParams.get('type') ?? 'profiles' // profiles | all
   const format = searchParams.get('format')
 
@@ -48,8 +53,16 @@ export async function GET(request: NextRequest) {
     const companies = companiesRes.data ?? []
     const posts = postsRes.data ?? []
 
+    if (profilesRes.error || companiesRes.error || postsRes.error) {
+      const msg = profilesRes.error?.message || companiesRes.error?.message || postsRes.error?.message
+      return new NextResponse(`# Search error\n\n${msg}\n`, {
+        status: 500,
+        headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+      })
+    }
+
     const lines: string[] = [
-      `# Search results for "${q}"`,
+      `# Search results for "${escapeMd(q)}"`,
       '',
       `Found ${profiles.length} profiles, ${companies.length} companies, ${posts.length} posts.`,
       '',
@@ -58,8 +71,8 @@ export async function GET(request: NextRequest) {
     if (profiles.length > 0) {
       lines.push('## Profiles', '')
       for (const p of profiles) {
-        const suffix = p.title ? ` — ${p.title}` : ''
-        lines.push(`- **${p.display_name}**${suffix}`)
+        const suffix = p.title ? ` — ${escapeMd(p.title)}` : ''
+        lines.push(`- **${escapeMd(p.display_name)}**${suffix}`)
         lines.push(`  ${baseUrl}/profile/${p.slug}/llm.txt`)
         lines.push('')
       }
@@ -68,8 +81,8 @@ export async function GET(request: NextRequest) {
     if (companies.length > 0) {
       lines.push('## Companies', '')
       for (const c of companies) {
-        const suffix = c.tagline ? ` — ${c.tagline}` : ''
-        lines.push(`- **${c.name}**${suffix}`)
+        const suffix = c.tagline ? ` — ${escapeMd(c.tagline)}` : ''
+        lines.push(`- **${escapeMd(c.name)}**${suffix}`)
         lines.push(`  ${baseUrl}/company/${c.slug}/llm.txt`)
         lines.push('')
       }
@@ -79,9 +92,9 @@ export async function GET(request: NextRequest) {
       lines.push('## Posts', '')
       for (const post of posts) {
         const profile = post.profile as unknown as { slug: string; display_name: string } | null
-        const byLine = profile ? ` by ${profile.display_name}` : ''
+        const byLine = profile ? ` by ${escapeMd(profile.display_name)}` : ''
         const profileSlug = profile?.slug ?? 'unknown'
-        lines.push(`- **${post.title || post.slug}**${byLine}`)
+        lines.push(`- **${escapeMd(post.title || post.slug)}**${byLine}`)
         lines.push(`  ${baseUrl}/profile/${profileSlug}/post/${post.slug}.md`)
         lines.push('')
       }

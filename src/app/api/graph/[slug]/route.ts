@@ -19,11 +19,12 @@ export async function GET(
     return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   }
 
-  // 2. Get post outbound_links — O(k) where k = post count
+  // 2. Get post outbound_links — O(k) where k = post count, capped at 500
   const { data: posts } = await supabase
     .from('posts')
     .select('outbound_links')
     .eq('profile_id', profile.id)
+    .limit(500)
 
   // 3. Merge outbound links from profile + all posts
   const outboundSlugs = new Set<string>(profile.outbound_links ?? [])
@@ -33,8 +34,8 @@ export async function GET(
     }
   }
 
-  // 4. Resolve outbound slugs: check which ones exist as profiles
-  const outboundArray = Array.from(outboundSlugs)
+  // 4. Resolve outbound slugs: check which ones exist as profiles (cap at 500)
+  const outboundArray = Array.from(outboundSlugs).slice(0, 500)
   let resolvedSlugs = new Set<string>()
   if (outboundArray.length > 0) {
     const { data: resolved } = await supabase
@@ -44,12 +45,13 @@ export async function GET(
     resolvedSlugs = new Set((resolved ?? []).map((p: { slug: string }) => p.slug))
   }
 
-  // 5. Find inbound links: profiles whose outbound_links contain this slug — O(log n) with index
+  // 5. Find inbound links: profiles whose outbound_links contain this slug (cap at 500)
   const { data: inboundProfiles } = await supabase
     .from('profiles')
     .select('slug, display_name')
     .contains('outbound_links', [profile.slug])
     .neq('slug', profile.slug)
+    .limit(500)
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'
 

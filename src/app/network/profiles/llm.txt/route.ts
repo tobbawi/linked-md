@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 
 const PAGE_SIZE = 100
+const SLUG_RE = /^[a-z0-9-]+$/
+
+/** Escape markdown-significant chars to prevent injection in LLM-consumed output */
+function escapeMd(s: string): string {
+  return s.replace(/[#\[\]*_`~>|\n\r\\]/g, (c) => (c === '\n' || c === '\r' ? ' ' : `\\${c}`))
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
-  const cursor = searchParams.get('cursor')
+  const rawCursor = searchParams.get('cursor')
+  const cursor = rawCursor && SLUG_RE.test(rawCursor) ? rawCursor : null
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'
 
   const supabase = createServerClient()
@@ -49,9 +56,9 @@ export async function GET(request: NextRequest) {
   lines.push('## Profiles', '')
 
   for (const p of page) {
-    const details = [p.title, p.location].filter(Boolean).join(', ')
+    const details = [p.title, p.location].filter(Boolean).map(escapeMd).join(', ')
     const suffix = details ? ` — ${details}` : ''
-    lines.push(`- **${p.display_name}**${suffix}`)
+    lines.push(`- **${escapeMd(p.display_name)}**${suffix}`)
     lines.push(`  ${baseUrl}/profile/${p.slug}/llm.txt | ${baseUrl}/profile/${p.slug}/llm-full.txt`)
     lines.push('')
   }

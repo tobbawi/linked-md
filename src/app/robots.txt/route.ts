@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 
-const ROBOTS_TXT = `# linked.md — an open professional network
+export async function GET() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'
+
+  const body = `# linked.md — an open professional network
 # Every profile is a markdown file. We welcome AI agents.
 
 User-agent: *
@@ -19,11 +22,10 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-Sitemap: ${process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'}/sitemap.xml
+Sitemap: ${baseUrl}/sitemap.xml
 `
 
-export async function GET() {
-  return new NextResponse(ROBOTS_TXT, {
+  return new NextResponse(body, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
       'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=86400',
