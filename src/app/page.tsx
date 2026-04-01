@@ -271,7 +271,7 @@ function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string 
             <Link
               key={tag}
               href={`/tags/${tag}`}
-              className="font-mono text-[11px] text-muted bg-bg border border-border rounded-sm py-2xs px-[7px]"
+              className="font-mono text-[11px] text-muted bg-bg border border-border rounded-sm py-xs px-sm min-h-[28px] inline-flex items-center"
             >
               #{tag}
             </Link>

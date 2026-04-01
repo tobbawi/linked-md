@@ -462,7 +462,7 @@ export default async function ProfilePage({ params }: PageProps) {
                             <a
                               key={tag}
                               href={`/tag/${tag}`}
-                              className="text-[11px] px-2 py-0.5 bg-primary-light text-primary rounded-sm font-medium hover:bg-primary hover:text-white transition-colors"
+                              className="text-[11px] px-sm py-xs bg-primary-light text-primary rounded-sm font-medium hover:bg-primary hover:text-white transition-colors min-h-[28px] inline-flex items-center"
                             >
                               {tag}
                             </a>
