@@ -57,7 +57,7 @@ function postPreview(post: Post): string {
 
 function LandingHero() {
   return (
-    <div className="pt-3xl pb-2xl text-center">
+    <div className="pt-3xl pb-2xl text-center border-b border-border mb-xl">
       <h1 className="font-serif text-[2.625rem] text-ink leading-[1.2] mb-md">
         Your profile is a markdown file.
       </h1>
