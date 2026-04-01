@@ -35,26 +35,16 @@ export function LikeButton({ postId, initialLiked, likeCount }: Props) {
     <button
       onClick={toggle}
       disabled={loading}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '5px',
-        fontSize: '13px',
-        fontWeight: 500,
-        padding: '5px 12px',
-        borderRadius: 'var(--radius-sm)',
-        border: '1px solid',
-        cursor: loading ? 'default' : 'pointer',
-        opacity: loading ? 0.6 : 1,
-        fontFamily: 'var(--font-sans)',
-        transition: 'background 150ms ease',
-        background: liked ? 'var(--color-primary-light)' : 'transparent',
-        color: liked ? 'var(--color-primary)' : 'var(--color-secondary)',
-        borderColor: liked ? 'var(--color-primary)' : 'var(--color-border)',
-      }}
+      className={`inline-flex items-center gap-[5px] text-[13px] font-medium py-[5px] px-[12px] rounded-sm border border-solid font-sans transition-[background] duration-150 ${
+        loading ? 'cursor-default opacity-60' : 'cursor-pointer opacity-100'
+      } ${
+        liked
+          ? 'bg-primary-light text-primary border-primary'
+          : 'bg-transparent text-secondary border-border'
+      }`}
       title={liked ? 'Unlike' : 'Like'}
     >
-      <span style={{ fontSize: '14px', lineHeight: 1 }}>{liked ? '♥' : '♡'}</span>
+      <span className="text-[14px] leading-none">{liked ? '♥' : '♡'}</span>
       <span>{count > 0 ? count : 'Like'}</span>
     </button>
   )

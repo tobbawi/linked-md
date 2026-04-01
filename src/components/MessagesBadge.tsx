@@ -23,46 +23,12 @@ export function MessagesBadge() {
   return (
     <Link
       href="/messages"
-      style={{
-        position: 'relative',
-        width: '32px',
-        height: '32px',
-        borderRadius: 'var(--radius-full)',
-        border: '1px solid var(--color-border)',
-        background: 'var(--color-card)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '15px',
-        color: 'var(--color-secondary)',
-        textDecoration: 'none',
-        transition: 'border-color 150ms ease',
-        flexShrink: 0,
-      }}
+      className="relative w-[32px] h-[32px] rounded-full border border-border bg-card flex items-center justify-center text-[15px] text-secondary no-underline transition-[border-color] duration-150 shrink-0 hover:border-primary"
       title="Messages"
-      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--color-primary)')}
-      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border)')}
     >
       💬
       {unread > 0 && (
-        <span
-          style={{
-            position: 'absolute',
-            top: '-3px',
-            right: '-3px',
-            width: '14px',
-            height: '14px',
-            borderRadius: 'var(--radius-full)',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            fontSize: '9px',
-            fontWeight: 700,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            lineHeight: 1,
-          }}
-        >
+        <span className="absolute top-[-3px] right-[-3px] w-[14px] h-[14px] rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center leading-none">
           {unread > 9 ? '9+' : unread}
         </span>
       )}
