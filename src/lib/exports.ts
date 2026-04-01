@@ -287,11 +287,18 @@ interface PersonEntry {
   period: string
 }
 
-// Company full: bio, all content, all people with roles, open roles
+interface AdminEntry {
+  display_name: string
+  slug: string
+  role: 'owner' | 'admin'
+}
+
+// Company full: bio, all content, admins, all people with roles, open roles
 export function buildLlmCompanyFullTxt(
   company: Company,
   people: PersonEntry[],
-  jobs: JobListing[] = []
+  jobs: JobListing[] = [],
+  admins: AdminEntry[] = []
 ): string {
   const lines: string[] = []
   lines.push(`# ${company.name} — linked.md company profile (full)`)
@@ -313,6 +320,13 @@ export function buildLlmCompanyFullTxt(
   }
   if (company.markdown_content) {
     lines.push(company.markdown_content)
+    lines.push('')
+  }
+  if (admins.length > 0) {
+    lines.push(`## Admins`)
+    for (const a of admins) {
+      lines.push(`- ${a.display_name} (${a.role}) /@${a.slug}`)
+    }
     lines.push('')
   }
   if (people.length > 0) {

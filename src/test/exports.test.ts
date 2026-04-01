@@ -494,4 +494,31 @@ describe('buildLlmCompanyFullTxt (company full)', () => {
     expect(txt).toContain('### Part-time Contractor')
     expect(txt).not.toContain('location:')
   })
+
+  it('includes ## Admins section with owner and admin roles', () => {
+    const admins = [
+      { display_name: 'Alice Owner', slug: 'alice', role: 'owner' as const },
+      { display_name: 'Bob Admin', slug: 'bob', role: 'admin' as const },
+    ]
+    const txt = buildLlmCompanyFullTxt(mockCompany, [], [], admins)
+    expect(txt).toContain('## Admins')
+    expect(txt).toContain('Alice Owner (owner) /@alice')
+    expect(txt).toContain('Bob Admin (admin) /@bob')
+  })
+
+  it('omits ## Admins section when no admins passed', () => {
+    const txt = buildLlmCompanyFullTxt(mockCompany, [], [], [])
+    expect(txt).not.toContain('## Admins')
+  })
+
+  it('Admins section appears before People section', () => {
+    const admins = [{ display_name: 'Alice', slug: 'alice', role: 'owner' as const }]
+    const people = [{ display_name: 'Jane Doe', slug: 'jane-doe', title: 'Engineer', is_current: true, period: '2024–now' }]
+    const txt = buildLlmCompanyFullTxt(mockCompany, people, [], admins)
+    const adminsPos = txt.indexOf('## Admins')
+    const peoplePos = txt.indexOf('## People')
+    expect(adminsPos).toBeGreaterThan(-1)
+    expect(peoplePos).toBeGreaterThan(-1)
+    expect(adminsPos).toBeLessThan(peoplePos)
+  })
 })
