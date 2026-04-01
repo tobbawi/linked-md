@@ -5,7 +5,7 @@ import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks } from '@/lib/wikilinks'
 import Avatar from '@/components/Avatar'
 import { CompanyFollowButton } from '@/components/CompanyFollowButton'
-import type { Company, Profile, ExperienceEntry, JobListing } from '@/types'
+import type { Company, Profile, ExperienceEntry, JobListing, CompanyMember } from '@/types'
 
 interface PageProps {
   params: { slug: string }
@@ -51,40 +51,71 @@ export default async function CompanyPage({ params }: PageProps) {
 
   if (!company) notFound()
 
-  // Check ownership + viewer's follow state
-  let isOwner = false
+  // ── Viewer auth + admin check ─────────────────────────────────────────────
+  let isAdmin = false
+  let isOriginalCreator = false
   let myProfileId: string | null = null
   let viewerFollowing = false
   try {
     const authClient = createAuthServerClient()
     const { data: { user } } = await authClient.auth.getUser()
-    isOwner = !!user && user.id === company.user_id
     if (user) {
+      isOriginalCreator = user.id === company.user_id
       const { data: myProfile } = await supabase
         .from('profiles')
         .select('id')
         .eq('user_id', user.id)
         .single()
       myProfileId = myProfile?.id ?? null
+
       if (myProfileId) {
-        const { data: followRow } = await supabase
-          .from('company_follows')
-          .select('company_id')
-          .eq('follower_id', myProfileId)
+        // Check admin membership
+        const { data: membership } = await supabase
+          .from('company_members')
+          .select('role')
           .eq('company_id', company.id)
+          .eq('profile_id', myProfileId)
           .maybeSingle()
-        viewerFollowing = !!followRow
+        isAdmin = !!membership
+
+        // Follow state (for non-original-creators)
+        if (!isOriginalCreator) {
+          const { data: followRow } = await supabase
+            .from('company_follows')
+            .select('company_id')
+            .eq('follower_id', myProfileId)
+            .eq('company_id', company.id)
+            .maybeSingle()
+          viewerFollowing = !!followRow
+        }
       }
     }
   } catch {
     // not logged in
   }
 
-  // People + jobs + follower count in parallel
-  const [{ data: experienceRows }, { data: jobRows }, { count: followerCount }] = await Promise.all([
+  // ── Data fetching ─────────────────────────────────────────────────────────
+  type MemberWithProfile = CompanyMember & {
+    profile: Pick<Profile, 'id' | 'slug' | 'display_name' | 'user_id' | 'avatar_url'>
+  }
+
+  // Fetch company_members separately so a missing table (migration not yet applied)
+  // degrades gracefully to an empty list rather than crashing the whole page.
+  const memberRowsResult = await supabase
+    .from('company_members')
+    .select('*, profile:profiles!profile_id(id, slug, display_name, user_id, avatar_url)')
+    .eq('company_id', company.id)
+    .order('created_at', { ascending: true })
+    .returns<MemberWithProfile[]>()
+
+  const [
+    { data: experienceRows },
+    { data: jobRows },
+    { count: followerCount },
+  ] = await Promise.all([
     supabase
       .from('experience')
-      .select('*, profile:profiles!profile_id(slug, display_name)')
+      .select('*, profile:profiles!profile_id(id, slug, display_name)')
       .eq('company_slug', company.slug)
       .order('is_current', { ascending: false })
       .order('end_year', { ascending: false, nullsFirst: true }),
@@ -101,14 +132,26 @@ export default async function CompanyPage({ params }: PageProps) {
       .eq('company_id', company.id),
   ])
 
+  const memberRows = memberRowsResult.error ? null : memberRowsResult.data
+
   type ExperienceWithProfile = ExperienceEntry & {
-    profile: Pick<Profile, 'slug' | 'display_name'>
+    profile: Pick<Profile, 'id' | 'slug' | 'display_name'>
   }
   const people = (experienceRows ?? []) as ExperienceWithProfile[]
   const jobs = (jobRows ?? []) as JobListing[]
+  const members = (memberRows ?? []) as MemberWithProfile[]
   const companyFollowerCount = followerCount ?? 0
 
-  // Wikilink resolution
+  // Build a set of admin profile_ids for O(1) badge lookup (keyed by UUID, not slug, to avoid false positives on slug reuse)
+  const adminProfileIds = new Set(members.map(m => m.profile_id).filter(Boolean))
+  // Build a map of slug → user_id for owner chip detection without repeated .find()
+  const memberSlugToUserId = new Map(
+    members.filter(m => m.profile).map(m => [m.profile!.slug, m.profile!.user_id])
+  )
+  // My slug (for "you" chip)
+  const myProfileSlug = members.find(m => m.profile_id === myProfileId)?.profile?.slug ?? null
+
+  // ── Wikilink resolution + markdown render ─────────────────────────────────
   const [{ data: profileSlugs }, { data: companySlugs }] = await Promise.all([
     supabase.from('profiles').select('slug'),
     supabase.from('companies').select('slug'),
@@ -116,7 +159,6 @@ export default async function CompanyPage({ params }: PageProps) {
   const resolvedProfiles = new Set<string>((profileSlugs ?? []).map((p: { slug: string }) => p.slug))
   const resolvedCompanies = new Set<string>((companySlugs ?? []).map((c: { slug: string }) => c.slug))
 
-  // Render markdown content
   const { remark } = await import('remark')
   const remarkRehype = (await import('remark-rehype')).default
   const rehypeSanitize = (await import('rehype-sanitize')).default
@@ -126,6 +168,21 @@ export default async function CompanyPage({ params }: PageProps) {
   const contentHtml = String(result)
 
   const mdUrl = `/company/${company.slug}.md`
+
+  // Badge styles
+  const chipStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    fontSize: '10px',
+    fontWeight: 600,
+    letterSpacing: '0.04em',
+    textTransform: 'uppercase',
+    color: 'var(--color-secondary)',
+    background: 'var(--color-bg)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '1px 6px',
+  }
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
@@ -167,7 +224,7 @@ export default async function CompanyPage({ params }: PageProps) {
               >
                 {company.name}
               </h1>
-              {isOwner && (
+              {isAdmin && (
                 <Link
                   href={`/editor/company?slug=${company.slug}`}
                   style={{
@@ -243,8 +300,8 @@ export default async function CompanyPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Follow button — shown to non-owners who are logged in */}
-            {myProfileId && !isOwner && (
+            {/* Follow button — for logged-in non-creators (co-admins can follow too) */}
+            {myProfileId && !isOriginalCreator && (
               <div style={{ marginBottom: 'var(--space-md)' }}>
                 <CompanyFollowButton
                   companySlug={company.slug}
@@ -254,8 +311,8 @@ export default async function CompanyPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Follower count — shown to owners instead of button */}
-            {isOwner && companyFollowerCount > 0 && (
+            {/* Follower count — shown to original creator only */}
+            {isOriginalCreator && companyFollowerCount > 0 && (
               <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: 'var(--space-md)' }}>
                 {companyFollowerCount} {companyFollowerCount === 1 ? 'follower' : 'followers'}
               </p>
@@ -291,7 +348,7 @@ export default async function CompanyPage({ params }: PageProps) {
               </span>
             </div>
 
-            {/* People */}
+            {/* People — with admin badges */}
             {people.length > 0 && (
               <div>
                 <p
@@ -307,24 +364,60 @@ export default async function CompanyPage({ params }: PageProps) {
                   People ({people.length})
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
-                  {people.map((e) => (
-                    <div key={e.id}>
-                      <Link
-                        href={`/profile/${e.profile.slug}`}
-                        style={{ fontSize: '13px', color: 'var(--color-text)', fontWeight: 500 }}
-                      >
-                        {e.profile.display_name}
-                      </Link>
-                      <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '1px' }}>
-                        {e.title}
-                        {e.is_current && (
-                          <span style={{ marginLeft: '4px', color: 'var(--color-primary)', fontWeight: 500 }}>· now</span>
-                        )}
+                  {people.map((e) => {
+                    const isPersonAdmin = adminProfileIds.has(e.profile.id)
+                    const isYou = myProfileSlug === e.profile.slug
+                    return (
+                      <div key={e.id}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                          <Link
+                            href={`/profile/${e.profile.slug}`}
+                            style={{ fontSize: '13px', color: 'var(--color-text)', fontWeight: 500 }}
+                          >
+                            {e.profile.display_name}
+                          </Link>
+                          {isPersonAdmin && (
+                            <span style={chipStyle}>
+                              {memberSlugToUserId.get(e.profile.slug) === company.user_id ? 'owner' : 'admin'}
+                            </span>
+                          )}
+                          {isYou && <span style={{ ...chipStyle, color: 'var(--color-primary)', borderColor: 'var(--color-primary)', background: 'var(--color-primary-light)' }}>you</span>}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '1px' }}>
+                          {e.title}
+                          {e.is_current && (
+                            <span style={{ marginLeft: '4px', color: 'var(--color-primary)', fontWeight: 500 }}>· now</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
+                {/* Manage admins link — visible to admins only */}
+                {isAdmin && (
+                  <Link
+                    href={`/editor/company?slug=${company.slug}&tab=team`}
+                    style={{
+                      display: 'block',
+                      marginTop: 'var(--space-md)',
+                      fontSize: '12px',
+                      color: 'var(--color-primary)',
+                    }}
+                  >
+                    Manage admins →
+                  </Link>
+                )}
               </div>
+            )}
+
+            {/* Show manage link even if no people yet */}
+            {isAdmin && people.length === 0 && (
+              <Link
+                href={`/editor/company?slug=${company.slug}&tab=team`}
+                style={{ display: 'block', fontSize: '12px', color: 'var(--color-primary)', marginTop: 'var(--space-xs)' }}
+              >
+                Manage admins →
+              </Link>
             )}
           </div>
         </aside>
@@ -370,7 +463,8 @@ export default async function CompanyPage({ params }: PageProps) {
                 <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: 'var(--color-ink)' }}>
                   Open Roles
                 </h2>
-                {isOwner && (
+                {/* REGRESSION: co-admin can manage jobs (company_admins policy) */}
+                {isAdmin && (
                   <Link
                     href={`/editor/jobs?company=${company.slug}`}
                     style={{
@@ -432,7 +526,7 @@ export default async function CompanyPage({ params }: PageProps) {
             </section>
           )}
 
-          {isOwner && jobs.length === 0 && (
+          {isAdmin && jobs.length === 0 && (
             <div style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)', background: 'var(--color-card)', border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-md)' }}>
               <p style={{ fontSize: '14px', color: 'var(--color-muted)', marginBottom: 'var(--space-sm)' }}>
                 No open roles yet.
@@ -446,7 +540,7 @@ export default async function CompanyPage({ params }: PageProps) {
           {!company.bio && !company.markdown_content && jobs.length === 0 && (
             <p style={{ color: 'var(--color-muted)', fontSize: '15px', paddingTop: 'var(--space-lg)' }}>
               No description yet.
-              {isOwner && (
+              {isAdmin && (
                 <> <Link href={`/editor/company?slug=${company.slug}`} style={{ color: 'var(--color-primary)' }}>Add one →</Link></>
               )}
             </p>
