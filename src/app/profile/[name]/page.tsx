@@ -441,7 +441,7 @@ export default async function ProfilePage({ params }: PageProps) {
                   return (
                     <article
                       key={post.id}
-                      className="bg-card border border-border rounded-md p-lg hover:border-primary transition-colors"
+                      className="bg-card border border-border rounded-md p-lg hover:border-primary hover:shadow-sm transition-all"
                     >
                       {post.title && (
                         <Link href={`/profile/${name}/post/${post.slug}`}>

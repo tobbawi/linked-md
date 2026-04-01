@@ -226,7 +226,7 @@ function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string 
   const mdUrl = `/profile/${post.profile.slug}/post/${post.slug}.md`
 
   return (
-    <article className="bg-card border border-border rounded-md p-lg">
+    <article className="bg-card border border-border rounded-md p-lg hover:shadow-sm transition-all">
       {/* Author row */}
       <div className="flex items-center gap-sm mb-sm">
         <Link href={`/profile/${post.profile.slug}`} className="inline-flex shrink-0">
@@ -372,7 +372,7 @@ function RepostCard({ repost, myProfileId }: { repost: FeedRepost; myProfileId?:
   const { reposter, post } = repost
   const author = post.post_author
   return (
-    <article className="bg-card border border-border rounded-md p-lg">
+    <article className="bg-card border border-border rounded-md p-lg hover:shadow-sm transition-all">
       {/* Reshared-by row */}
       <div className="flex items-center gap-sm mb-md">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
