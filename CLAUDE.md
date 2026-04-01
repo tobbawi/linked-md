@@ -43,8 +43,9 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - Profile completeness score: `src/lib/completeness.ts` — computed percentage (avatar, bio, experience, education, skills, posts, followers); rendered as progress bar with hints on profile pages
 - Direct messaging: `conversations`, `conversation_members`, `messages` tables; Supabase Realtime subscription; advisory-locked `create_conversation_with_members` RPC prevents duplicate conversations under concurrent requests; `/messages` list + `/messages/[id]` thread pages; `MessageButton` on profiles
 - Message validation: `src/lib/messageValidation.ts` — pure `validateMessageBody` + `MESSAGE_MAX_LENGTH = 2000` constant, shared between API and tests
-- Job listings: `job_listings` table with company ownership + `active` flag for soft-delete; `/jobs` listing page; `/api/jobs/save` with company ownership verification
-- Company llm-full: `/api/llm-full/company/[slug]` mirrors profile llm-full for AI agents
+- Job listings: `job_listings` table with company admin ownership + `active` flag for soft-delete; `/jobs` listing page; `/api/jobs/save`; any company admin can manage listings (RLS updated in migration 017)
+- Company llm-full: `/api/llm-full/company/[slug]` mirrors profile llm-full for AI agents; includes `## Admins` section listing all admins with owner/admin roles.
+- Company admin management: `company_members` table (multi-admin); `POST`/`DELETE /api/company/member` to invite/remove admins; creator auto-seeded as first admin on company creation. Last-admin guard enforced at both app level and DB trigger (with advisory lock for TOCTOU safety); owner removal blocked at DB level too. `createServerClient` = service-role client (bypasses RLS) — all `company_members` writes use it.
 - `createServerClient` (server components/routes) vs `createBrowserClient` (client components)
 - Dark mode via CSS custom properties `[data-theme="dark"]` with localStorage persistence
 - Flash-prevention: inline `<script>` in `<head>` sets `data-theme` before first paint
