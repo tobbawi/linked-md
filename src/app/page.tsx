@@ -72,13 +72,13 @@ function LandingHero() {
       <div className="flex gap-sm justify-center flex-wrap">
         <Link
           href="/auth"
-          className="inline-block py-[10px] px-lg bg-primary text-white rounded-sm font-semibold text-[15px]"
+          className="inline-flex items-center py-[12px] px-xl bg-primary text-white rounded-sm font-semibold text-[15px] min-h-[44px] hover:bg-primary-hover transition-colors"
         >
           Get started
         </Link>
         <Link
           href="/auth?tab=login"
-          className="inline-block py-[10px] px-lg bg-transparent text-secondary rounded-sm font-medium text-[15px] border border-border"
+          className="inline-flex items-center py-[12px] px-xl bg-transparent text-secondary rounded-sm font-medium text-[15px] border border-border min-h-[44px] hover:border-primary transition-colors"
         >
           Sign in
         </Link>
