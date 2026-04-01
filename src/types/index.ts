@@ -29,6 +29,14 @@ export interface Company {
   updated_at: string
 }
 
+export interface CompanyMember {
+  company_id: string
+  profile_id: string
+  role: 'admin'
+  created_at: string
+  profile?: Pick<Profile, 'id' | 'slug' | 'display_name' | 'user_id' | 'avatar_url'>
+}
+
 export interface Post {
   id: string
   profile_id: string
