@@ -11,6 +11,7 @@ import SkillsSection from '@/components/SkillsSection'
 import RecommendationsSection from '@/components/RecommendationsSection'
 import WriteRecommendationButton from '@/components/WriteRecommendationButton'
 import ProfileViewTracker from '@/components/ProfileViewTracker'
+import { FilepathBar } from '@/components/ui'
 import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation } from '@/types'
 
 interface PageProps {
@@ -75,21 +76,10 @@ export default async function ProfilePage({ params }: PageProps) {
 
   if (!profile) {
     return (
-      <div style={{ padding: 'var(--space-3xl) var(--space-md)', textAlign: 'center' }}>
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.25rem',
-            color: 'var(--color-ink)',
-            marginBottom: 'var(--space-sm)',
-          }}
-        >
-          Profile not found.
-        </h1>
-        <p style={{ color: 'var(--color-secondary)', fontSize: '15px' }}>
-          <Link href="/" style={{ color: 'var(--color-primary)', fontWeight: 500 }}>
-            Go to feed →
-          </Link>
+      <div className="py-3xl px-md text-center">
+        <h1 className="font-serif text-xl text-ink mb-sm">Profile not found.</h1>
+        <p className="text-secondary text-[15px]">
+          <Link href="/" className="text-primary font-medium">Go to feed →</Link>
         </p>
       </div>
     )
@@ -229,410 +219,280 @@ export default async function ProfilePage({ params }: PageProps) {
   const isFollowing = !!followRow.data
 
   return (
-    <div style={{ padding: 'var(--space-xl) 0' }}>
-      <ProfileViewTracker profileSlug={name} />
-      <div className="sidebar-layout" style={{ display: 'flex', gap: 'var(--space-xl)', alignItems: 'flex-start' }}>
-        {/* Left column — profile card */}
-        <aside className="sidebar" style={{ width: '240px', flexShrink: 0 }}>
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-lg)',
-              padding: 'var(--space-lg)',
-              position: 'sticky',
-              top: '72px',
-            }}
-          >
-            {/* Avatar */}
-            <div style={{ marginBottom: 'var(--space-md)' }}>
-              <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={64} />
-            </div>
+    <div>
+      {/* Document metaphor: filepath bar */}
+      <FilepathBar path={`/profile/${name}.md`} href={`/profile/${name}.md`} />
 
-            {/* Display name + edit button */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                gap: 'var(--space-sm)',
-                marginBottom: profile.bio ? 'var(--space-sm)' : 'var(--space-md)',
-              }}
-            >
-              <h1
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.125rem',
-                  color: 'var(--color-ink)',
-                  lineHeight: 1.3,
-                }}
-              >
-                {profile.display_name}
-              </h1>
-              {isOwner && (
-                <Link
-                  href="/editor"
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    color: 'var(--color-secondary)',
-                    padding: '3px 8px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    flexShrink: 0,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Edit
-                </Link>
-              )}
-            </div>
+      <div className="py-xl">
+        <ProfileViewTracker profileSlug={name} />
+        <div className="sidebar-layout flex gap-xl items-start">
+          {/* Left column — profile card */}
+          <aside className="sidebar w-[260px] shrink-0">
+            <div className="bg-card border border-border rounded-lg p-lg sticky top-[72px]">
+              {/* Avatar */}
+              <div className="mb-md">
+                <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={72} />
+              </div>
 
-            {/* Title */}
-            {profile.title && (
-              <p
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--color-text)',
-                  fontWeight: 500,
-                  marginBottom: 'var(--space-xs)',
-                }}
-              >
-                {profile.title}
-              </p>
-            )}
+              {/* Display name + .md badge (promoted to name-level) */}
+              <div className="flex items-start justify-between gap-sm mb-xs">
+                <h1 className="font-serif text-lg text-ink leading-tight">
+                  {profile.display_name}
+                </h1>
+                {isOwner && (
+                  <Link
+                    href="/editor"
+                    className="text-[11px] font-medium text-secondary px-2 py-0.5 rounded-sm border border-border shrink-0 whitespace-nowrap hover:border-primary transition-colors"
+                  >
+                    Edit
+                  </Link>
+                )}
+              </div>
 
-            {/* Location */}
-            {profile.location && (
-              <p
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--color-muted)',
-                  marginBottom: profile.website || profile.bio ? 'var(--space-xs)' : 'var(--space-md)',
-                }}
-              >
-                {profile.location}
-              </p>
-            )}
-
-            {/* Website */}
-            {profile.website && (
-              <a
-                href={profile.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'block',
-                  fontSize: '13px',
-                  color: 'var(--color-primary)',
-                  marginBottom: profile.bio ? 'var(--space-xs)' : 'var(--space-md)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {profile.website.replace(/^https?:\/\//, '')}
-              </a>
-            )}
-
-            {/* Bio */}
-            {profile.bio && (
-              <p
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--color-secondary)',
-                  lineHeight: 1.5,
-                  marginBottom: 'var(--space-md)',
-                }}
-              >
-                {profile.bio}
-              </p>
-            )}
-
-            {/* Follow button (non-owners) + follower/following counts */}
-            <div style={{ marginBottom: 'var(--space-md)' }}>
-              {!isOwner && viewerProfileId && (
-                <div style={{ marginBottom: 'var(--space-sm)', display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
-                  <FollowButton
-                    followeeSlug={name}
-                    initialFollowing={isFollowing}
-                    followerCount={followerCount ?? 0}
-                  />
-                  <MessageButton recipientSlug={name} />
-                </div>
-              )}
-              {(isOwner || !viewerProfileId) && (
-                <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
-                  <span style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
-                    <strong style={{ color: 'var(--color-text)' }}>{followerCount ?? 0}</strong>{' '}
-                    {(followerCount ?? 0) === 1 ? 'follower' : 'followers'}
-                  </span>
-                  <span style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
-                    <strong style={{ color: 'var(--color-text)' }}>{followingCount ?? 0}</strong>{' '}
-                    following
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Badges */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--space-xs)',
-                marginBottom:
-                  outboundLinks.length > 0 || backlinks.length > 0 ? 'var(--space-md)' : 0,
-              }}
-            >
-              <a
-                href={`/profile/${name}/llm.txt`}
-                className="llm-badge"
-                style={{ alignSelf: 'flex-start' }}
-                title="AI-readable profile summary"
-              >
-                llm.txt available
-              </a>
-              <a
-                href={`/profile/${name}/llm-full.txt`}
-                className="llm-badge"
-                style={{ alignSelf: 'flex-start' }}
-                title="Full AI-readable profile with experience + posts"
-              >
-                llm-full.txt
-              </a>
-              <span className="md-url" style={{ alignSelf: 'flex-start' }}>
+              {/* .md URL badge — promoted to just below name */}
+              <span className="md-url mb-sm block w-fit">
                 /profile/{name}.md
               </span>
-            </div>
 
-            {/* Outbound wikilinks */}
-            {(outboundLinks.length > 0 || (profile.company_links ?? []).length > 0) && (
-              <div style={{ marginBottom: backlinks.length > 0 ? 'var(--space-md)' : 0 }}>
-                <p
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    color: 'var(--color-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    marginBottom: 'var(--space-xs)',
-                  }}
-                >
-                  Links to
+              {/* Title */}
+              {profile.title && (
+                <p className="text-[13px] text-text font-medium mb-xs">
+                  {profile.title}
                 </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
-                  {outboundLinks.map(({ name: linkName, slug: linkSlug }) =>
-                    resolvedSlugs.has(linkSlug) ? (
-                      <Link
-                        key={`p:${linkSlug}`}
-                        href={`/profile/${linkSlug}`}
-                        className="wikilink-resolved"
-                        style={{ fontSize: '13px' }}
-                      >
-                        {linkName}
-                      </Link>
-                    ) : (
-                      <span
-                        key={`p:${linkSlug}`}
-                        className="wikilink-unresolved"
-                        style={{ fontSize: '13px' }}
-                        title="Profile not found"
-                      >
-                        {linkName}
-                      </span>
-                    )
-                  )}
-                  {(profile.company_links ?? []).map((companySlug) => (
-                    <Link
-                      key={`c:${companySlug}`}
-                      href={`/company/${companySlug}`}
-                      className="wikilink-resolved"
-                      style={{ fontSize: '12px' }}
-                    >
-                      {companySlug}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Backlinks */}
-            {backlinks.length > 0 && (
-              <div>
-                <p
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    color: 'var(--color-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    marginBottom: 'var(--space-xs)',
-                  }}
-                >
-                  Mentioned by
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
-                  {backlinks.map((b) => (
-                    <Link
-                      key={b.slug}
-                      href={`/profile/${b.slug}`}
-                      className="wikilink-resolved"
-                      style={{ fontSize: '12px' }}
-                    >
-                      {b.display_name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </aside>
-
-        {/* Right column — experience, education, skills, recommendations, posts */}
-        <main style={{ flex: 1, minWidth: 0 }}>
-          <ExperienceSection experience={experience} />
-          <EducationSection education={education} />
-          <SkillsSection
-            skills={skills}
-            isOwner={isOwner}
-            isLoggedIn={isOwner || !!viewerProfileId}
-          />
-          <RecommendationsSection
-            recommendations={recommendations}
-            isOwner={isOwner}
-          />
-
-          {/* Write recommendation — visible to logged-in non-owners */}
-          {!isOwner && viewerProfileId && (
-            <WriteRecommendationButton
-              recipientId={profile.id}
-              recipientName={profile.display_name}
-            />
-          )}
-
-          {isOwner && (
-            <div style={{ marginBottom: 'var(--space-md)', textAlign: 'right' }}>
-              <Link
-                href="/editor?mode=post"
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: 'var(--color-primary)',
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--color-primary-light)',
-                  border: '1px solid var(--color-primary)',
-                }}
-              >
-                + New post
-              </Link>
-            </div>
-          )}
-
-          {allPosts.length === 0 ? (
-            <p style={{ color: 'var(--color-muted)', fontSize: '15px', paddingTop: 'var(--space-lg)' }}>
-              {isOwner ? (
-                <>No posts yet. <Link href="/editor?mode=post" style={{ color: 'var(--color-primary)' }}>Write your first post →</Link></>
-              ) : (
-                'No posts yet.'
               )}
-            </p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-              {allPosts.map((post) => {
-                const rawPreview = postPreview(post).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]!))
-                const postWikilinksHtml = renderWikilinks(rawPreview, resolvedSlugs, resolvedCompanySlugs)
-                return (
-                  <article
-                    key={post.id}
-                    style={{
-                      background: 'var(--color-card)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: 'var(--space-lg)',
-                    }}
-                  >
-                    {post.title && (
-                      <Link href={`/profile/${name}/post/${post.slug}`}>
-                        <h2
-                          style={{
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: '1.125rem',
-                            color: 'var(--color-ink)',
-                            marginBottom: 'var(--space-xs)',
-                            lineHeight: 1.35,
-                          }}
-                        >
-                          {post.title}
-                        </h2>
-                      </Link>
-                    )}
 
-                    <p
-                      className="prose"
-                      style={{
-                        fontSize: '15px',
-                        color: 'var(--color-text)',
-                        lineHeight: 1.6,
-                        marginBottom: 'var(--space-md)',
-                      }}
-                      dangerouslySetInnerHTML={{ __html: postWikilinksHtml }}
+              {/* Location */}
+              {profile.location && (
+                <p className="text-[13px] text-muted mb-xs">
+                  {profile.location}
+                </p>
+              )}
+
+              {/* Website */}
+              {profile.website && (
+                <a
+                  href={profile.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-[13px] text-primary mb-xs overflow-hidden text-ellipsis whitespace-nowrap"
+                >
+                  {profile.website.replace(/^https?:\/\//, '')}
+                </a>
+              )}
+
+              {/* Bio */}
+              {profile.bio && (
+                <p className="text-[13px] text-secondary leading-relaxed mb-md">
+                  {profile.bio}
+                </p>
+              )}
+
+              {/* Follow button (non-owners) + follower/following counts */}
+              <div className="mb-md">
+                {!isOwner && viewerProfileId && (
+                  <div className="mb-sm flex gap-xs flex-wrap">
+                    <FollowButton
+                      followeeSlug={name}
+                      initialFollowing={isFollowing}
+                      followerCount={followerCount ?? 0}
                     />
+                    <MessageButton recipientSlug={name} />
+                  </div>
+                )}
+                {(isOwner || !viewerProfileId) && (
+                  <div className="flex gap-md">
+                    <span className="text-[13px] text-muted">
+                      <strong className="text-text">{followerCount ?? 0}</strong>{' '}
+                      {(followerCount ?? 0) === 1 ? 'follower' : 'followers'}
+                    </span>
+                    <span className="text-[13px] text-muted">
+                      <strong className="text-text">{followingCount ?? 0}</strong>{' '}
+                      following
+                    </span>
+                  </div>
+                )}
+              </div>
 
-                    {(post.tags ?? []).length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: 'var(--space-sm)' }}>
-                        {post.tags.map((tag) => (
-                          <a
-                            key={tag}
-                            href={`/tag/${tag}`}
-                            style={{
-                              fontSize: '11px',
-                              padding: '2px 8px',
-                              background: 'var(--color-primary-light)',
-                              color: 'var(--color-primary)',
-                              borderRadius: 'var(--radius-sm)',
-                              fontWeight: 500,
-                            }}
-                          >
-                            {tag}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        flexWrap: 'wrap',
-                        gap: 'var(--space-sm)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-                        <time
-                          dateTime={post.created_at}
-                          style={{ fontSize: '13px', color: 'var(--color-muted)' }}
-                        >
-                          {formatDate(post.created_at)}
-                        </time>
+              {/* LLM badges */}
+              <div className="flex flex-col gap-xs mb-md">
+                <a
+                  href={`/profile/${name}/llm.txt`}
+                  className="llm-badge self-start"
+                  title="AI-readable profile summary"
+                >
+                  llm.txt available
+                </a>
+                <a
+                  href={`/profile/${name}/llm-full.txt`}
+                  className="llm-badge self-start"
+                  title="Full AI-readable profile with experience + posts"
+                >
+                  llm-full.txt
+                </a>
+              </div>
+
+              {/* Outbound wikilinks */}
+              {(outboundLinks.length > 0 || (profile.company_links ?? []).length > 0) && (
+                <div className={backlinks.length > 0 ? 'mb-md' : ''}>
+                  <p className="text-[11px] font-semibold text-muted uppercase tracking-wider mb-xs">
+                    Links to
+                  </p>
+                  <div className="flex flex-wrap gap-xs">
+                    {outboundLinks.map(({ name: linkName, slug: linkSlug }) =>
+                      resolvedSlugs.has(linkSlug) ? (
                         <Link
-                          href={`/profile/${name}/post/${post.slug}`}
-                          style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-primary)' }}
+                          key={`p:${linkSlug}`}
+                          href={`/profile/${linkSlug}`}
+                          className="wikilink-resolved text-[13px]"
                         >
-                          Read →
+                          {linkName}
                         </Link>
-                      </div>
-                      <span className="md-url">
-                        /profile/{name}/post/{post.slug}.md
-                      </span>
-                    </div>
-                  </article>
-                )
-              })}
+                      ) : (
+                        <span
+                          key={`p:${linkSlug}`}
+                          className="wikilink-unresolved text-[13px]"
+                          title="Profile not found"
+                        >
+                          {linkName}
+                        </span>
+                      )
+                    )}
+                    {(profile.company_links ?? []).map((companySlug) => (
+                      <Link
+                        key={`c:${companySlug}`}
+                        href={`/company/${companySlug}`}
+                        className="wikilink-resolved text-[12px]"
+                      >
+                        {companySlug}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Backlinks */}
+              {backlinks.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-semibold text-muted uppercase tracking-wider mb-xs">
+                    Mentioned by
+                  </p>
+                  <div className="flex flex-wrap gap-xs">
+                    {backlinks.map((b) => (
+                      <Link
+                        key={b.slug}
+                        href={`/profile/${b.slug}`}
+                        className="wikilink-resolved text-[12px]"
+                      >
+                        {b.display_name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </main>
+          </aside>
+
+          {/* Right column — document gutter + content */}
+          <main className="flex-1 min-w-0 border-l-2 border-border pl-lg">
+            <ExperienceSection experience={experience} />
+            <EducationSection education={education} />
+            <SkillsSection
+              skills={skills}
+              isOwner={isOwner}
+              isLoggedIn={isOwner || !!viewerProfileId}
+            />
+            <RecommendationsSection
+              recommendations={recommendations}
+              isOwner={isOwner}
+            />
+
+            {/* Write recommendation — visible to logged-in non-owners */}
+            {!isOwner && viewerProfileId && (
+              <WriteRecommendationButton
+                recipientId={profile.id}
+                recipientName={profile.display_name}
+              />
+            )}
+
+            {isOwner && (
+              <div className="mb-md text-right">
+                <Link
+                  href="/editor?mode=post"
+                  className="text-[13px] font-medium text-primary px-3.5 py-1.5 rounded-sm bg-primary-light border border-primary hover:bg-primary hover:text-white transition-colors"
+                >
+                  + New post
+                </Link>
+              </div>
+            )}
+
+            {allPosts.length === 0 ? (
+              <p className="text-muted text-[15px] pt-lg">
+                {isOwner ? (
+                  <>No posts yet. <Link href="/editor?mode=post" className="text-primary">Write your first post →</Link></>
+                ) : (
+                  'No posts yet.'
+                )}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-md">
+                {allPosts.map((post) => {
+                  const rawPreview = postPreview(post).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]!))
+                  const postWikilinksHtml = renderWikilinks(rawPreview, resolvedSlugs, resolvedCompanySlugs)
+                  return (
+                    <article
+                      key={post.id}
+                      className="bg-card border border-border rounded-md p-lg hover:border-primary transition-colors"
+                    >
+                      {post.title && (
+                        <Link href={`/profile/${name}/post/${post.slug}`}>
+                          <h2 className="font-serif text-lg text-ink mb-xs leading-snug hover:text-primary transition-colors">
+                            {post.title}
+                          </h2>
+                        </Link>
+                      )}
+
+                      <p
+                        className="prose text-[15px] text-text leading-relaxed mb-md"
+                        dangerouslySetInnerHTML={{ __html: postWikilinksHtml }}
+                      />
+
+                      {(post.tags ?? []).length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-sm">
+                          {post.tags.map((tag) => (
+                            <a
+                              key={tag}
+                              href={`/tag/${tag}`}
+                              className="text-[11px] px-2 py-0.5 bg-primary-light text-primary rounded-sm font-medium hover:bg-primary hover:text-white transition-colors"
+                            >
+                              {tag}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between flex-wrap gap-sm">
+                        <div className="flex items-center gap-md">
+                          <time dateTime={post.created_at} className="text-[13px] text-muted">
+                            {formatDate(post.created_at)}
+                          </time>
+                          <Link
+                            href={`/profile/${name}/post/${post.slug}`}
+                            className="text-[13px] font-medium text-primary hover:underline"
+                          >
+                            Read →
+                          </Link>
+                        </div>
+                        <span className="md-url">
+                          /profile/{name}/post/{post.slug}.md
+                        </span>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            )}
+          </main>
+        </div>
       </div>
     </div>
   )
