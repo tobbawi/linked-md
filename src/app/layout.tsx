@@ -58,13 +58,7 @@ export default async function RootLayout({
       </head>
       <body>
         <Nav user={user} profileSlug={profileSlug} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} />
-        <main
-          style={{
-            maxWidth: '960px',
-            margin: '0 auto',
-            padding: '0 var(--space-md)',
-          }}
-        >
+        <main className="max-w-[960px] mx-auto px-md">
           {children}
         </main>
       </body>

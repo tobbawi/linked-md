@@ -121,10 +121,10 @@ function SearchBox() {
   )
 
   return (
-    <div ref={containerRef} className="nav-search-desktop" style={{ position: 'relative' }}>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+    <div ref={containerRef} className="nav-search-desktop relative">
+      <div className="relative flex items-center">
         <svg
-          style={{ position: 'absolute', left: '8px', color: 'var(--color-muted)', pointerEvents: 'none' }}
+          className="absolute left-[8px] text-muted pointer-events-none"
           width="14" height="14" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         >
@@ -140,15 +140,9 @@ function SearchBox() {
           style={{
             width: '180px',
             padding: `5px ${loading ? '24px' : '8px'} 5px 28px`,
-            fontSize: '13px',
-            fontFamily: 'var(--font-sans)',
-            color: 'var(--color-text)',
-            background: 'var(--color-bg)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-sm)',
-            outline: 'none',
             transition: 'border-color 150ms, width 150ms',
           }}
+          className="text-[13px] font-sans text-text bg-bg border border-border rounded-[var(--radius-sm)] outline-none"
           onFocusCapture={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.width = '220px' }}
           onBlurCapture={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.width = '180px' }}
         />
@@ -156,21 +150,10 @@ function SearchBox() {
 
       {open && query && (
         <div
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 6px)',
-            left: 0,
-            width: '300px',
-            background: 'var(--color-card)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-            zIndex: 100,
-            overflow: 'hidden',
-          }}
+          className="absolute top-[calc(100%+6px)] left-0 w-[300px] bg-card border border-border rounded-[var(--radius-md)] shadow-[0_4px_16px_rgba(0,0,0,0.10)] z-[100] overflow-hidden"
         >
           {!hasResults ? (
-            <div style={{ padding: 'var(--space-md)', fontSize: '13px', color: 'var(--color-muted)', textAlign: 'center' }}>
+            <div className="p-[var(--space-md)] text-[13px] text-muted text-center">
               No results for &ldquo;{query}&rdquo;
             </div>
           ) : (
@@ -221,16 +204,7 @@ function SearchBox() {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <div style={{
-        padding: '6px 12px 4px',
-        fontSize: '10px',
-        fontFamily: 'var(--font-mono)',
-        fontWeight: 600,
-        color: 'var(--color-muted)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.06em',
-        borderTop: '1px solid var(--color-border)',
-      }}>
+      <div className="px-[12px] pt-[6px] pb-[4px] text-[10px] font-mono font-semibold text-muted uppercase tracking-[0.06em] border-t border-border">
         {label}
       </div>
       {children}
@@ -239,24 +213,13 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 }
 
 function ResultRow({ primary, secondary, onClick }: { primary: string; secondary?: string; onClick: () => void }) {
-  const [hovered, setHovered] = useState(false)
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'block',
-        width: '100%',
-        textAlign: 'left',
-        padding: '7px 12px',
-        background: hovered ? 'var(--color-primary-light)' : 'transparent',
-        border: 'none',
-        cursor: 'pointer',
-      }}
+      className="block w-full text-left px-[12px] py-[7px] bg-transparent hover:bg-primary-light border-none cursor-pointer"
     >
-      <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-ink)', lineHeight: 1.3 }}>{primary}</div>
-      {secondary && <div style={{ fontSize: '11px', color: 'var(--color-muted)' }}>{secondary}</div>}
+      <div className="text-[13px] font-medium text-ink leading-[1.3]">{primary}</div>
+      {secondary && <div className="text-[11px] text-muted">{secondary}</div>}
     </button>
   )
 }
@@ -314,23 +277,10 @@ function NotificationBell() {
   }
 
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
+    <div ref={containerRef} className="relative">
       <button
         onClick={toggleOpen}
-        style={{
-          position: 'relative',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '32px',
-          height: '32px',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          color: open ? 'var(--color-ink)' : 'var(--color-secondary)',
-          borderRadius: 'var(--radius-sm)',
-          transition: 'color 150ms ease',
-        }}
+        className={`relative inline-flex items-center justify-center w-[32px] h-[32px] bg-transparent border-none cursor-pointer rounded-[var(--radius-sm)] transition-colors duration-150 ${open ? 'text-ink' : 'text-secondary'}`}
         title="Notifications"
         aria-label="Notifications"
       >
@@ -341,78 +291,38 @@ function NotificationBell() {
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {unread > 0 && (
-          <span style={{
-            position: 'absolute',
-            top: '4px',
-            right: '4px',
-            width: '8px',
-            height: '8px',
-            background: 'var(--color-primary)',
-            borderRadius: '50%',
-            border: '1.5px solid var(--color-bg)',
-          }} />
+          <span className="absolute top-[4px] right-[4px] w-[8px] h-[8px] bg-primary rounded-full border-[1.5px] border-bg" />
         )}
       </button>
 
       {open && (
-        <div style={{
-          position: 'absolute',
-          top: 'calc(100% + 6px)',
-          right: 0,
-          width: '320px',
-          background: 'var(--color-card)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.10)',
-          zIndex: 100,
-          overflow: 'hidden',
-        }}>
-          <div style={{
-            padding: '10px 14px',
-            borderBottom: '1px solid var(--color-border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-ink)' }}>Notifications</span>
+        <div className="absolute top-[calc(100%+6px)] right-0 w-[320px] bg-card border border-border rounded-[var(--radius-md)] shadow-[0_4px_16px_rgba(0,0,0,0.10)] z-[100] overflow-hidden">
+          <div className="px-[14px] py-[10px] border-b border-border flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-ink">Notifications</span>
           </div>
 
           {notifications.length === 0 ? (
-            <div style={{ padding: 'var(--space-lg)', fontSize: '13px', color: 'var(--color-muted)', textAlign: 'center' }}>
+            <div className="p-[var(--space-lg)] text-[13px] text-muted text-center">
               No notifications yet
             </div>
           ) : (
-            <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
+            <div className="max-h-[360px] overflow-y-auto">
               {notifications.slice(0, 20).map((n) => (
                 <button
                   key={n.id}
                   onClick={() => handleNotificationClick(n)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: 'var(--space-sm)',
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 14px',
-                    background: n.read ? 'transparent' : 'var(--color-primary-light)',
-                    border: 'none',
-                    borderBottom: '1px solid var(--color-border)',
-                    cursor: 'pointer',
-                    transition: 'background 150ms ease',
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'var(--color-bg)' }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = n.read ? 'transparent' : 'var(--color-primary-light)' }}
+                  className={`flex items-start gap-[var(--space-sm)] w-full text-left px-[14px] py-[10px] border-none border-b border-border cursor-pointer transition-colors duration-150 hover:bg-bg ${n.read ? 'bg-transparent' : 'bg-primary-light'}`}
                 >
                   {n.actor && (
-                    <div style={{ flexShrink: 0, marginTop: '1px' }}>
+                    <div className="shrink-0 mt-[1px]">
                       <Avatar name={n.actor.display_name} size={28} />
                     </div>
                   )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', color: 'var(--color-text)', lineHeight: 1.4 }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] text-text leading-[1.4]">
                       {notificationLabel(n)}
                     </div>
-                    <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '2px' }}>
+                    <div className="text-[11px] text-muted mt-[2px]">
                       {timeAgo(n.created_at)}
                     </div>
                   </div>
@@ -433,57 +343,23 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
 
   return (
     <nav
-      style={{
-        borderBottom: '1px solid var(--color-border)',
-        background: 'var(--color-bg)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-      }}
+      className="border-b border-border bg-bg sticky top-0 z-50"
     >
       <div
-        style={{
-          maxWidth: '960px',
-          margin: '0 auto',
-          padding: '0 var(--space-lg)',
-          height: '52px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-md)',
-        }}
+        className="max-w-[960px] mx-auto px-[var(--space-lg)] h-[52px] flex items-center gap-[var(--space-md)]"
       >
         {/* Logo */}
         <Link
           href="/"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            textDecoration: 'none',
-            flexShrink: 0,
-          }}
+          className="flex items-center gap-[4px] no-underline shrink-0"
         >
           <span
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '20px',
-              fontStyle: 'italic',
-              fontWeight: 600,
-              color: 'var(--color-ink)',
-              letterSpacing: '-0.02em',
-            }}
+            className="font-serif text-[20px] italic font-semibold text-ink tracking-[-0.02em]"
           >
             linked
           </span>
           <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '13px',
-              color: 'var(--color-primary)',
-              background: 'var(--color-primary-light)',
-              padding: '2px 5px',
-              borderRadius: 'var(--radius-sm)',
-            }}
+            className="font-mono text-[13px] text-primary bg-primary-light px-[5px] py-[2px] rounded-[var(--radius-sm)]"
           >
             .md
           </span>
@@ -500,19 +376,7 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
               <Link
                 key={href}
                 href={href}
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: isActive ? 'var(--color-ink)' : 'var(--color-secondary)',
-                  textDecoration: 'none',
-                  padding: '4px 0',
-                  borderBottom: `2px solid ${isActive ? 'var(--color-primary)' : 'transparent'}`,
-                  transition: 'color 150ms ease, border-color 150ms ease',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  minHeight: '44px',
-                  whiteSpace: 'nowrap',
-                }}
+                className={`text-[13px] font-medium no-underline py-[4px] inline-flex items-center min-h-[44px] whitespace-nowrap transition-colors duration-150 ${isActive ? 'text-ink border-b-2 border-primary' : 'text-secondary border-b-2 border-transparent'}`}
               >
                 {label}
               </Link>
@@ -521,7 +385,7 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
         </div>
 
         {/* Right side */}
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+        <div className="ml-auto flex items-center gap-[var(--space-sm)]">
           {user ? (
             <>
               {/* Notification bell */}
@@ -530,26 +394,7 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
               {/* Write button */}
               <Link
                 href="/post/new"
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: 'var(--color-secondary)',
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--color-border)',
-                  background: 'transparent',
-                  transition: 'background 150ms ease',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  whiteSpace: 'nowrap',
-                  textDecoration: 'none',
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.background = 'var(--color-card)')
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.background = 'transparent')
-                }
+                className="text-[13px] font-medium text-secondary px-[12px] py-[6px] rounded-[var(--radius-sm)] border border-border bg-transparent transition-colors duration-150 inline-flex items-center whitespace-nowrap no-underline hover:bg-card"
               >
                 Write
               </Link>
@@ -558,7 +403,7 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
               {profileSlug && (
                 <Link
                   href={`/profile/${profileSlug}`}
-                  style={{ display: 'inline-flex', flexShrink: 0, textDecoration: 'none' }}
+                  className="inline-flex shrink-0 no-underline"
                   title={`@${profileSlug}`}
                 >
                   <Avatar
@@ -573,20 +418,7 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
           ) : (
             <Link
               href="/auth"
-              style={{
-                fontSize: '13px',
-                fontWeight: 500,
-                color: 'var(--color-primary)',
-                padding: '0 16px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'var(--color-primary-light)',
-                border: '1px solid var(--color-primary)',
-                transition: 'background 150ms ease',
-                display: 'inline-flex',
-                alignItems: 'center',
-                height: '34px',
-                textDecoration: 'none',
-              }}
+              className="text-[13px] font-medium text-primary px-[16px] rounded-[var(--radius-sm)] bg-primary-light border border-primary transition-colors duration-150 inline-flex items-center h-[34px] no-underline"
             >
               Sign in
             </Link>
