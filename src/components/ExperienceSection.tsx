@@ -2,35 +2,9 @@
 
 import Link from 'next/link'
 import type { ExperienceEntry } from '@/types'
+import { formatPeriod, getDuration } from '@/lib/dateUtils'
 
-interface Props {
-  experience: ExperienceEntry[]
-}
-
-function formatPeriod(entry: ExperienceEntry): string {
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const startMonth = entry.start_month ? `${monthNames[entry.start_month - 1]} ` : ''
-  const start = `${startMonth}${entry.start_year}`
-  if (entry.is_current) return `${start} – present`
-  if (!entry.end_year) return start
-  const endMonth = entry.end_month ? `${monthNames[entry.end_month - 1]} ` : ''
-  return `${start} – ${endMonth}${entry.end_year}`
-}
-
-function getDuration(entry: ExperienceEntry): string {
-  const endYear = entry.is_current ? new Date().getFullYear() : (entry.end_year ?? entry.start_year)
-  const endMonth = entry.is_current ? new Date().getMonth() + 1 : (entry.end_month ?? entry.start_month ?? 1)
-  const startMonth = entry.start_month ?? 1
-  const totalMonths = (endYear - entry.start_year) * 12 + (endMonth - startMonth)
-  if (totalMonths < 1) return ''
-  const years = Math.floor(totalMonths / 12)
-  const months = totalMonths % 12
-  const parts: string[] = []
-  if (years > 0) parts.push(`${years}y`)
-  if (months > 0 || years === 0) parts.push(`${months}mo`)
-  return parts.join(' ')
-}
+type Props = { experience: ExperienceEntry[] }
 
 export default function ExperienceSection({ experience }: Props) {
   if (experience.length === 0) return null
@@ -40,8 +14,8 @@ export default function ExperienceSection({ experience }: Props) {
       <h2
         style={{
           fontFamily: 'var(--font-serif)',
-          fontSize: '1.125rem',
-          fontWeight: 400,
+          fontSize: '1.25rem',
+          fontWeight: 600,
           color: 'var(--color-ink)',
           marginBottom: '1.25rem',
           letterSpacing: '-0.01em',

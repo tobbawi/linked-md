@@ -166,8 +166,8 @@ function NewPostPageInner() {
     <div style={{ paddingTop: 'var(--space-lg)', paddingBottom: 'var(--space-3xl)' }}>
       <h1
         style={{
-          fontSize: '20px',
-          fontWeight: 600,
+          fontFamily: 'var(--font-serif)',
+          fontSize: '1.25rem',
           color: 'var(--color-ink)',
           marginBottom: 'var(--space-lg)',
         }}

@@ -2,10 +2,16 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks, extractWikilinks, toSlug } from '@/lib/wikilinks'
+import Avatar from '@/components/Avatar'
 import { FollowButton } from '@/components/FollowButton'
+import { MessageButton } from '@/components/MessageButton'
 import ExperienceSection from '@/components/ExperienceSection'
+import EducationSection from '@/components/EducationSection'
+import SkillsSection from '@/components/SkillsSection'
+import RecommendationsSection from '@/components/RecommendationsSection'
+import WriteRecommendationButton from '@/components/WriteRecommendationButton'
 import ProfileViewTracker from '@/components/ProfileViewTracker'
-import type { Profile, Post, ExperienceEntry } from '@/types'
+import type { Profile, Post, ExperienceEntry, EducationEntry, ProfileSkill, Recommendation } from '@/types'
 
 interface PageProps {
   params: { name: string }
@@ -25,7 +31,7 @@ function truncate(text: string, maxLen: number): string {
 }
 
 function postPreview(post: Post): string {
-  const raw = post.title ?? post.markdown_content
+  const raw = post.markdown_content
   const stripped = raw
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\*\*?([^*]+)\*\*?/g, '$1')
@@ -73,7 +79,7 @@ export default async function ProfilePage({ params }: PageProps) {
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
-            fontSize: '1.5rem',
+            fontSize: '1.25rem',
             color: 'var(--color-ink)',
             marginBottom: 'var(--space-sm)',
           }}
@@ -108,8 +114,14 @@ export default async function ProfilePage({ params }: PageProps) {
     // not logged in
   }
 
-  // Fetch posts (newest first) + experience (user-defined sort order)
-  const [{ data: posts }, { data: experienceRows }] = await Promise.all([
+  // Fetch posts, experience, education, skills, recommendations in parallel
+  const [
+    { data: posts },
+    { data: experienceRows },
+    { data: educationRows },
+    { data: skillRows },
+    { data: recommendationRows },
+  ] = await Promise.all([
     supabase
       .from('posts')
       .select('*')
@@ -122,10 +134,59 @@ export default async function ProfilePage({ params }: PageProps) {
       .eq('profile_id', profile.id)
       .order('sort_order', { ascending: true })
       .returns<ExperienceEntry[]>(),
+    supabase
+      .from('education_entries')
+      .select('*')
+      .eq('profile_id', profile.id)
+      .order('sort_order', { ascending: true })
+      .returns<EducationEntry[]>(),
+    supabase
+      .from('profile_skills')
+      .select('*, endorsement_count:skill_endorsements(count)')
+      .eq('profile_id', profile.id)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('recommendations')
+      .select('*, author:profiles!author_id(slug, display_name)')
+      .eq('recipient_id', profile.id)
+      .eq('visible', true)
+      .order('created_at', { ascending: false })
+      .returns<Recommendation[]>(),
   ])
 
   const allPosts = posts ?? []
   const experience = experienceRows ?? []
+  const education = educationRows ?? []
+  const recommendations = recommendationRows ?? []
+
+  // Build skills with endorsement counts + viewer endorsement state
+  const rawSkills = (skillRows ?? []) as Array<{
+    id: string
+    name: string
+    sort_order: number
+    endorsement_count: Array<{ count: number }>
+  }>
+
+  // Fetch viewer's endorsements if logged in and not owner
+  let viewerEndorsedSkillIds = new Set<string>()
+  if (viewerProfileId) {
+    const { data: endorsements } = await supabase
+      .from('skill_endorsements')
+      .select('skill_id')
+      .eq('endorser_id', viewerProfileId)
+      .in('skill_id', rawSkills.map(s => s.id))
+    viewerEndorsedSkillIds = new Set((endorsements ?? []).map(e => e.skill_id))
+  }
+
+  const skills: ProfileSkill[] = rawSkills.map(s => ({
+    id: s.id,
+    profile_id: profile.id,
+    name: s.name,
+    sort_order: s.sort_order,
+    created_at: '',
+    endorsement_count: s.endorsement_count[0]?.count ?? 0,
+    viewer_has_endorsed: viewerEndorsedSkillIds.has(s.id),
+  }))
 
   // Fetch all profile + company slugs for wikilink resolution
   const [{ data: profileSlugs }, { data: companySlugsData }] = await Promise.all([
@@ -184,24 +245,8 @@ export default async function ProfilePage({ params }: PageProps) {
             }}
           >
             {/* Avatar */}
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--color-primary-light)',
-                border: '2px solid var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                fontWeight: 700,
-                color: 'var(--color-primary)',
-                fontFamily: 'var(--font-serif)',
-                marginBottom: 'var(--space-md)',
-              }}
-            >
-              {profile.display_name.charAt(0).toUpperCase()}
+            <div style={{ marginBottom: 'var(--space-md)' }}>
+              <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={64} />
             </div>
 
             {/* Display name + edit button */}
@@ -261,7 +306,7 @@ export default async function ProfilePage({ params }: PageProps) {
             {profile.location && (
               <p
                 style={{
-                  fontSize: '12px',
+                  fontSize: '13px',
                   color: 'var(--color-muted)',
                   marginBottom: profile.website || profile.bio ? 'var(--space-xs)' : 'var(--space-md)',
                 }}
@@ -278,7 +323,7 @@ export default async function ProfilePage({ params }: PageProps) {
                 rel="noopener noreferrer"
                 style={{
                   display: 'block',
-                  fontSize: '12px',
+                  fontSize: '13px',
                   color: 'var(--color-primary)',
                   marginBottom: profile.bio ? 'var(--space-xs)' : 'var(--space-md)',
                   overflow: 'hidden',
@@ -307,21 +352,22 @@ export default async function ProfilePage({ params }: PageProps) {
             {/* Follow button (non-owners) + follower/following counts */}
             <div style={{ marginBottom: 'var(--space-md)' }}>
               {!isOwner && viewerProfileId && (
-                <div style={{ marginBottom: 'var(--space-sm)' }}>
+                <div style={{ marginBottom: 'var(--space-sm)', display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
                   <FollowButton
                     followeeSlug={name}
                     initialFollowing={isFollowing}
                     followerCount={followerCount ?? 0}
                   />
+                  <MessageButton recipientSlug={name} />
                 </div>
               )}
               {(isOwner || !viewerProfileId) && (
                 <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
-                  <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
                     <strong style={{ color: 'var(--color-text)' }}>{followerCount ?? 0}</strong>{' '}
                     {(followerCount ?? 0) === 1 ? 'follower' : 'followers'}
                   </span>
-                  <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
                     <strong style={{ color: 'var(--color-text)' }}>{followingCount ?? 0}</strong>{' '}
                     following
                   </span>
@@ -382,7 +428,7 @@ export default async function ProfilePage({ params }: PageProps) {
                         key={`p:${linkSlug}`}
                         href={`/profile/${linkSlug}`}
                         className="wikilink-resolved"
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: '13px' }}
                       >
                         {linkName}
                       </Link>
@@ -390,7 +436,7 @@ export default async function ProfilePage({ params }: PageProps) {
                       <span
                         key={`p:${linkSlug}`}
                         className="wikilink-unresolved"
-                        style={{ fontSize: '12px' }}
+                        style={{ fontSize: '13px' }}
                         title="Profile not found"
                       >
                         {linkName}
@@ -443,9 +489,27 @@ export default async function ProfilePage({ params }: PageProps) {
           </div>
         </aside>
 
-        {/* Right column — experience + posts */}
+        {/* Right column — experience, education, skills, recommendations, posts */}
         <main style={{ flex: 1, minWidth: 0 }}>
           <ExperienceSection experience={experience} />
+          <EducationSection education={education} />
+          <SkillsSection
+            skills={skills}
+            isOwner={isOwner}
+            isLoggedIn={isOwner || !!viewerProfileId}
+          />
+          <RecommendationsSection
+            recommendations={recommendations}
+            isOwner={isOwner}
+          />
+
+          {/* Write recommendation — visible to logged-in non-owners */}
+          {!isOwner && viewerProfileId && (
+            <WriteRecommendationButton
+              recipientId={profile.id}
+              recipientName={profile.display_name}
+            />
+          )}
 
           {isOwner && (
             <div style={{ marginBottom: 'var(--space-md)', textAlign: 'right' }}>
@@ -527,7 +591,7 @@ export default async function ProfilePage({ params }: PageProps) {
                               padding: '2px 8px',
                               background: 'var(--color-primary-light)',
                               color: 'var(--color-primary)',
-                              borderRadius: 'var(--radius-full)',
+                              borderRadius: 'var(--radius-sm)',
                               fontWeight: 500,
                             }}
                           >
