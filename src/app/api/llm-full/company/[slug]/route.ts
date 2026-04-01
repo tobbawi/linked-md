@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 import { buildLlmCompanyFullTxt } from '@/lib/exports'
-import type { Company, ExperienceEntry, Profile, JobListing } from '@/types'
+import type { Company, ExperienceEntry, Profile, JobListing, CompanyMember } from '@/types'
 
 export async function GET(
   _request: NextRequest,
@@ -61,7 +61,25 @@ export async function GET(
     .order('created_at', { ascending: false })
     .returns<JobListing[]>()
 
-  const txt = buildLlmCompanyFullTxt(company, people, jobRows ?? [])
+  const { data: memberRows } = await supabase
+    .from('company_members')
+    .select('profile_id, role, profile:profiles!profile_id(slug, display_name, user_id)')
+    .eq('company_id', company.id)
+    .order('created_at', { ascending: true })
+
+  type MemberWithProfile = CompanyMember & {
+    profile: Pick<Profile, 'slug' | 'display_name' | 'user_id'>
+  }
+
+  const admins = ((memberRows ?? []) as unknown as MemberWithProfile[])
+    .filter(m => m.profile)
+    .map(m => ({
+      display_name: m.profile.display_name,
+      slug: m.profile.slug,
+      role: (m.profile.user_id === company.user_id ? 'owner' : 'admin') as 'owner' | 'admin',
+    }))
+
+  const txt = buildLlmCompanyFullTxt(company, people, jobRows ?? [], admins)
 
   return new NextResponse(txt, {
     headers: {

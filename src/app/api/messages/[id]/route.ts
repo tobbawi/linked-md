@@ -45,7 +45,7 @@ export async function GET(
 
   const { data: messages } = await supabase
     .from('messages')
-    .select('*, sender:profiles!sender_id(id, slug, display_name)')
+    .select('*, sender:profiles!sender_id(id, slug, display_name, avatar_url)')
     .eq('conversation_id', params.id)
     .order('created_at', { ascending: true })
     .returns<Message[]>()
@@ -53,13 +53,13 @@ export async function GET(
   // Get other member info
   const { data: members } = await supabase
     .from('conversation_members')
-    .select('profile:profiles!profile_id(id, slug, display_name)')
+    .select('profile:profiles!profile_id(id, slug, display_name, avatar_url)')
     .eq('conversation_id', params.id)
     .neq('profile_id', myProfile.id)
 
-  type MemberRow = { profile: { id: string; slug: string; display_name: string } }
+  type MemberRow = { profile: { id: string; slug: string; display_name: string; avatar_url?: string | null } | { id: string; slug: string; display_name: string; avatar_url?: string | null }[] }
   const otherProfile = members && members.length > 0
-    ? (members[0] as MemberRow).profile
+    ? (() => { const p = (members[0] as MemberRow).profile; return Array.isArray(p) ? p[0] : p })()
     : null
 
   return NextResponse.json({

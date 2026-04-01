@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Fire notification (non-blocking — ignore failures)
-  serviceClient
+  void serviceClient
     .from('notifications')
     .insert({
       recipient_id: skill.profile_id,
@@ -52,8 +52,6 @@ export async function POST(request: NextRequest) {
       skill_id: skill.id,
       skill_name: skill.name,
     })
-    .then(() => {})
-    .catch(() => {})
 
   return NextResponse.json({ ok: true })
 }

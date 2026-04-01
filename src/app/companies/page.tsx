@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
+import Avatar from '@/components/Avatar'
 import type { Company } from '@/types'
 
 function formatDate(dateStr: string): string {
@@ -126,24 +127,8 @@ export default async function CompaniesPage() {
               >
                 <div className="company-card">
                   {/* Avatar */}
-                  <div
-                    style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'var(--color-primary-light)',
-                      border: '1px solid var(--color-primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '18px',
-                      fontWeight: 700,
-                      color: 'var(--color-primary)',
-                      fontFamily: 'var(--font-serif)',
-                      marginBottom: 'var(--space-sm)',
-                    }}
-                  >
-                    {company.name.charAt(0).toUpperCase()}
+                  <div style={{ marginBottom: 'var(--space-sm)' }}>
+                    <Avatar name={company.name} size={40} shape="square" />
                   </div>
 
                   <h2

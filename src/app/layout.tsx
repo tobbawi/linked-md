@@ -23,6 +23,8 @@ export default async function RootLayout({
 }) {
   let user = null
   let profileSlug: string | null = null
+  let profileDisplayName: string | null = null
+  let profileAvatarUrl: string | null = null
 
   try {
     const supabase = createAuthServerClient()
@@ -34,10 +36,12 @@ export default async function RootLayout({
     if (user) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('slug')
+        .select('slug, display_name, avatar_url')
         .eq('user_id', user.id)
         .single()
       profileSlug = profile?.slug ?? null
+      profileDisplayName = profile?.display_name ?? null
+      profileAvatarUrl = profile?.avatar_url ?? null
     }
   } catch {
     // Supabase not configured — dev mode
@@ -53,7 +57,7 @@ export default async function RootLayout({
         />
       </head>
       <body>
-        <Nav user={user} profileSlug={profileSlug} />
+        <Nav user={user} profileSlug={profileSlug} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} />
         <main
           style={{
             maxWidth: '960px',

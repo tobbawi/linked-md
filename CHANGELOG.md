@@ -6,6 +6,49 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [0.2.2.0] - 2026-04-01
+
+### Added
+- **Company admin management (M5):** Multi-admin support for companies via `company_members` join table. Company creators are automatically seeded as the first admin. Any admin can invite or remove other admins via `POST`/`DELETE /api/company/member`. The company editor gains a "Team" tab to manage admins and view employees. Admin roster displayed on public company pages with owner/admin badges.
+- **Company member API (`/api/company/member`):** `POST` adds an admin (verified admin of the company required), `DELETE` removes one (last-admin guard + owner removal guard enforced at both app and DB level). Returns 409 on duplicate, 403 if caller is not an admin, 404 if target is not a member.
+- **`CompanyMember` type:** New `CompanyMember` interface in `src/types/index.ts` with `company_id`, `profile_id`, `role: 'admin'`, and optional joined `profile` shape.
+- **Admins section in company llm-full.txt:** `buildLlmCompanyFullTxt` now accepts an `admins` array and emits a `## Admins` section listing each admin with owner/admin role and profile URL, appearing before `## People`.
+
+### Changed
+- **Company save splits INSERT/UPDATE:** `POST /api/company/save` now detects existing companies by slug and issues either an INSERT (new company, seeds creator as first admin in `company_members`) or an UPDATE (existing company, strips `user_id` from payload to prevent co-admin user_id overwrite). RLS updated: any admin can update/delete the company.
+- **Company page admin context:** Company page now checks `company_members` for the viewer's admin status (`isAdmin`) rather than matching `user_id`. Admin badge in the "People" section now correctly uses `profile_id` (UUID) as the lookup key instead of `profile.slug` to prevent false positives from slug reuse.
+- **Job listings RLS:** `company_admins_can_manage_job_listings` policy replaces owner-only constraint so any company admin can manage listings.
+
+### Fixed
+- **Last-admin TOCTOU race (migration 018):** `prevent_last_admin_removal` trigger now acquires a transaction-level advisory lock keyed by `company_id` before counting, serializing concurrent DELETEs and preventing two simultaneous removals from emptying `company_members`.
+- **Owner removal DB guard (migration 018):** New `company_members_owner_guard` trigger blocks removal of the original company creator at the DB level, not just in application code.
+- **DELETE non-member silent 200:** `DELETE /api/company/member` now returns 404 if the target profile exists but is not a member, rather than returning `{ removed: true }` for a no-op delete.
+
+---
+
+## [0.2.1.0] - 2026-03-24
+
+### Added
+- **Avatar uploads (M2):** Profile photo upload via `POST /api/avatar/upload` with MIME type validation, magic number verification (prevents spoofing), 2MB size limit, and Supabase Storage CDN. `Avatar` component renders initials as base layer with photo overlay. Pure helper functions `getInitials`, `getAvatarColor`, `validateAvatarFile` in `src/lib/avatar.ts`.
+- **Network feed (M2):** Home feed shows posts and reposts from followed profiles. `mergeFeedItems<T>()` pure function deduplicates and sorts by `(created_at DESC, id DESC)`. Feed tracks like/comment/repost counts per post.
+- **Company following (M3):** `company_follows` table with RLS. `CompanyFollowButton` client component with optimistic toggle. `POST`/`DELETE /api/company/follow` with `company_follow` notification type for the owner's bell.
+- **Reposts (M2.4):** `reposts` table with `UNIQUE(profile_id, original_post_id)` constraint. `POST`/`DELETE /api/repost` (409 on duplicate, 403 on own post). `RepostButton` client component. `RepostCard` in feed shows reshared-by header and original post. Repost section added to `llm-full.txt`.
+- **Nav search:** Debounced (300ms) `SearchBox` in the nav bar, fetches `/api/search?type=all&q=` returning grouped `{ profiles, companies, posts }`, grouped dropdown, ESC/outside-click to close.
+- **Notification bell:** `NotificationBell` in nav with emerald badge for unread count, dropdown with actor label and timeAgo, marks all read on open via `POST /api/notifications/read`.
+- **Analytics dashboard (M4.3):** `/analytics` page with 3 stat cards (profile views, post impressions, followers), 30-day sparkline SVG charts, and per-post table (views, likes, comments, reposts). All view counts deduplicated by `viewer_hash`.
+
+### Fixed
+- **Analytics 7d dedup:** `profileViews7d` and `postViews7d` now use distinct `viewer_hash` sets (matching the 30d methodology) instead of raw row counts that could be inflated by repeat visits.
+- **hasFollows logic:** Feed empty-state now correctly detects whether the user follows anyone, independent of whether those users have written posts.
+- **Avatar Storage:** Introduced `createAdminStorageClient()` using plain `@supabase/supabase-js` to bypass `@supabase/ssr`'s cookie session override that caused RLS rejections for Storage even with the service role key.
+- **Avatar magic numbers:** Upload now validates file bytes against JPEG/PNG/WebP magic numbers, preventing MIME type spoofing via crafted multipart Content-Type headers.
+- **Company follow status code:** `getIds()` now returns a discriminated result — 401 for unauthenticated, 404 for missing company (was always 401).
+- **Optimistic count floor:** `RepostButton` and `CompanyFollowButton` clamp optimistic counters at 0, preventing negative display from stale server-rendered counts.
+- **RepostCard null guard:** `post.markdown_content` coerced to `''` before `.replace()` to prevent TypeError crash when post content is null.
+- **notificationHref fallback:** Repost/like/comment notifications where the original post was deleted now fall back to the actor's profile instead of `/`.
+
+---
+
 ## [0.2.0.0] - 2026-03-23
 
 ### Added

@@ -43,15 +43,13 @@ export async function POST(request: NextRequest) {
   }
 
   // Fire notification (non-blocking)
-  serviceClient
+  void serviceClient
     .from('notifications')
     .insert({
       recipient_id,
       actor_id: author.id,
       type: 'recommendation',
     })
-    .then(() => {})
-    .catch(() => {})
 
   return NextResponse.json({ id: rec.id })
 }

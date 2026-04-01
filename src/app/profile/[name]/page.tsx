@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks, extractWikilinks, toSlug } from '@/lib/wikilinks'
+import Avatar from '@/components/Avatar'
 import { FollowButton } from '@/components/FollowButton'
 import { MessageButton } from '@/components/MessageButton'
 import ExperienceSection from '@/components/ExperienceSection'
@@ -78,7 +79,7 @@ export default async function ProfilePage({ params }: PageProps) {
         <h1
           style={{
             fontFamily: 'var(--font-serif)',
-            fontSize: '1.5rem',
+            fontSize: '1.25rem',
             color: 'var(--color-ink)',
             marginBottom: 'var(--space-sm)',
           }}
@@ -182,6 +183,7 @@ export default async function ProfilePage({ params }: PageProps) {
     profile_id: profile.id,
     name: s.name,
     sort_order: s.sort_order,
+    created_at: '',
     endorsement_count: s.endorsement_count[0]?.count ?? 0,
     viewer_has_endorsed: viewerEndorsedSkillIds.has(s.id),
   }))
@@ -243,24 +245,8 @@ export default async function ProfilePage({ params }: PageProps) {
             }}
           >
             {/* Avatar */}
-            <div
-              style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--color-primary-light)',
-                border: '2px solid var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                fontWeight: 700,
-                color: 'var(--color-primary)',
-                fontFamily: 'var(--font-serif)',
-                marginBottom: 'var(--space-md)',
-              }}
-            >
-              {profile.display_name.charAt(0).toUpperCase()}
+            <div style={{ marginBottom: 'var(--space-md)' }}>
+              <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={64} />
             </div>
 
             {/* Display name + edit button */}
@@ -605,7 +591,7 @@ export default async function ProfilePage({ params }: PageProps) {
                               padding: '2px 8px',
                               background: 'var(--color-primary-light)',
                               color: 'var(--color-primary)',
-                              borderRadius: 'var(--radius-full)',
+                              borderRadius: 'var(--radius-sm)',
                               fontWeight: 500,
                             }}
                           >

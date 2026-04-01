@@ -36,29 +36,36 @@ function JobsEditorInner() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/auth'); return }
 
+      // Resolve the viewer's profile id (needed for membership check)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .single()
+
+      if (!profile) {
+        setError('Profile not found. Complete your profile first.')
+        setLoading(false)
+        return
+      }
+
       if (!companySlug) {
-        // Find user's company
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .single()
+        // Find any company this user admins via company_members
+        const { data: membership } = await supabase
+          .from('company_members')
+          .select('company_id, companies(*)')
+          .eq('profile_id', profile.id)
+          .limit(1)
+          .maybeSingle()
 
-        if (profile) {
-          const { data: co } = await supabase
-            .from('companies')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .single()
-
-          if (!co) {
-            setError('No company found. Create a company first.')
-            setLoading(false)
-            return
-          }
-          setCompany(co as Company)
-          await loadJobs(co.id)
+        if (!membership) {
+          setError('No company found. Create a company first.')
+          setLoading(false)
+          return
         }
+        const co = (membership as unknown as { companies: Company }).companies
+        setCompany(co)
+        await loadJobs(co.id)
       } else {
         const { data: co } = await supabase
           .from('companies')
@@ -72,8 +79,16 @@ function JobsEditorInner() {
           return
         }
 
-        if ((co as Company).user_id !== session.user.id) {
-          setError('You do not own this company.')
+        // Verify caller is an admin of this company
+        const { data: membership } = await supabase
+          .from('company_members')
+          .select('role')
+          .eq('company_id', co.id)
+          .eq('profile_id', profile.id)
+          .maybeSingle()
+
+        if (!membership) {
+          setError('You are not an admin of this company.')
           setLoading(false)
           return
         }
@@ -193,13 +208,13 @@ function JobsEditorInner() {
 
   return (
     <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div style={{ maxWidth: '640px', margin: '0 auto' }}>
+      <div>
         {/* Header */}
         <div style={{ marginBottom: 'var(--space-xl)' }}>
           <h1
             style={{
               fontFamily: 'var(--font-serif)',
-              fontSize: '1.5rem',
+              fontSize: '1.25rem',
               color: 'var(--color-ink)',
               marginBottom: 'var(--space-xs)',
             }}

@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useTransition, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-browser'
+import Avatar from '@/components/Avatar'
+import { validateAvatarFile } from '@/lib/avatar'
 import {
   renderMarkdown,
   useWikilinkAutocomplete,
@@ -383,6 +385,9 @@ export default function EditorPage() {
   const [bio, setBio] = useState('')
   const [content, setContent] = useState('')
   const [slug, setSlug] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [avatarUploading, setAvatarUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState('')
   const [experience, setExperience] = useState<ExperienceInput[]>([])
   const [education, setEducation] = useState<EducationInput[]>([])
   const [skills, setSkills] = useState<string[]>([])
@@ -396,6 +401,7 @@ export default function EditorPage() {
 
   const [contentCursor, setContentCursor] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const avatarInputRef = useRef<HTMLInputElement>(null)
 
   // Auth guard + load existing profile + experience
   useEffect(() => {
@@ -419,6 +425,7 @@ export default function EditorPage() {
             setBio(profileData.bio ?? '')
             setContent(profileData.markdown_content ?? '')
             setSlug(profileData.slug ?? '')
+            setAvatarUrl(profileData.avatar_url ?? null)
 
             // Load experience, education, skills, post count in parallel
             const [{ data: expRows }, { data: eduRows }, { data: skillRows }, { count: pCount }] = await Promise.all([
@@ -501,6 +508,24 @@ export default function EditorPage() {
       return next
     })
   }, [])
+
+  async function handleAvatarUpload(file: File) {
+    setAvatarError('')
+    setAvatarUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/avatar/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) {
+        setAvatarError(data.error ?? 'Upload failed — try again')
+      } else {
+        setAvatarUrl(data.avatarUrl)
+      }
+    } finally {
+      setAvatarUploading(false)
+    }
+  }
 
   async function handleSave() {
     if (!displayName.trim() || !slug.trim()) {
@@ -592,7 +617,8 @@ export default function EditorPage() {
 
       <h1
         style={{
-          fontSize: '20px',
+          fontFamily: 'var(--font-serif)',
+          fontSize: '1.25rem',
           fontWeight: 600,
           color: 'var(--color-ink)',
           marginBottom: 'var(--space-lg)',
@@ -613,6 +639,70 @@ export default function EditorPage() {
               marginBottom: 'var(--space-lg)',
             }}
           >
+            {/* Avatar upload */}
+            <div style={{ marginBottom: 'var(--space-lg)' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: 'var(--color-secondary)',
+                  marginBottom: 'var(--space-sm)',
+                }}
+              >
+                Profile photo
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                <Avatar name={displayName || slug || '?'} avatarUrl={avatarUrl} size={52} />
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={avatarUploading}
+                    style={{
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: 'var(--color-primary)',
+                      background: 'var(--color-primary-light)',
+                      border: '1px solid var(--color-primary)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '5px 12px',
+                      cursor: avatarUploading ? 'not-allowed' : 'pointer',
+                      opacity: avatarUploading ? 0.6 : 1,
+                    }}
+                  >
+                    {avatarUploading ? 'Uploading…' : avatarUrl ? 'Change photo' : 'Upload photo'}
+                  </button>
+                  <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>
+                    jpeg, png or webp · max 2MB · initials shown if no photo
+                  </p>
+                  {avatarError && (
+                    <p style={{ fontSize: '12px', color: 'var(--color-error, #E11D48)', marginTop: '4px' }}>
+                      {avatarError}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  const v = validateAvatarFile({ type: file.type, size: file.size })
+                  if (!v.valid) {
+                    setAvatarError(v.error ?? 'Invalid file')
+                    return
+                  }
+                  handleAvatarUpload(file)
+                  // Reset input so same file can be re-selected
+                  e.target.value = ''
+                }}
+              />
+            </div>
+
             <FieldGroup label="Display name" htmlFor="display-name">
               <Input
                 id="display-name"
