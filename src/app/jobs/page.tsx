@@ -45,12 +45,14 @@ export default async function JobsPage() {
 
         {/* Job list */}
         {allJobs.length === 0 ? (
-          <p className="text-muted text-[15px]">
-            No open roles yet.{' '}
-            <Link href="/companies" className="text-primary">
+          <div className="text-center py-2xl">
+            <div className="text-[32px] mb-sm">💼</div>
+            <p className="text-ink text-[17px] font-medium mb-xs">No open roles yet</p>
+            <p className="text-secondary text-[14px] mb-md">Companies on linked.md will post roles here.</p>
+            <Link href="/companies" className="text-primary font-medium text-[14px] hover:underline">
               Browse companies →
             </Link>
-          </p>
+          </div>
         ) : (
           <div className="flex flex-col gap-md">
             {allJobs.map((job) => (
