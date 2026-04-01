@@ -69,97 +69,52 @@ export default async function NotificationsPage() {
   const allNotifications = notifications ?? []
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-xl pb-3xl">
       <div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 'var(--space-xl)',
-          }}
-        >
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.25rem',
-              color: 'var(--color-ink)',
-            }}
-          >
+        <div className="flex items-center justify-between mb-xl">
+          <h1 className="font-serif text-[1.25rem] text-ink">
             Notifications
           </h1>
           <Link
             href={`/profile/${myProfile.slug}`}
-            style={{ fontSize: '13px', color: 'var(--color-secondary)' }}
+            className="text-[13px] text-secondary"
           >
             ← My profile
           </Link>
         </div>
 
         {allNotifications.length === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: 'var(--space-3xl) 0',
-              color: 'var(--color-muted)',
-            }}
-          >
-            <p style={{ fontSize: '15px', marginBottom: 'var(--space-sm)' }}>
+          <div className="text-center py-3xl text-muted">
+            <p className="text-[15px] mb-sm">
               No notifications yet.
             </p>
-            <p style={{ fontSize: '13px' }}>
+            <p className="text-[13px]">
               When someone follows you, likes a post, or comments — it shows up here.
             </p>
           </div>
         ) : (
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              overflow: 'hidden',
-            }}
-          >
+          <div className="bg-card border border-border rounded-md overflow-hidden">
             {allNotifications.map((n, i) => (
               <Link
                 key={n.id}
                 href={notificationHref(n, myProfile.slug)}
+                className="flex items-start gap-md px-lg py-md no-underline transition-colors duration-150"
                 style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  gap: 'var(--space-md)',
-                  padding: 'var(--space-md) var(--space-lg)',
                   borderBottom:
                     i < allNotifications.length - 1 ? '1px solid var(--color-border)' : 'none',
-                  textDecoration: 'none',
                   background: n.read ? 'transparent' : 'var(--color-primary-light)',
-                  transition: 'background 150ms ease',
                 }}
               >
                 {/* Type icon */}
-                <span
-                  style={{
-                    fontSize: '16px',
-                    lineHeight: 1,
-                    marginTop: '2px',
-                    flexShrink: 0,
-                  }}
-                >
+                <span className="text-[16px] leading-none mt-[2px] shrink-0">
                   {n.type === 'follow' ? '👋' : n.type === 'like' ? '♥' : '💬'}
                 </span>
 
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      fontSize: '14px',
-                      color: 'var(--color-text)',
-                      margin: '0 0 2px',
-                      lineHeight: 1.4,
-                    }}
-                  >
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] text-text leading-[1.4] mb-[2px]">
                     {notificationText(n)}
                   </p>
-                  <p style={{ fontSize: '12px', color: 'var(--color-muted)', margin: 0 }}>
+                  <p className="text-[12px] text-muted m-0">
                     {formatDate(n.created_at)}
                   </p>
                 </div>

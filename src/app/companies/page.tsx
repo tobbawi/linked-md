@@ -43,38 +43,15 @@ export default async function CompaniesPage() {
   const allCompanies = companies ?? []
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--color-border)',
-          marginBottom: 'var(--space-lg)',
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.25rem',
-            color: 'var(--color-ink)',
-          }}
-        >
+    <div className="pt-xl pb-3xl">
+      <div className="flex items-center justify-between pb-lg border-b border-border mb-lg">
+        <h1 className="font-serif text-[1.25rem] text-ink">
           Companies
         </h1>
         {isLoggedIn && (
           <Link
             href="/editor/company"
-            style={{
-              fontSize: '13px',
-              fontWeight: 500,
-              color: 'var(--color-primary)',
-              padding: '6px 14px',
-              borderRadius: 'var(--radius-sm)',
-              background: 'var(--color-primary-light)',
-              border: '1px solid var(--color-primary)',
-            }}
+            className="text-[13px] font-medium text-primary py-[6px] px-[14px] rounded-sm bg-primary-light border border-primary"
           >
             + Add company
           </Link>
@@ -82,93 +59,56 @@ export default async function CompaniesPage() {
       </div>
 
       {allCompanies.length === 0 ? (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: 'var(--space-3xl) 0',
-            color: 'var(--color-muted)',
-          }}
-        >
-          <p style={{ fontSize: '15px', marginBottom: 'var(--space-sm)' }}>
+        <div className="text-center py-3xl text-muted">
+          <p className="text-[15px] mb-sm">
             No companies yet. Be the first.
           </p>
           {isLoggedIn && (
             <Link
               href="/editor/company"
-              style={{
-                display: 'inline-block',
-                padding: '10px 24px',
-                background: 'var(--color-primary)',
-                color: '#fff',
-                borderRadius: 'var(--radius-sm)',
-                fontWeight: 600,
-                fontSize: '14px',
-              }}
+              className="inline-block py-[10px] px-[24px] bg-primary text-white rounded-sm font-semibold text-[14px]"
             >
               Add a company
             </Link>
           )}
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 'var(--space-md)',
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-md">
           {allCompanies.map((company) => {
             const empCount = employeeCountMap.get(company.slug) ?? 0
             return (
               <Link
                 key={company.id}
                 href={`/company/${company.slug}`}
-                style={{ textDecoration: 'none' }}
+                className="no-underline"
               >
                 <div className="company-card">
                   {/* Avatar */}
-                  <div style={{ marginBottom: 'var(--space-sm)' }}>
+                  <div className="mb-sm">
                     <Avatar name={company.name} size={40} shape="square" />
                   </div>
 
                   <h2
+                    className="font-serif text-[1rem] text-ink leading-[1.3]"
                     style={{
-                      fontFamily: 'var(--font-serif)',
-                      fontSize: '1rem',
-                      color: 'var(--color-ink)',
                       marginBottom: company.tagline ? 'var(--space-xs)' : 'var(--space-sm)',
-                      lineHeight: 1.3,
                     }}
                   >
                     {company.name}
                   </h2>
 
                   {company.tagline && (
-                    <p
-                      style={{
-                        fontSize: '13px',
-                        color: 'var(--color-secondary)',
-                        lineHeight: 1.4,
-                        marginBottom: 'var(--space-sm)',
-                      }}
-                    >
+                    <p className="text-[13px] text-secondary leading-[1.4] mb-sm">
                       {company.tagline}
                     </p>
                   )}
 
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginTop: 'auto',
-                    }}
-                  >
-                    <span className="md-url" style={{ fontSize: '11px' }}>
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className="md-url text-[11px]">
                       /company/{company.slug}.md
                     </span>
                     {empCount > 0 && (
-                      <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                      <span className="text-[12px] text-muted">
                         {empCount} {empCount === 1 ? 'person' : 'people'}
                       </span>
                     )}

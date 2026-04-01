@@ -32,97 +32,61 @@ export default async function JobsPage() {
   const allJobs = jobs ?? []
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-xl pb-3xl">
         {/* Header */}
-        <div style={{ marginBottom: 'var(--space-xl)' }}>
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.25rem',
-              color: 'var(--color-ink)',
-              marginBottom: 'var(--space-xs)',
-            }}
-          >
+        <div className="mb-xl">
+          <h1 className="font-serif text-[1.25rem] text-ink mb-xs">
             Open Roles
           </h1>
-          <p style={{ fontSize: '14px', color: 'var(--color-secondary)' }}>
+          <p className="text-[14px] text-secondary">
             {allJobs.length} role{allJobs.length !== 1 ? 's' : ''} at companies on linked.md
           </p>
         </div>
 
         {/* Job list */}
         {allJobs.length === 0 ? (
-          <p style={{ color: 'var(--color-muted)', fontSize: '15px' }}>
+          <p className="text-muted text-[15px]">
             No open roles yet.{' '}
-            <Link href="/companies" style={{ color: 'var(--color-primary)' }}>
+            <Link href="/companies" className="text-primary">
               Browse companies →
             </Link>
           </p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <div className="flex flex-col gap-md">
             {allJobs.map((job) => (
               <Link
                 key={job.id}
                 href={`/company/${job.company.slug}`}
-                style={{ textDecoration: 'none' }}
+                className="no-underline"
               >
-                <div
-                  style={{
-                    padding: 'var(--space-lg)',
-                    background: 'var(--color-card)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-md)',
-                    transition: 'border-color 150ms ease',
-                  }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      justifyContent: 'space-between',
-                      gap: 'var(--space-md)',
-                      marginBottom: 'var(--space-xs)',
-                    }}
-                  >
-                    <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-ink)' }}>
+                <div className="p-lg bg-card border border-border rounded-md transition-colors duration-150">
+                  <div className="flex items-start justify-between gap-md mb-xs">
+                    <h2 className="text-[15px] font-semibold text-ink">
                       {job.title}
                     </h2>
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        fontWeight: 500,
-                        color: 'var(--color-secondary)',
-                        background: 'var(--color-bg)',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        padding: '2px 8px',
-                        flexShrink: 0,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
+                    <span className="text-[11px] font-medium text-secondary bg-bg border border-border rounded-sm py-[2px] px-[8px] shrink-0 whitespace-nowrap">
                       {JOB_TYPE_LABELS[job.type] ?? job.type}
                     </span>
                   </div>
 
-                  <p style={{ fontSize: '13px', color: 'var(--color-primary)', marginBottom: job.location ? 'var(--space-xs)' : 0 }}>
+                  <p
+                    className="text-[13px] text-primary"
+                    style={{ marginBottom: job.location ? 'var(--space-xs)' : 0 }}
+                  >
                     {job.company.name}
                   </p>
 
                   {job.location && (
-                    <p style={{ fontSize: '13px', color: 'var(--color-secondary)', marginBottom: job.description_md ? 'var(--space-sm)' : 0 }}>
+                    <p
+                      className="text-[13px] text-secondary"
+                      style={{ marginBottom: job.description_md ? 'var(--space-sm)' : 0 }}
+                    >
                       {job.location}
                     </p>
                   )}
 
                   {job.description_md && (
-                    <p
-                      style={{
-                        fontSize: '13px',
-                        color: 'var(--color-muted)',
-                        lineHeight: 1.5,
-                        marginTop: 'var(--space-xs)',
-                      }}
-                    >
+                    <p className="text-[13px] text-muted leading-[1.5] mt-xs">
                       {job.description_md.length > 200
                         ? job.description_md.slice(0, 200) + '…'
                         : job.description_md}
