@@ -2,7 +2,7 @@
 
 ---
 
-## M5 — Company Admin & Employee Roster (planned)
+## M5 — Company Admin & Employee Roster ✓ Shipped v0.2.2.0
 
 ### Account deletion + last-admin trigger conflict
 **Priority:** P2
@@ -51,10 +51,10 @@
 
 ### Add integration tests for API routes
 **Priority:** P2
-**What:** Unit/integration tests for `/api/follow`, `/api/reaction`, `/api/comment`, `/api/views/*`, new M2–M4 routes.
-**Why:** All API routes have 0 automated test coverage — bugs are invisible until production.
-**Cons:** Requires Supabase mock or test DB strategy.
-**Context:** Use `vi.mock` for Supabase client. Start with simplest routes (views, follow toggle).
+**What:** Unit/integration tests for `/api/follow`, `/api/reaction`, `/api/comment`, `/api/views/*`, M2–M5 routes. M5 (`/api/company/member`) has 15 unit tests with mocked Supabase (auth guards, last-admin guard, owner guard, happy paths, non-member 404) but no real-DB tests that verify the RLS policies and DB triggers actually fire.
+**Why:** Mocked unit tests catch business logic bugs; real-DB integration tests catch RLS policy bugs and trigger behavior — different failure modes.
+**Cons:** Requires a test DB strategy (Supabase test project or pg container).
+**Context:** Use `vi.mock` for Supabase client (already done for M5). For real-DB: a separate test Supabase project or a local `supabase start` + migrate. Start with `/api/company/member` since it has the most critical DB-enforced invariants (last-admin trigger, RLS insert policy).
 **Depends on:** Decision on mock vs real test DB.
 
 ### Extend remark-wiki-link for disambiguation and backlinks
@@ -68,6 +68,13 @@
 ---
 
 ## Completed
+
+### v0.2.2.0 — 2026-04-01
+- M5: Company admin management — `company_members` table, multi-admin invite/remove, Team tab in editor, admin roster on company page
+- M5: `POST`/`DELETE /api/company/member` with auth guard, last-admin guard (DB trigger + advisory lock), owner guard (DB trigger)
+- M5: `buildLlmCompanyFullTxt` now includes `## Admins` section; company `llm-full.txt` lists all admins with owner/admin roles
+- M5: DB guard hardening — `prevent_last_admin_removal` trigger with advisory lock (TOCTOU fix), `prevent_owner_removal` trigger (DB-level owner protection)
+- Design fix: admin badge in People section now uses `profile_id` UUID (not slug) as lookup key
 
 ### v0.2.1.0 — 2026-03-24
 - M2.1: Network feed (follows + own posts, `mergeFeedItems<T>()` dedup/sort, reaction/comment counts)

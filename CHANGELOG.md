@@ -6,6 +6,26 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [0.2.2.0] - 2026-04-01
+
+### Added
+- **Company admin management (M5):** Multi-admin support for companies via `company_members` join table. Company creators are automatically seeded as the first admin. Any admin can invite or remove other admins via `POST`/`DELETE /api/company/member`. The company editor gains a "Team" tab to manage admins and view employees. Admin roster displayed on public company pages with owner/admin badges.
+- **Company member API (`/api/company/member`):** `POST` adds an admin (verified admin of the company required), `DELETE` removes one (last-admin guard + owner removal guard enforced at both app and DB level). Returns 409 on duplicate, 403 if caller is not an admin, 404 if target is not a member.
+- **`CompanyMember` type:** New `CompanyMember` interface in `src/types/index.ts` with `company_id`, `profile_id`, `role: 'admin'`, and optional joined `profile` shape.
+- **Admins section in company llm-full.txt:** `buildLlmCompanyFullTxt` now accepts an `admins` array and emits a `## Admins` section listing each admin with owner/admin role and profile URL, appearing before `## People`.
+
+### Changed
+- **Company save splits INSERT/UPDATE:** `POST /api/company/save` now detects existing companies by slug and issues either an INSERT (new company, seeds creator as first admin in `company_members`) or an UPDATE (existing company, strips `user_id` from payload to prevent co-admin user_id overwrite). RLS updated: any admin can update/delete the company.
+- **Company page admin context:** Company page now checks `company_members` for the viewer's admin status (`isAdmin`) rather than matching `user_id`. Admin badge in the "People" section now correctly uses `profile_id` (UUID) as the lookup key instead of `profile.slug` to prevent false positives from slug reuse.
+- **Job listings RLS:** `company_admins_can_manage_job_listings` policy replaces owner-only constraint so any company admin can manage listings.
+
+### Fixed
+- **Last-admin TOCTOU race (migration 018):** `prevent_last_admin_removal` trigger now acquires a transaction-level advisory lock keyed by `company_id` before counting, serializing concurrent DELETEs and preventing two simultaneous removals from emptying `company_members`.
+- **Owner removal DB guard (migration 018):** New `company_members_owner_guard` trigger blocks removal of the original company creator at the DB level, not just in application code.
+- **DELETE non-member silent 200:** `DELETE /api/company/member` now returns 404 if the target profile exists but is not a member, rather than returning `{ removed: true }` for a no-op delete.
+
+---
+
 ## [0.2.1.0] - 2026-03-24
 
 ### Added
