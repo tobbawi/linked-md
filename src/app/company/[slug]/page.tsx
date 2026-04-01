@@ -348,6 +348,30 @@ export default async function CompanyPage({ params }: PageProps) {
               </span>
             </div>
 
+            {/* Admins not visible in People — show "Managed by" fallback */}
+            {(() => {
+              const peopleProfileIds = new Set(people.map(e => e.profile.id))
+              const hiddenAdmins = members.filter(m => m.profile && !peopleProfileIds.has(m.profile_id))
+              if (hiddenAdmins.length === 0) return null
+              return (
+                <div style={{ marginBottom: 'var(--space-md)' }}>
+                  <p style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-sm)' }}>
+                    Managed by
+                  </p>
+                  {hiddenAdmins.map(m => (
+                    <div key={m.profile_id} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                      <Link href={`/profile/${m.profile!.slug}`} style={{ fontSize: '13px', color: 'var(--color-text)', fontWeight: 500 }}>
+                        {m.profile!.display_name}
+                      </Link>
+                      <span style={chipStyle}>
+                        {m.profile!.user_id === company.user_id ? 'owner' : 'admin'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
+
             {/* People — with admin badges */}
             {people.length > 0 && (
               <div>
