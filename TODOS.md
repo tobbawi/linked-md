@@ -1,19 +1,116 @@
 # TODOS — linked.md
 
-## Milestone 2
+---
+
+## M5 — Company Admin & Employee Roster ✓ Shipped v0.2.2.0
+
+### Account deletion + last-admin trigger conflict
+**Priority:** P2
+**What:** If a user ever deletes their account, `profiles DELETE` cascades to `company_members`. If they were the last admin of a company, the `prevent_last_admin_removal` trigger fires and blocks the deletion with an exception. The company becomes permanently unmanageable.
+**Why:** Not a live bug today (no account deletion feature), but will cause a silent failure when account deletion is built.
+**Pros:** Fixing it now (or at account-deletion design time) prevents orphaned unmanageable companies.
+**Cons:** Account deletion is complex; fixing this in isolation may be premature.
+**Context:** The fix needs to either (a) skip the last-admin trigger for account deletions (use a separate deletion path), or (b) require the user to transfer or dissolve their companies before deletion. Capture this when designing account deletion.
+**Depends on:** Account deletion feature.
+
+---
+
+## Milestone 3 — Profile Completeness Layer ✓ Shipped v0.2.0.0
+
+### Skill reorder UI
+**Priority:** P3
+**What:** Drag-to-reorder for skills in the editor. `sort_order` column exists in `profile_skills` but no UI to reorder.
+**Why:** Users with many skills want to control which appear first.
+**Pros:** Clean UX; `sort_order` already in schema.
+**Cons:** Requires DnD library or custom drag logic.
+**Context:** `sort_order` is re-indexed on every save (same as `experience` sort_order pattern). Add after M3.2 ships.
+**Depends on:** M3.2.
+
+### Education in buildLlmTxt summary
+**Priority:** P3
+**What:** Add a brief education section to `buildLlmTxt` (the short llm.txt file). Currently only shows current experience roles.
+**Why:** AI agents reading the concise llm.txt would benefit from seeing highest degree or current school.
+**Pros:** One additional `## Education` line in the summary — small diff.
+**Context:** Currently education only appears in `llm-full.txt`. Consider showing only `is_current` or most recent entry in summary.
+**Depends on:** M3.1.
+
+---
+
+## Milestone 4 — Career Layer + Messaging ✓ Shipped v0.2.0.0
+
+---
+
+## Technical Debt
 
 ### Migrate file exports to Cloudflare R2
-**What:** Replace local filesystem writes with R2 object storage when social interactions are added.
-**Why:** Local filesystem doesn't persist on serverless deploys and won't scale for batch exports of social data (60s intervals for likes/follows/comments).
-**Pros:** CDN-served .md files, infinite storage, no disk management.
-**Cons:** Adds cloud dependency, R2 SDK integration, cross-provider setup.
-**Context:** M1 uses local filesystem (eng review decision 1C). When M2 adds social interactions with batch re-exports, local disk becomes a bottleneck. Migrate at start of M2.
-**Depends on:** M1 complete, social interaction schema designed.
+**Priority:** P2
+**What:** Replace local filesystem writes with R2 object storage.
+**Why:** Local filesystem doesn't persist on serverless deploys.
+**Context:** M1 uses local filesystem (eng review decision 1C). Migrate when deploying to Vercel/Fly.
+**Depends on:** Production deploy decision.
+
+### Add integration tests for API routes
+**Priority:** P2
+**What:** Unit/integration tests for `/api/follow`, `/api/reaction`, `/api/comment`, `/api/views/*`, M2–M5 routes. M5 (`/api/company/member`) has 15 unit tests with mocked Supabase (auth guards, last-admin guard, owner guard, happy paths, non-member 404) but no real-DB tests that verify the RLS policies and DB triggers actually fire.
+**Why:** Mocked unit tests catch business logic bugs; real-DB integration tests catch RLS policy bugs and trigger behavior — different failure modes.
+**Cons:** Requires a test DB strategy (Supabase test project or pg container).
+**Context:** Use `vi.mock` for Supabase client (already done for M5). For real-DB: a separate test Supabase project or a local `supabase start` + migrate. Start with `/api/company/member` since it has the most critical DB-enforced invariants (last-admin trigger, RLS insert policy).
+**Depends on:** Decision on mock vs real test DB.
 
 ### Extend remark-wiki-link for disambiguation and backlinks
-**What:** Fork or extend remark-wiki-link for: (a) ambiguous name disambiguation, (b) reverse link indexing (backlinks), (c) graph.json generation from link tree.
-**Why:** Stock plugin only parses `[[links]]` into hrefs — doesn't resolve slugs, handle ambiguity, or track backlinks.
-**Pros:** Custom plugin becomes the core of the bidirectional linking system. Publishable as open-source `remark-wiki-link-bidirectional`.
+**Priority:** P3
+**What:** Fork or extend remark-wiki-link for ambiguous name disambiguation, reverse link indexing, graph.json generation.
+**Why:** Stock plugin only parses `[[links]]` without resolving slugs or tracking backlinks.
 **Cons:** Maintaining a fork adds long-term burden.
-**Context:** M1 uses basic exact-slug-match resolution. M2 needs disambiguation UI and backlink display. Consider publishing as standalone package.
-**Depends on:** M1 links table working, basic wikilink resolution proven.
+**Context:** M1 uses basic exact-slug-match. Needed for M2+ backlink display.
+**Depends on:** M1 links table proven stable.
+
+---
+
+## Completed
+
+### v0.2.2.0 — 2026-04-01
+- M5: Company admin management — `company_members` table, multi-admin invite/remove, Team tab in editor, admin roster on company page
+- M5: `POST`/`DELETE /api/company/member` with auth guard, last-admin guard (DB trigger + advisory lock), owner guard (DB trigger)
+- M5: `buildLlmCompanyFullTxt` now includes `## Admins` section; company `llm-full.txt` lists all admins with owner/admin roles
+- M5: DB guard hardening — `prevent_last_admin_removal` trigger with advisory lock (TOCTOU fix), `prevent_owner_removal` trigger (DB-level owner protection)
+- Design fix: admin badge in People section now uses `profile_id` UUID (not slug) as lookup key
+
+### v0.2.1.0 — 2026-03-24
+- M2.1: Network feed (follows + own posts, `mergeFeedItems<T>()` dedup/sort, reaction/comment counts)
+- M2.2: Profile avatars (Supabase Storage, `Avatar` component, magic number MIME validation)
+- M2.3: Company following (`company_follows` table, `CompanyFollowButton`, feed integration)
+- M2.4: Reposts (`reposts` table, `RepostButton`, `RepostCard` in feed, llm-full.txt section)
+- M4.3: Analytics dashboard (30d sparklines, per-post table, deduplicated view counts)
+- Nav search + notification bell (debounced SearchBox, NotificationBell with bell badge)
+- P0: Search endpoint `Cache-Control: private, max-age=60` (rate limiting)
+- Composite DB indexes: `posts(profile_id, created_at DESC)`, `follows(follower_id)` (migration 014)
+
+### v0.2.0.0 — 2026-03-23
+- M3: Education entries, skills + endorsements, recommendations, profile completeness score
+- M4: Job listings (company-owned, active flag), direct messaging (Supabase Realtime, advisory-locked dedup, read receipts)
+- Message validation helper (`validateMessageBody`, `MESSAGE_MAX_LENGTH`)
+- DB hardening: atomic `replace_skills` RPC, advisory-locked `create_conversation_with_members`, job field length guards, mark-read-before-fetch ordering
+
+### v0.1.3.0 — 2026-03-22
+- View tracking: profile_views + post_views, SHA-256 privacy, self-view suppression, live home page stats
+- Experience entries: work history timeline on profiles
+- Company llm-full: /api/llm-full/company/[slug]
+- Shared editor component + /post/new shortcut route
+
+### v0.1.2.1 — 2026-03-21
+- Stored XSS fix: rehype-sanitize pipeline for user markdown
+- Design polish: 5 design review fixes (touch targets, hierarchy, mobile nav)
+
+### v0.1.2.0 — 2026-03-21
+- Social layer: follows, likes/reactions, comments, notifications
+- Dark mode, mobile responsive layout
+- Company profiles + editor
+- Connection graph (SVG)
+- Search, explore, tags, people pages
+
+### v0.1.1.0 — 2026-03-20
+- Auth (Supabase magic link)
+- Profile page + split-screen editor
+- Post CRUD + markdown rendering
+- LLM exports (llm.txt, llm-full.txt, graph.json)

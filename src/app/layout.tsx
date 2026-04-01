@@ -1,44 +1,73 @@
-import type { Metadata } from "next";
-import { Instrument_Sans, Instrument_Serif } from "next/font/google";
-import localFont from "next/font/local";
-import "./globals.css";
-
-const instrumentSans = Instrument_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
-});
-
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  variable: "--font-serif",
-  weight: ["400"],
-  style: ["normal", "italic"],
-});
+import type { Metadata } from 'next'
+import localFont from 'next/font/local'
+import './globals.css'
+import { Nav } from '@/components/Nav'
+import { createAuthServerClient } from '@/lib/supabase'
 
 const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-mono",
-  weight: "100 900",
-});
+  src: './fonts/GeistMonoVF.woff',
+  variable: '--font-mono',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
-  title: "linked.md — Your professional identity, in markdown.",
-  description: "Open. Portable. AI-readable.",
-};
+  title: 'linked.md — Open Professional Network',
+  description:
+    'An open professional network where every profile, post, and company is a markdown file. Open. Portable. AI-readable.',
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
+  let user = null
+  let profileSlug: string | null = null
+  let profileDisplayName: string | null = null
+  let profileAvatarUrl: string | null = null
+
+  try {
+    const supabase = createAuthServerClient()
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser()
+    user = authUser
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('slug, display_name, avatar_url')
+        .eq('user_id', user.id)
+        .single()
+      profileSlug = profile?.slug ?? null
+      profileDisplayName = profile?.display_name ?? null
+      profileAvatarUrl = profile?.avatar_url ?? null
+    }
+  } catch {
+    // Supabase not configured — dev mode
+  }
+
   return (
-    <html lang="en">
-      <body
-        className={`${instrumentSans.variable} ${instrumentSerif.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="en" className={geistMono.variable} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t=localStorage.getItem('theme');if(t){document.documentElement.setAttribute('data-theme',t);}else if(window.matchMedia('(prefers-color-scheme: dark)').matches){document.documentElement.setAttribute('data-theme','dark');}})()`,
+          }}
+        />
+      </head>
+      <body>
+        <Nav user={user} profileSlug={profileSlug} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} />
+        <main
+          style={{
+            maxWidth: '960px',
+            margin: '0 auto',
+            padding: '0 var(--space-md)',
+          }}
+        >
+          {children}
+        </main>
       </body>
     </html>
-  );
+  )
 }
