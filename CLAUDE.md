@@ -57,3 +57,23 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - Reposts: `reposts` table with `UNIQUE(profile_id, original_post_id)`; `RepostButton`; `RepostCard` in feed; `## Reposts` section in llm-full.txt; `POST`/`DELETE /api/repost` (409 on duplicate, 403 on own post).
 - Analytics: `/analytics` owner-only page with 30-day inline SVG sparklines and per-post stats table. All view counts deduplicated by `viewer_hash`.
 - Nav: `SearchBox` (debounced 300ms, grouped results) + `NotificationBell` both in `src/components/Nav.tsx`.
+
+## Skill routing
+
+When the user's request matches an available skill, ALWAYS invoke it using the Skill
+tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
+The skill has specialized workflows that produce better results than ad-hoc answers.
+
+Key routing rules:
+- Product ideas, "is this worth building", brainstorming → invoke office-hours
+- Bugs, errors, "why is this broken", 500 errors → invoke investigate
+- Ship, deploy, push, create PR → invoke ship
+- QA, test the site, find bugs → invoke qa
+- Code review, check my diff → invoke review
+- Update docs after shipping → invoke document-release
+- Weekly retro → invoke retro
+- Design system, brand → invoke design-consultation
+- Visual audit, design polish → invoke design-review
+- Architecture review → invoke plan-eng-review
+- Save progress, checkpoint, resume → invoke checkpoint
+- Code quality, health check → invoke health
