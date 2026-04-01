@@ -3,18 +3,110 @@ import { createServerClient } from '@/lib/supabase'
 
 const CACHE = { headers: { 'Cache-Control': 'private, max-age=60' } }
 
+/** Escape markdown-significant chars to prevent injection in LLM-consumed output */
+function escapeMd(s: string): string {
+  return s.replace(/[#\[\]*_`~>|\n\r\\]/g, (c) => (c === '\n' || c === '\r' ? ' ' : `\\${c}`))
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const q = (searchParams.get('q') ?? '').trim()
-  // Strip PostgREST filter-syntax special chars to prevent filter injection
-  const safeQ = q.replace(/[,().]/g, '')
+  // Strip PostgREST filter-syntax special chars + SQL LIKE wildcards to prevent injection
+  const safeQ = q.replace(/[,().%_]/g, '')
   const type = searchParams.get('type') ?? 'profiles' // profiles | all
+  const format = searchParams.get('format')
 
   if (!q) {
+    if (format === 'llm') {
+      return new NextResponse('# Search\n\nNo query provided. Use ?q=QUERY&format=llm\n', {
+        headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+      })
+    }
     return NextResponse.json(type === 'all' ? { profiles: [], companies: [], posts: [] } : [])
   }
 
   const supabase = createServerClient()
+
+  // LLM format always does unified search
+  if (format === 'llm') {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'
+
+    const [profilesRes, companiesRes, postsRes] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('slug, display_name, title')
+        .or(`slug.ilike.%${safeQ}%,display_name.ilike.%${safeQ}%,bio.ilike.%${safeQ}%,title.ilike.%${safeQ}%`)
+        .limit(10),
+      supabase
+        .from('companies')
+        .select('slug, name, tagline')
+        .or(`slug.ilike.%${safeQ}%,name.ilike.%${safeQ}%,tagline.ilike.%${safeQ}%`)
+        .limit(10),
+      supabase
+        .from('posts')
+        .select('slug, title, profile:profiles!profile_id(slug, display_name)')
+        .or(`title.ilike.%${safeQ}%,markdown_content.ilike.%${safeQ}%`)
+        .limit(10),
+    ])
+
+    const profiles = profilesRes.data ?? []
+    const companies = companiesRes.data ?? []
+    const posts = postsRes.data ?? []
+
+    if (profilesRes.error || companiesRes.error || postsRes.error) {
+      const msg = profilesRes.error?.message || companiesRes.error?.message || postsRes.error?.message
+      return new NextResponse(`# Search error\n\n${msg}\n`, {
+        status: 500,
+        headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+      })
+    }
+
+    const lines: string[] = [
+      `# Search results for "${escapeMd(q)}"`,
+      '',
+      `Found ${profiles.length} profiles, ${companies.length} companies, ${posts.length} posts.`,
+      '',
+    ]
+
+    if (profiles.length > 0) {
+      lines.push('## Profiles', '')
+      for (const p of profiles) {
+        const suffix = p.title ? ` — ${escapeMd(p.title)}` : ''
+        lines.push(`- **${escapeMd(p.display_name)}**${suffix}`)
+        lines.push(`  ${baseUrl}/profile/${p.slug}/llm.txt`)
+        lines.push('')
+      }
+    }
+
+    if (companies.length > 0) {
+      lines.push('## Companies', '')
+      for (const c of companies) {
+        const suffix = c.tagline ? ` — ${escapeMd(c.tagline)}` : ''
+        lines.push(`- **${escapeMd(c.name)}**${suffix}`)
+        lines.push(`  ${baseUrl}/company/${c.slug}/llm.txt`)
+        lines.push('')
+      }
+    }
+
+    if (posts.length > 0) {
+      lines.push('## Posts', '')
+      for (const post of posts) {
+        const profile = post.profile as unknown as { slug: string; display_name: string } | null
+        const byLine = profile ? ` by ${escapeMd(profile.display_name)}` : ''
+        const profileSlug = profile?.slug ?? 'unknown'
+        lines.push(`- **${escapeMd(post.title || post.slug)}**${byLine}`)
+        lines.push(`  ${baseUrl}/profile/${profileSlug}/post/${post.slug}.md`)
+        lines.push('')
+      }
+    }
+
+    return new NextResponse(lines.join('\n'), {
+      headers: {
+        'Content-Type': 'text/markdown; charset=utf-8',
+        'Cache-Control': 'private, max-age=60',
+      },
+    })
+  }
 
   if (type === 'company') {
     const { data, error } = await supabase

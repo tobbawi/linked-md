@@ -6,6 +6,21 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [0.3.0.0] - 2026-04-01
+
+### Added
+- **AI Agent Gateway (M6):** The entire network is now machine-traversable. AI agents can discover the platform via `/robots.txt`, read an overview at `/llms.txt`, browse all profiles and companies through paginated directories, and search with markdown-formatted results.
+- **`/robots.txt`:** Explicit AI crawler permissions (GPTBot, ClaudeBot, PerplexityBot, Applebot-Extended) with `X-Llms-Txt` header pointing to `/llms.txt`.
+- **`/llms.txt`:** Platform root discovery document in the llms.txt standard format. Describes how to read profiles, companies, browse the network, and search.
+- **Paginated profile directory (`/network/profiles/llm.txt`):** Cursor-based pagination (100 per page) with `Link` header for programmatic traversal. Each entry includes name, title, location, and links to llm.txt/llm-full.txt.
+- **Paginated company directory (`/network/companies/llm.txt`):** Same pattern as profiles with name, tagline, and links.
+- **LLM-format search (`/api/search?format=llm`):** Returns search results as text/markdown instead of JSON. Same query, agent-friendly output.
+
+### Fixed
+- **graph.json O(n) scale bug:** Replaced full-profile-scan + runtime markdown parsing with `outbound_links` array queries and Supabase `contains` filter for inbound links. Scales to millions of profiles without degradation.
+
+---
+
 ## [0.2.2.0] - 2026-04-01
 
 ### Added

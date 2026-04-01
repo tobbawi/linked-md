@@ -57,6 +57,7 @@ In QA mode, flag any code that doesn't match DESIGN.md.
 - Reposts: `reposts` table with `UNIQUE(profile_id, original_post_id)`; `RepostButton`; `RepostCard` in feed; `## Reposts` section in llm-full.txt; `POST`/`DELETE /api/repost` (409 on duplicate, 403 on own post).
 - Analytics: `/analytics` owner-only page with 30-day inline SVG sparklines and per-post stats table. All view counts deduplicated by `viewer_hash`.
 - Nav: `SearchBox` (debounced 300ms, grouped results) + `NotificationBell` both in `src/components/Nav.tsx`.
+- AI Agent Gateway (M6): `/robots.txt` (AI crawler permissions + `X-Llms-Txt` header), `/llms.txt` (platform root discovery), `/network/profiles/llm.txt` and `/network/companies/llm.txt` (cursor-based paginated directories, 100/page, `Link` header for next page), `/api/search?format=llm` (markdown search results). Graph endpoint uses `outbound_links` arrays + `contains` filter for inbound (no O(n) scan).
 
 ## Skill routing
 
