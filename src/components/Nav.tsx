@@ -139,10 +139,7 @@ function SearchBox() {
           placeholder="Search…"
           style={{
             width: '180px',
-            paddingLeft: '28px',
-            paddingRight: loading ? '24px' : '8px',
-            paddingTop: '5px',
-            paddingBottom: '5px',
+            padding: `5px ${loading ? '24px' : '8px'} 5px 28px`,
             fontSize: '13px',
             fontFamily: 'var(--font-sans)',
             color: 'var(--color-text)',
@@ -150,7 +147,7 @@ function SearchBox() {
             border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-sm)',
             outline: 'none',
-            transition: 'border-color 150ms ease, width 150ms ease',
+            transition: 'border-color 150ms, width 150ms',
           }}
           onFocusCapture={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.width = '220px' }}
           onBlurCapture={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.width = '180px' }}
