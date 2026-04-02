@@ -58,7 +58,7 @@ export default async function RootLayout({
       </head>
       <body>
         <Nav user={user} profileSlug={profileSlug} displayName={profileDisplayName} avatarUrl={profileAvatarUrl} />
-        <main className="max-w-[960px] mx-auto px-md">
+        <main className="max-w-[1200px] mx-auto px-xl pt-[60px]">
           {children}
         </main>
       </body>

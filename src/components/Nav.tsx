@@ -343,23 +343,23 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
 
   return (
     <nav
-      className="border-b border-border bg-bg sticky top-0 z-50"
+      className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-white/85 backdrop-blur-[16px] backdrop-saturate-[180%]"
     >
       <div
-        className="max-w-[960px] mx-auto px-[var(--space-lg)] h-[52px] flex items-center gap-[var(--space-md)]"
+        className="max-w-[1200px] mx-auto px-xl h-[60px] flex items-center gap-xl"
       >
         {/* Logo */}
         <Link
           href="/"
-          className="flex items-center gap-[4px] no-underline shrink-0"
+          className="flex items-center no-underline shrink-0"
         >
           <span
-            className="font-serif text-[20px] italic font-semibold text-ink tracking-[-0.02em]"
+            className="font-sans text-[20px] font-extrabold text-ink tracking-[-0.03em]"
           >
             linked
           </span>
           <span
-            className="font-mono text-[13px] text-primary bg-primary-light px-[5px] py-[2px] rounded-[var(--radius-sm)]"
+            className="font-mono text-[14px] font-medium text-white bg-primary px-[10px] py-[3px] rounded-[6px] ml-[4px]"
           >
             .md
           </span>
@@ -376,7 +376,7 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
               <Link
                 key={href}
                 href={href}
-                className={`text-[13px] font-medium no-underline py-[4px] inline-flex items-center min-h-[44px] whitespace-nowrap transition-colors duration-150 ${isActive ? 'text-ink border-b-2 border-primary' : 'text-secondary border-b-2 border-transparent'}`}
+                className={`text-[14px] font-medium no-underline px-[14px] py-[6px] rounded-sm inline-flex items-center min-h-[44px] whitespace-nowrap transition-all duration-150 ${isActive ? 'text-ink bg-off-white' : 'text-secondary hover:text-ink hover:bg-off-white'}`}
               >
                 {label}
               </Link>
@@ -385,7 +385,7 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
         </div>
 
         {/* Right side */}
-        <div className="ml-auto flex items-center gap-[var(--space-sm)]">
+        <div className="ml-auto flex items-center gap-[10px]">
           {user ? (
             <>
               {/* Notification bell */}
@@ -416,12 +416,20 @@ export function Nav({ user, profileSlug, displayName, avatarUrl }: NavProps) {
               )}
             </>
           ) : (
-            <Link
-              href="/auth"
-              className="text-[13px] font-medium text-primary px-[16px] rounded-[var(--radius-sm)] bg-primary-light border border-primary transition-colors duration-150 inline-flex items-center h-[34px] no-underline"
-            >
-              Sign in
-            </Link>
+            <>
+              <Link
+                href="/auth"
+                className="text-[14px] font-medium text-secondary px-[18px] py-[9px] rounded-[10px] border-[1.5px] border-border transition-all duration-150 inline-flex items-center no-underline hover:text-ink hover:border-secondary"
+              >
+                Sign in
+              </Link>
+              <Link
+                href="/auth"
+                className="text-[14px] font-semibold text-white px-[18px] py-[9px] rounded-[10px] bg-ink transition-all duration-200 inline-flex items-center no-underline hover:bg-text hover:-translate-y-px hover:shadow-md"
+              >
+                Get started
+              </Link>
+            </>
           )}
         </div>
       </div>
