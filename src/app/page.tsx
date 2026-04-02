@@ -57,37 +57,41 @@ function postPreview(post: Post): string {
 
 function LandingHero() {
   return (
-    <div className="pt-3xl pb-2xl text-center border-b border-border mb-xl">
-      <h1 className="font-serif text-[2.625rem] text-ink leading-[1.2] mb-md">
-        Your profile is a markdown file.
-      </h1>
-      <p className="text-[1.125rem] text-secondary max-w-[480px] mx-auto mb-xl leading-[1.6]">
-        An open professional network where every profile, post, and company is a{' '}
-        <span className="font-mono text-primary">
-          .md
-        </span>{' '}
-        file. Open. Portable. AI-readable.
-      </p>
+    <div className="relative overflow-hidden rounded-lg mb-2xl" style={{ background: 'linear-gradient(135deg, #064E3B 0%, #0D9373 50%, #065F46 100%)' }}>
+      <div className="relative z-10 py-3xl px-xl text-center">
+        <h1 className="font-serif text-[3.5rem] text-white leading-[1.1] mb-md tracking-[-0.02em]" style={{ fontVariationSettings: "'opsz' 72" }}>
+          Your profile is a<br />markdown file.
+        </h1>
+        <p className="text-[1.125rem] text-white/80 max-w-[520px] mx-auto mb-xl leading-[1.6]">
+          An open professional network where every profile, post, and company is a{' '}
+          <span className="font-mono text-white bg-white/15 px-1.5 py-0.5 rounded-sm">
+            .md
+          </span>{' '}
+          file. Open. Portable. AI-readable.
+        </p>
 
-      <div className="flex gap-sm justify-center flex-wrap">
-        <Link
-          href="/auth"
-          className="inline-flex items-center py-[12px] px-xl bg-primary text-white rounded-sm font-semibold text-[15px] min-h-[44px] hover:bg-primary-hover transition-colors"
-        >
-          Get started
-        </Link>
-        <Link
-          href="/auth?tab=login"
-          className="inline-flex items-center py-[12px] px-xl bg-transparent text-secondary rounded-sm font-medium text-[15px] border border-border min-h-[44px] hover:border-primary transition-colors"
-        >
-          Sign in
-        </Link>
-      </div>
+        <div className="flex gap-md justify-center flex-wrap">
+          <Link
+            href="/auth"
+            className="inline-flex items-center py-[14px] px-xl bg-white text-primary rounded-md font-semibold text-[15px] min-h-[48px] hover:bg-white/90 transition-all shadow-md"
+          >
+            Get started
+          </Link>
+          <Link
+            href="/auth?tab=login"
+            className="inline-flex items-center py-[14px] px-xl bg-white/10 text-white rounded-md font-medium text-[15px] border border-white/25 min-h-[48px] hover:bg-white/20 transition-all"
+          >
+            Sign in
+          </Link>
+        </div>
 
-      <div className="mt-xl inline-flex items-center gap-sm text-muted text-[13px]">
-        <span>Your profile lives at</span>
-        <span className="md-url">/profile/your-name.md</span>
+        <div className="mt-xl inline-flex items-center gap-sm text-white/60 text-[13px]">
+          <span>Your profile lives at</span>
+          <span className="font-mono text-white bg-white/15 px-2 py-0.5 rounded-sm text-[12px]">/profile/your-name.md</span>
+        </div>
       </div>
+      {/* Subtle pattern overlay */}
+      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
     </div>
   )
 }
@@ -226,11 +230,11 @@ function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string 
   const mdUrl = `/profile/${post.profile.slug}/post/${post.slug}.md`
 
   return (
-    <article className="bg-card border border-border rounded-md p-lg hover:shadow-sm transition-all">
+    <article className="bg-card border border-border rounded-md p-lg shadow-sm hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
       {/* Author row */}
-      <div className="flex items-center gap-sm mb-sm">
+      <div className="flex items-center gap-sm mb-md">
         <Link href={`/profile/${post.profile.slug}`} className="inline-flex shrink-0">
-          <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={28} />
+          <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={32} />
         </Link>
         <Link
           href={`/profile/${post.profile.slug}`}
@@ -250,7 +254,7 @@ function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string 
       {/* Title */}
       {post.title && (
         <Link href={`/profile/${post.profile.slug}/post/${post.slug}`}>
-          <h3 className="font-serif text-[1.2rem] text-ink leading-[1.35] mb-xs">
+          <h3 className="font-serif text-[1.375rem] text-ink leading-[1.3] mb-sm font-medium">
             {post.title}
           </h3>
         </Link>
@@ -437,7 +441,7 @@ function RightWidgets({
   trendingTags: string[]
 }) {
   return (
-    <div className="flex flex-col gap-md">
+    <div className="flex flex-col gap-lg">
       {/* People to follow */}
       {suggestedProfiles.length > 0 && (
         <div className="bg-card border border-border rounded-md overflow-hidden">
@@ -814,7 +818,7 @@ export default async function HomePage() {
             return feedItems.length === 0 ? (
               <EmptyFeed isLoggedIn={isLoggedIn} />
             ) : (
-              <div className="flex flex-col gap-md">
+              <div className="flex flex-col gap-lg">
                 {feedItems.map((item) => {
                   if ('feed_type' in item) {
                     if (item.feed_type === 'job') return <JobCard key={`job-${item.id}`} job={item as FeedJobListing} />

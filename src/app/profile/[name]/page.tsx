@@ -228,7 +228,7 @@ export default async function ProfilePage({ params }: PageProps) {
         <div className="sidebar-layout flex gap-xl items-start">
           {/* Left column — profile card */}
           <aside className="sidebar w-[260px] shrink-0">
-            <div className="bg-card border border-border rounded-lg p-lg sticky top-[72px]">
+            <div className="bg-card border border-border rounded-lg p-lg sticky top-[72px] shadow-md">
               {/* Avatar */}
               <div className="mb-md">
                 <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={72} />
@@ -434,18 +434,18 @@ export default async function ProfilePage({ params }: PageProps) {
                 )}
               </p>
             ) : (
-              <div className="flex flex-col gap-md">
+              <div className="flex flex-col gap-lg">
                 {allPosts.map((post) => {
                   const rawPreview = postPreview(post).replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]!))
                   const postWikilinksHtml = renderWikilinks(rawPreview, resolvedSlugs, resolvedCompanySlugs)
                   return (
                     <article
                       key={post.id}
-                      className="bg-card border border-border rounded-md p-lg hover:border-primary hover:shadow-sm transition-all"
+                      className="bg-card border border-border rounded-md p-lg shadow-sm hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200"
                     >
                       {post.title && (
                         <Link href={`/profile/${name}/post/${post.slug}`}>
-                          <h2 className="font-serif text-lg text-ink mb-xs leading-snug hover:text-primary transition-colors">
+                          <h2 className="font-serif text-[1.375rem] text-ink mb-sm leading-snug font-medium hover:text-primary transition-colors">
                             {post.title}
                           </h2>
                         </Link>
