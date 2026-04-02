@@ -9,6 +9,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ## [0.4.0.0] - 2026-04-02
 
 ### Added
+- **Full-text search (M10).** Search now uses PostgreSQL tsvector with GIN indexes instead of sequential ilike scans. Weighted by relevance: display name (A), title (B), bio (C), slug (D). Auto-maintained via triggers. At 100K profiles: search drops from ~500ms to <100ms.
+- **GIN indexes on wikilink arrays.** Graph and backlink queries use indexed array containment instead of sequential scans. At 100K profiles: graph.json drops from ~5s to ~50ms.
+- **Feed composite indexes.** Optimized query patterns for follows, company follows, active job listings, reposts, comments, and reactions.
+- **ISR on list pages.** Explore (30s), People (120s), Companies (120s) pages serve cached HTML and revalidate in the background.
+- **R2 storage abstraction.** New `src/lib/storage.ts` with `StorageProvider` interface. Local filesystem in dev, Cloudflare R2 in production. Prepares for Vercel deployment.
+- **Connection pooler support.** Server-side queries use pgBouncer pooler URL when `SUPABASE_POOLER_URL` is set, avoiding connection exhaustion.
 - **Synthetic data seed script.** `scripts/seed-synthetic.mjs` populates the network with 1,000 profiles, 200 companies, 5,000 posts, plus experience, education, skills, follows, likes, comments, and job listings. Idempotent, batched, uses deterministic email patterns.
 
 ### Changed

@@ -4,6 +4,8 @@ import Avatar from '@/components/Avatar'
 import type { Post, Profile } from '@/types'
 import { renderWikilinks } from '@/lib/wikilinks'
 
+export const revalidate = 30 // ISR: revalidate every 30 seconds (high-traffic page)
+
 type PostWithProfile = Post & { profile: Pick<Profile, 'slug' | 'display_name' | 'avatar_url'> | null }
 
 function postPreview(content: string, limit = 280): string {
