@@ -225,18 +225,23 @@ export default async function ProfilePage({ params }: PageProps) {
 
       <div className="py-xl">
         <ProfileViewTracker profileSlug={name} />
-        <div className="sidebar-layout flex gap-xl items-start">
+        <div className="sidebar-layout flex gap-2xl items-start">
           {/* Left column — profile card */}
-          <aside className="sidebar w-[260px] shrink-0">
-            <div className="bg-card border border-border rounded-lg p-lg sticky top-[72px] shadow-md">
+          <aside className="sidebar w-[320px] shrink-0">
+            <div className="bg-card border-[1.5px] border-border rounded-xl overflow-hidden sticky top-[80px]">
+              {/* Gradient header */}
+              <div className="h-[100px]" style={{ background: 'linear-gradient(135deg, #0D9373, #059669, #047857)' }} />
+              <div className="px-lg pb-lg -mt-[40px]">
               {/* Avatar */}
               <div className="mb-md">
-                <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={72} />
+                <div className="border-4 border-white rounded-full inline-flex">
+                  <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={80} />
+                </div>
               </div>
 
               {/* Display name + .md badge (promoted to name-level) */}
               <div className="flex items-start justify-between gap-sm mb-xs">
-                <h1 className="font-serif text-lg text-ink leading-tight">
+                <h1 className="font-serif text-[26px] text-ink leading-[1.15] tracking-[-0.02em]" style={{ fontVariationSettings: "'opsz' 32" }}>
                   {profile.display_name}
                 </h1>
                 {isOwner && (
@@ -250,9 +255,9 @@ export default async function ProfilePage({ params }: PageProps) {
               </div>
 
               {/* .md URL badge — promoted to just below name */}
-              <span className="md-url mb-sm block w-fit">
+              <a href={`/profile/${name}.md`} className="font-mono text-[13px] text-primary bg-primary-light px-[14px] py-[5px] rounded-sm inline-block mb-md hover:bg-primary/10 transition-colors">
                 /profile/{name}.md
-              </span>
+              </a>
 
               {/* Title */}
               {profile.title && (
@@ -389,6 +394,7 @@ export default async function ProfilePage({ params }: PageProps) {
                   </div>
                 </div>
               )}
+            </div>
             </div>
           </aside>
 
