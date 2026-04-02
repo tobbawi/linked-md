@@ -57,42 +57,88 @@ function postPreview(post: Post): string {
 
 function LandingHero() {
   return (
-    <div className="relative overflow-hidden rounded-lg mb-2xl" style={{ background: 'linear-gradient(135deg, #064E3B 0%, #0D9373 50%, #065F46 100%)' }}>
-      <div className="relative z-10 py-3xl px-xl text-center">
-        <h1 className="font-serif text-[3.5rem] text-white leading-[1.1] mb-md tracking-[-0.02em]" style={{ fontVariationSettings: "'opsz' 72" }}>
-          Your profile is a<br />markdown file.
-        </h1>
-        <p className="text-[1.125rem] text-white/80 max-w-[520px] mx-auto mb-xl leading-[1.6]">
-          An open professional network where every profile, post, and company is a{' '}
-          <span className="font-mono text-white bg-white/15 px-1.5 py-0.5 rounded-sm">
-            .md
-          </span>{' '}
-          file. Open. Portable. AI-readable.
-        </p>
+    <section className="relative overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-[40px] py-[100px] pb-[80px] grid grid-cols-1 md:grid-cols-2 gap-[60px] items-center">
+        {/* Left: content */}
+        <div className="relative z-[2]">
+          {/* Hero tag pill */}
+          <div className="inline-flex items-center gap-[8px] font-mono text-[13px] font-medium text-primary bg-primary-light py-[7px] px-[16px] rounded-full mb-[28px]">
+            <span className="w-[7px] h-[7px] bg-primary rounded-full animate-pulse" />
+            Open network &middot; AI-readable
+          </div>
 
-        <div className="flex gap-md justify-center flex-wrap">
-          <Link
-            href="/auth"
-            className="inline-flex items-center py-[14px] px-xl bg-white text-primary rounded-md font-semibold text-[15px] min-h-[48px] hover:bg-white/90 transition-all shadow-md"
+          {/* H1 */}
+          <h1
+            className="font-serif text-[64px] font-normal text-ink leading-[1.05] tracking-[-0.035em] mb-[24px]"
+            style={{ fontVariationSettings: "'opsz' 72" }}
           >
-            Get started
-          </Link>
-          <Link
-            href="/auth?tab=login"
-            className="inline-flex items-center py-[14px] px-xl bg-white/10 text-white rounded-md font-medium text-[15px] border border-white/25 min-h-[48px] hover:bg-white/20 transition-all"
-          >
-            Sign in
-          </Link>
+            Your profile<br />is a <em className="italic text-primary">markdown</em><br />file.
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-[18px] text-secondary leading-[1.6] max-w-[440px] mb-[36px]">
+            The professional network where every profile, post, and company is a{' '}
+            <code className="font-mono text-[16px] text-primary bg-primary-light px-[8px] py-[2px] rounded-[5px]">
+              .md
+            </code>{' '}
+            file. Open. Portable. Yours.
+          </p>
+
+          {/* Action buttons */}
+          <div className="flex gap-[12px] mb-[32px]">
+            <Link
+              href="/auth"
+              className="inline-flex items-center py-[14px] px-[32px] bg-ink text-white rounded-[12px] font-semibold text-[16px] hover:bg-text hover:-translate-y-[1px] hover:shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition-all"
+            >
+              Create your profile
+            </Link>
+            <Link
+              href="/auth?tab=login"
+              className="inline-flex items-center py-[14px] px-[32px] bg-transparent text-secondary rounded-[12px] font-semibold text-[16px] border-[1.5px] border-border hover:text-ink hover:border-secondary transition-all"
+            >
+              Sign in
+            </Link>
+          </div>
+
+          {/* Filepath line */}
+          <div className="font-mono text-[14px] text-faint">
+            Your profile lives at{' '}
+            <span className="text-primary bg-primary-light py-[4px] px-[12px] rounded-[6px] ml-[4px]">
+              /profile/your-name.md
+            </span>
+          </div>
         </div>
 
-        <div className="mt-xl inline-flex items-center gap-sm text-white/60 text-[13px]">
-          <span>Your profile lives at</span>
-          <span className="font-mono text-white bg-white/15 px-2 py-0.5 rounded-sm text-[12px]">/profile/your-name.md</span>
+        {/* Right: decorative profile card */}
+        <div className="relative hidden md:block">
+          <div
+            className="bg-white border-[1.5px] border-border rounded-[20px] p-[32px] shadow-[0_24px_48px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] -rotate-2 hover:rotate-0 transition-transform duration-300"
+          >
+            <div
+              className="font-serif text-[28px] text-ink mb-[4px]"
+              style={{ fontVariationSettings: "'opsz' 32" }}
+            >
+              Wim Tobback
+            </div>
+            <div className="font-mono text-[13px] text-primary bg-primary-light py-[4px] px-[12px] rounded-[6px] inline-block mb-[16px]">
+              /profile/wim-tobback.md
+            </div>
+            <div className="text-[15px] text-secondary font-medium mb-[4px]">AIGENEER</div>
+            <div className="text-[14px] text-muted mb-[16px]">Belgium</div>
+            <div className="text-[14px] text-secondary leading-[1.6] pt-[16px] border-t border-border">
+              Embracing the era of the AIGENEER. Building at the intersection of AI and entrepreneurship. Three roles, one mission.
+            </div>
+          </div>
+          {/* Floating badges */}
+          <div className="absolute top-[-10px] right-[-20px] bg-white border-[1.5px] border-border rounded-[14px] py-[14px] px-[18px] shadow-[0_12px_32px_rgba(0,0,0,0.06)] font-mono text-[12px] text-primary rotate-3">
+            llm.txt available
+          </div>
+          <div className="absolute bottom-[20px] left-[-30px] bg-white border-[1.5px] border-border rounded-[14px] py-[14px] px-[18px] shadow-[0_12px_32px_rgba(0,0,0,0.06)] font-mono text-[12px] text-primary -rotate-3">
+            graph.json
+          </div>
         </div>
       </div>
-      {/* Subtle pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-    </div>
+    </section>
   )
 }
 
@@ -226,35 +272,42 @@ function UserSidebar({
 
 // ── Post card ───────────────────────────────────────────────────────────────
 
-function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string | null }) {
+function PostCard({ post, myProfileId, featured }: { post: FeedPost; myProfileId?: string | null; featured?: boolean }) {
   const mdUrl = `/profile/${post.profile.slug}/post/${post.slug}.md`
 
   return (
-    <article className="bg-card border border-border rounded-md p-lg shadow-sm hover:shadow-hover hover:-translate-y-0.5 transition-all duration-200">
+    <article
+      className={
+        featured
+          ? 'col-span-1 md:col-span-2 md:row-span-2 bg-primary-deep border-primary-deep text-white rounded-[20px] p-[48px] transition-all duration-250 hover:-translate-y-[4px] hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:border-primary relative overflow-hidden border-[1.5px]'
+          : 'bg-card border-[1.5px] border-border rounded-[20px] p-[32px] transition-all duration-250 hover:border-primary hover:-translate-y-[4px] hover:shadow-hover relative overflow-hidden'
+      }
+    >
       {/* Author row */}
-      <div className="flex items-center gap-sm mb-md">
+      <div className="flex items-center gap-[12px] mb-[20px]">
         <Link href={`/profile/${post.profile.slug}`} className="inline-flex shrink-0">
-          <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={32} />
+          <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={40} />
         </Link>
-        <Link
-          href={`/profile/${post.profile.slug}`}
-          className="text-[13px] font-medium text-text"
-        >
-          {post.profile.display_name}
-        </Link>
-        <span className="text-border">·</span>
-        <time
-          dateTime={post.created_at}
-          className="text-[12px] text-muted"
-        >
-          {formatDate(post.created_at)}
-        </time>
+        <div>
+          <Link
+            href={`/profile/${post.profile.slug}`}
+            className={`text-[14px] font-semibold ${featured ? 'text-white' : 'text-ink'}`}
+          >
+            {post.profile.display_name}
+          </Link>
+          <div className={`text-[12px] ${featured ? 'text-white/60' : 'text-muted'}`}>
+            {formatDate(post.created_at)}
+          </div>
+        </div>
       </div>
 
       {/* Title */}
       {post.title && (
         <Link href={`/profile/${post.profile.slug}/post/${post.slug}`}>
-          <h3 className="font-serif text-[1.375rem] text-ink leading-[1.3] mb-sm font-medium">
+          <h3
+            className={`font-serif leading-[1.25] mb-[12px] font-normal tracking-[-0.01em] ${featured ? 'text-white text-[32px]' : 'text-ink text-[22px]'}`}
+            style={{ fontVariationSettings: "'opsz' 32" }}
+          >
             {post.title}
           </h3>
         </Link>
@@ -262,57 +315,60 @@ function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string 
 
       {/* Preview */}
       <p
-        className="text-[14px] text-secondary leading-[1.6]"
-        style={{ marginBottom: post.tags && post.tags.length > 0 ? 'var(--space-sm)' : 'var(--space-md)' }}
+        className={`text-[14px] leading-[1.65] mb-[20px] ${featured ? 'text-white/70 text-[16px]' : 'text-secondary'}`}
       >
         {postPreview(post)}
       </p>
 
-      {/* Tags */}
-      {post.tags && post.tags.length > 0 && (
-        <div className="flex flex-wrap gap-xs mb-md">
-          {post.tags.slice(0, 4).map((tag) => (
+      {/* Footer: tags + md URL */}
+      <div className="flex items-center justify-between flex-wrap gap-[10px]">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-[6px]">
+          {(post.tags ?? []).slice(0, 4).map((tag) => (
             <Link
               key={tag}
               href={`/tags/${tag}`}
-              className="font-mono text-[11px] text-muted bg-bg border border-border rounded-sm py-xs px-sm min-h-[28px] inline-flex items-center"
+              className={`font-mono text-[11px] py-[4px] px-[12px] rounded-full border inline-flex items-center transition-all duration-150 ${
+                featured
+                  ? 'text-white/80 bg-white/[0.12] border-white/20 hover:text-white hover:border-white/40'
+                  : 'text-secondary bg-bg border-border hover:text-primary hover:border-primary hover:bg-primary-light'
+              }`}
             >
               #{tag}
             </Link>
           ))}
         </div>
-      )}
 
-      {/* Footer */}
-      <div className="flex items-center justify-between flex-wrap gap-sm">
-        <div className="flex items-center gap-md">
-          <Link
-            href={`/profile/${post.profile.slug}/post/${post.slug}`}
-            className="text-[13px] font-medium text-primary"
-          >
-            Read →
-          </Link>
-          {(post.likeCount ?? 0) > 0 && (
-            <span className="text-[12px] text-muted">
-              {post.likeCount} likes
-            </span>
-          )}
-          {(post.commentCount ?? 0) > 0 && (
-            <span className="text-[12px] text-muted">
-              {post.commentCount} comments
-            </span>
-          )}
-          <RepostButton
-            postId={post.id}
-            postAuthorProfileId={post.profile_id}
-            myProfileId={myProfileId ?? null}
-            initialReposted={post.viewerHasReposted ?? false}
-            repostCount={post.repostCount ?? 0}
-          />
-        </div>
-        <span className="md-url text-[11px]">
+        <span className={`md-url text-[11px] font-mono ${featured ? 'text-white/40' : 'text-muted'}`}>
           {mdUrl}
         </span>
+      </div>
+
+      {/* Engagement row — below footer */}
+      <div className="flex items-center gap-md mt-[12px]">
+        <Link
+          href={`/profile/${post.profile.slug}/post/${post.slug}`}
+          className={`text-[13px] font-medium ${featured ? 'text-white/80 hover:text-white' : 'text-primary'}`}
+        >
+          Read →
+        </Link>
+        {(post.likeCount ?? 0) > 0 && (
+          <span className={`text-[12px] ${featured ? 'text-white/50' : 'text-muted'}`}>
+            {post.likeCount} likes
+          </span>
+        )}
+        {(post.commentCount ?? 0) > 0 && (
+          <span className={`text-[12px] ${featured ? 'text-white/50' : 'text-muted'}`}>
+            {post.commentCount} comments
+          </span>
+        )}
+        <RepostButton
+          postId={post.id}
+          postAuthorProfileId={post.profile_id}
+          myProfileId={myProfileId ?? null}
+          initialReposted={post.viewerHasReposted ?? false}
+          repostCount={post.repostCount ?? 0}
+        />
       </div>
     </article>
   )
@@ -815,9 +871,28 @@ export default async function HomePage() {
               ...feedJobs,
               ...feedReposts,
             ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            return feedItems.length === 0 ? (
-              <EmptyFeed isLoggedIn={isLoggedIn} />
-            ) : (
+            if (feedItems.length === 0) return <EmptyFeed isLoggedIn={isLoggedIn} />
+
+            // Logged-out: bento grid layout
+            if (!isLoggedIn) {
+              let firstPostIndex = 0
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
+                  {feedItems.map((item) => {
+                    if ('feed_type' in item) {
+                      if (item.feed_type === 'job') return <JobCard key={`job-${item.id}`} job={item as FeedJobListing} />
+                      if (item.feed_type === 'repost') return <RepostCard key={`repost-${item.id}`} repost={item as FeedRepost} myProfileId={myProfileId} />
+                    }
+                    const isFeatured = firstPostIndex === 0
+                    firstPostIndex++
+                    return <PostCard key={item.id} post={item as FeedPost} myProfileId={myProfileId} featured={isFeatured} />
+                  })}
+                </div>
+              )
+            }
+
+            // Logged-in: keep linear feed
+            return (
               <div className="flex flex-col gap-lg">
                 {feedItems.map((item) => {
                   if ('feed_type' in item) {
