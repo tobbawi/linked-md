@@ -8,6 +8,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [0.4.0.0] - 2026-04-02
 
+### Added
+- **Synthetic data seed script.** `scripts/seed-synthetic.mjs` populates the network with 1,000 profiles, 200 companies, 5,000 posts, plus experience, education, skills, follows, likes, comments, and job listings. Idempotent, batched, uses deterministic email patterns.
+
 ### Changed
 - **Complete design overhaul (M7).** Every page redesigned with Tailwind CSS v4. 795 inline styles eliminated. New bento grid homepage with featured emerald card. Split hero with floating profile card. Frosted glass nav. Profile cards with gradient headers and overlapping avatars. Cards with shadows, hover lift, 20px radii. Bolder Fraunces serif headings throughout.
 - **7 shared UI components:** Card, Button, MdBadge, LlmBadge, FilepathBar, PageShell, SectionHeading.
