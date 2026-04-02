@@ -8,6 +8,11 @@ function escapeMd(s: string): string {
   return s.replace(/[#\[\]*_`~>|\n\r\\]/g, (c) => (c === '\n' || c === '\r' ? ' ' : `\\${c}`))
 }
 
+/** Convert user query to tsquery format. Handles multi-word queries with & operator. */
+function toTsQuery(q: string): string {
+  return q.trim().split(/\s+/).filter(Boolean).map(w => w.replace(/[^a-zA-Z0-9]/g, '')).filter(Boolean).join(' & ')
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const q = (searchParams.get('q') ?? '').trim()
@@ -26,32 +31,25 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createServerClient()
+  const tsQuery = toTsQuery(safeQ)
+  // Use full-text search for 3+ char queries, ilike for short ones
+  const useFts = tsQuery.length >= 3
 
   // LLM format always does unified search
   if (format === 'llm') {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://linked.md'
 
     const [profilesRes, companiesRes, postsRes] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select('slug, display_name, title')
-        .or(`slug.ilike.%${safeQ}%,display_name.ilike.%${safeQ}%,bio.ilike.%${safeQ}%,title.ilike.%${safeQ}%`)
-        .limit(10),
-      supabase
-        .from('companies')
-        .select('slug, name, tagline')
-        .or(`slug.ilike.%${safeQ}%,name.ilike.%${safeQ}%,tagline.ilike.%${safeQ}%`)
-        .limit(10),
-      supabase
-        .from('posts')
-        .select('slug, title, profile:profiles!profile_id(slug, display_name)')
-        .or(`title.ilike.%${safeQ}%,markdown_content.ilike.%${safeQ}%`)
-        .limit(10),
+      useFts
+        ? supabase.from('profiles').select('slug, display_name, title').textSearch('search_vector', tsQuery, { type: 'plain' }).limit(10)
+        : supabase.from('profiles').select('slug, display_name, title').or(`slug.ilike.%${safeQ}%,display_name.ilike.%${safeQ}%`).limit(10),
+      useFts
+        ? supabase.from('companies').select('slug, name, tagline').textSearch('search_vector', tsQuery, { type: 'plain' }).limit(10)
+        : supabase.from('companies').select('slug, name, tagline').or(`slug.ilike.%${safeQ}%,name.ilike.%${safeQ}%`).limit(10),
+      useFts
+        ? supabase.from('posts').select('slug, title, profile:profiles!profile_id(slug, display_name)').textSearch('search_vector', tsQuery, { type: 'plain' }).limit(10)
+        : supabase.from('posts').select('slug, title, profile:profiles!profile_id(slug, display_name)').or(`title.ilike.%${safeQ}%,markdown_content.ilike.%${safeQ}%`).limit(10),
     ])
-
-    const profiles = profilesRes.data ?? []
-    const companies = companiesRes.data ?? []
-    const posts = postsRes.data ?? []
 
     if (profilesRes.error || companiesRes.error || postsRes.error) {
       const msg = profilesRes.error?.message || companiesRes.error?.message || postsRes.error?.message
@@ -60,6 +58,10 @@ export async function GET(request: NextRequest) {
         headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
       })
     }
+
+    const profiles = profilesRes.data ?? []
+    const companies = companiesRes.data ?? []
+    const posts = postsRes.data ?? []
 
     const lines: string[] = [
       `# Search results for "${escapeMd(q)}"`,
@@ -109,13 +111,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (type === 'company') {
-    const { data, error } = await supabase
-      .from('companies')
-      .select('slug, name')
-      .or(`slug.ilike.%${safeQ}%,name.ilike.%${safeQ}%`)
-      .limit(10)
+    const { data, error } = useFts
+      ? await supabase.from('companies').select('slug, name').textSearch('search_vector', tsQuery, { type: 'plain' }).limit(10)
+      : await supabase.from('companies').select('slug, name').or(`slug.ilike.%${safeQ}%,name.ilike.%${safeQ}%`).limit(10)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    // Return same shape as profile search: { slug, display_name }
     return NextResponse.json((data ?? []).map((c: { slug: string; name: string }) => ({
       slug: c.slug,
       display_name: c.name,
@@ -124,33 +123,24 @@ export async function GET(request: NextRequest) {
 
   if (type !== 'all') {
     // Backward-compat: plain profile search used by editor autocomplete
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('slug, display_name')
-      .or(`slug.ilike.%${safeQ}%,display_name.ilike.%${safeQ}%`)
-      .limit(10)
-
+    const { data, error } = useFts
+      ? await supabase.from('profiles').select('slug, display_name').textSearch('search_vector', tsQuery, { type: 'plain' }).limit(10)
+      : await supabase.from('profiles').select('slug, display_name').or(`slug.ilike.%${safeQ}%,display_name.ilike.%${safeQ}%`).limit(10)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json(data ?? [], CACHE)
   }
 
   // Unified search across profiles, companies, and posts
   const [profilesRes, companiesRes, postsRes] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('slug, display_name, title, bio')
-      .or(`slug.ilike.%${safeQ}%,display_name.ilike.%${safeQ}%,bio.ilike.%${safeQ}%,title.ilike.%${safeQ}%`)
-      .limit(8),
-    supabase
-      .from('companies')
-      .select('slug, name, tagline')
-      .or(`slug.ilike.%${safeQ}%,name.ilike.%${safeQ}%,tagline.ilike.%${safeQ}%`)
-      .limit(8),
-    supabase
-      .from('posts')
-      .select('slug, title, markdown_content, profile:profiles!profile_id(slug, display_name)')
-      .or(`title.ilike.%${safeQ}%,markdown_content.ilike.%${safeQ}%`)
-      .limit(8),
+    useFts
+      ? supabase.from('profiles').select('slug, display_name, title, bio').textSearch('search_vector', tsQuery, { type: 'plain' }).limit(8)
+      : supabase.from('profiles').select('slug, display_name, title, bio').or(`slug.ilike.%${safeQ}%,display_name.ilike.%${safeQ}%`).limit(8),
+    useFts
+      ? supabase.from('companies').select('slug, name, tagline').textSearch('search_vector', tsQuery, { type: 'plain' }).limit(8)
+      : supabase.from('companies').select('slug, name, tagline').or(`slug.ilike.%${safeQ}%,name.ilike.%${safeQ}%`).limit(8),
+    useFts
+      ? supabase.from('posts').select('slug, title, markdown_content, profile:profiles!profile_id(slug, display_name)').textSearch('search_vector', tsQuery, { type: 'plain' }).limit(8)
+      : supabase.from('posts').select('slug, title, markdown_content, profile:profiles!profile_id(slug, display_name)').or(`title.ilike.%${safeQ}%,markdown_content.ilike.%${safeQ}%`).limit(8),
   ])
 
   return NextResponse.json({
