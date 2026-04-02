@@ -1,17 +1,65 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
 
-:root {
-  /* Colors */
+/* Tailwind v4 theme — maps design tokens to utility classes */
+@theme {
+  /* Colors — matched to prototype v2 */
   --color-primary: #0D9373;
   --color-primary-hover: #0B7D62;
-  --color-primary-light: #E6F5F0;
-  --color-bg: #FAFAF8;
-  --color-card: #F0F0EC;
-  --color-border: #E0E0D8;
-  --color-ink: #1A1A1A;
-  --color-text: #333330;
-  --color-secondary: #666660;
-  --color-muted: #76766E;
+  --color-primary-deep: #064E3B;
+  --color-primary-light: #ECFDF5;
+  --color-bg: #FFFFFF;
+  --color-off-white: #F7F7F5;
+  --color-card: #FFFFFF;
+  --color-border: #E2E2DC;
+  --color-ink: #111110;
+  --color-text: #2D2D2A;
+  --color-secondary: #71716B;
+  --color-muted: #B5B5AE;
+  --color-faint: #E2E2DC;
+  --color-error: #DC2626;
+  --color-warning: #D97706;
+
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'GeistMono', 'Geist Mono', 'Courier New', monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 6px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.03);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-hover: 0 16px 40px rgba(13,147,115,0.08), 0 4px 12px rgba(0,0,0,0.04);
+
+  --spacing-2xs: 2px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  --spacing-3xl: 64px;
+}
+
+:root {
+  /* Colors — prototype v2 */
+  --color-primary: #0D9373;
+  --color-primary-hover: #0B7D62;
+  --color-primary-deep: #064E3B;
+  --color-primary-light: #ECFDF5;
+  --color-bg: #FFFFFF;
+  --color-off-white: #F7F7F5;
+  --color-card: #FFFFFF;
+  --color-border: #E2E2DC;
+  --color-ink: #111110;
+  --color-text: #2D2D2A;
+  --color-secondary: #71716B;
+  --color-muted: #B5B5AE;
+  --color-faint: #E2E2DC;
   --color-error: #DC2626;
   --color-warning: #D97706;
 
@@ -21,9 +69,10 @@
   --font-mono: 'GeistMono', 'Geist Mono', 'Courier New', monospace;
 
   /* Border radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
 
   /* Spacing */
@@ -37,25 +86,29 @@
   --space-3xl: 64px;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
 
-html, body {
-  font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--color-text);
-  background-color: var(--color-bg);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer base {
+  html, body {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 /* .md URL badge */
@@ -159,16 +212,19 @@ a {
 
 /* Dark mode */
 [data-theme="dark"] {
-  --color-bg: #111110;
-  --color-card: #1A1A18;
+  --color-bg: #0A0A09;
+  --color-off-white: #141413;
+  --color-card: #141413;
   --color-border: #2A2A28;
   --color-ink: #F5F5F0;
-  --color-text: #D0D0C8;
-  --color-secondary: #888880;
-  --color-muted: #555550;
+  --color-text: #E8E8E2;
+  --color-secondary: #A0A098;
+  --color-muted: #666660;
+  --color-faint: #333330;
   --color-primary: #10B981;
-  --color-primary-hover: #0EA974;
-  --color-primary-light: #0D2E26;
+  --color-primary-hover: #34D399;
+  --color-primary-deep: #064E3B;
+  --color-primary-light: rgba(16,185,129,0.12);
 }
 
 /* Search input focus */
@@ -258,6 +314,7 @@ a {
   border-radius: var(--radius-md);
   padding: var(--space-lg);
   height: 100%;
+  box-shadow: var(--shadow-sm);
   transition: border-color 150ms ease;
 }
 

@@ -47,94 +47,68 @@ export default function MessagesPage() {
 
   if (loading) {
     return (
-      <div style={{ paddingTop: 'var(--space-3xl)', textAlign: 'center', color: 'var(--color-muted)' }}>
+      <div className="pt-3xl text-center text-muted">
         Loading…
       </div>
     )
   }
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-xl pb-3xl">
       <div>
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.25rem',
-            color: 'var(--color-ink)',
-            marginBottom: 'var(--space-xl)',
-          }}
-        >
+        <h1 className="font-serif text-[1.25rem] text-ink mb-xl">
           Messages
         </h1>
 
         {error && (
-          <p style={{ color: '#dc2626', fontSize: '14px', marginBottom: 'var(--space-md)' }}>{error}</p>
+          <p className="text-[#dc2626] text-[14px] mb-md">{error}</p>
         )}
 
         {conversations.length === 0 ? (
-          <div
-            style={{
-              padding: 'var(--space-xl)',
-              background: 'var(--color-card)',
-              border: '1px dashed var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              textAlign: 'center',
-            }}
-          >
-            <p style={{ color: 'var(--color-muted)', fontSize: '15px', marginBottom: 'var(--space-sm)' }}>
+          <div className="p-xl bg-card border border-dashed border-border rounded-md text-center">
+            <p className="text-muted text-[15px] mb-sm">
               No messages yet.
             </p>
-            <p style={{ fontSize: '13px', color: 'var(--color-muted)' }}>
+            <p className="text-[13px] text-muted">
               Visit a profile and click{' '}
-              <strong style={{ color: 'var(--color-secondary)' }}>Message</strong>{' '}
+              <strong className="text-secondary">Message</strong>{' '}
               to start a conversation.
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="flex flex-col">
             {conversations.map((conv) => (
               <Link
                 key={conv.id}
                 href={`/messages/${conv.id}`}
-                style={{ textDecoration: 'none' }}
+                className="no-underline"
               >
                 <div
+                  className="px-lg py-md border-b border-border flex items-center gap-md"
                   style={{
-                    padding: 'var(--space-md) var(--space-lg)',
-                    borderBottom: '1px solid var(--color-border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--space-md)',
                     background: (conv.unread_count ?? 0) > 0 ? 'var(--color-primary-light)' : 'transparent',
                   }}
                 >
                   {/* Avatar */}
                   <Avatar name={conv.other_profile?.display_name} avatarUrl={conv.other_profile?.avatar_url} size={40} />
 
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-sm)' }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-sm">
                       <p
-                        style={{
-                          fontSize: '14px',
-                          fontWeight: (conv.unread_count ?? 0) > 0 ? 600 : 500,
-                          color: 'var(--color-ink)',
-                        }}
+                        className="text-[14px] text-ink"
+                        style={{ fontWeight: (conv.unread_count ?? 0) > 0 ? 600 : 500 }}
                       >
                         {conv.other_profile?.display_name ?? 'Unknown'}
                       </p>
-                      <span style={{ fontSize: '11px', color: 'var(--color-muted)', flexShrink: 0 }}>
+                      <span className="text-[11px] text-muted shrink-0">
                         {conv.last_message ? timeAgo(conv.last_message.created_at) : ''}
                       </span>
                     </div>
                     {conv.last_message && (
                       <p
+                        className="text-[13px] overflow-hidden text-ellipsis whitespace-nowrap mt-[2px]"
                         style={{
-                          fontSize: '13px',
                           color: (conv.unread_count ?? 0) > 0 ? 'var(--color-ink)' : 'var(--color-muted)',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          marginTop: '2px',
                           fontWeight: (conv.unread_count ?? 0) > 0 ? 500 : 400,
                         }}
                       >
@@ -144,21 +118,7 @@ export default function MessagesPage() {
                   </div>
 
                   {(conv.unread_count ?? 0) > 0 && (
-                    <div
-                      style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: 'var(--radius-full)',
-                        background: 'var(--color-primary)',
-                        color: '#fff',
-                        fontSize: '11px',
-                        fontWeight: 600,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}
-                    >
+                    <div className="w-[20px] h-[20px] rounded-full bg-primary text-white text-[11px] font-semibold flex items-center justify-center shrink-0">
                       {conv.unread_count}
                     </div>
                   )}

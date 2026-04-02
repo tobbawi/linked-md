@@ -120,16 +120,10 @@ export function FieldGroup({
   children: React.ReactNode
 }) {
   return (
-    <div style={{ marginBottom: 'var(--space-md)' }}>
+    <div className="mb-md">
       <label
         htmlFor={htmlFor}
-        style={{
-          display: 'block',
-          fontSize: '13px',
-          fontWeight: 500,
-          color: 'var(--color-text)',
-          marginBottom: 'var(--space-xs)',
-        }}
+        className="block text-[13px] font-medium text-text mb-xs"
       >
         {label}
       </label>
@@ -158,20 +152,9 @@ export function Input({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      style={{
-        width: '100%',
-        padding: '9px 12px',
-        fontSize: '15px',
-        fontFamily: mono ? 'var(--font-mono)' : 'var(--font-sans)',
-        color: 'var(--color-text)',
-        background: 'var(--color-bg)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-sm)',
-        outline: 'none',
-        transition: 'border-color 150ms ease',
-      }}
-      onFocus={(e) => (e.target.style.borderColor = 'var(--color-primary)')}
-      onBlur={(e) => (e.target.style.borderColor = 'var(--color-border)')}
+      className={`w-full py-[9px] px-[12px] text-[15px] text-text bg-bg border border-border rounded-sm outline-none transition-[border-color] duration-150 focus:border-primary ${
+        mono ? 'font-mono' : 'font-sans'
+      }`}
     />
   )
 }
@@ -216,35 +199,17 @@ export function StatusMessage({
   return (
     <div
       role={isSuccess ? 'status' : 'alert'}
-      style={{
-        marginBottom: 'var(--space-md)',
-        padding: '10px 12px',
-        background: isSuccess ? 'var(--color-primary-light)' : '#FEF2F2',
-        border: `1px solid ${isSuccess ? 'var(--color-primary)' : '#FECACA'}`,
-        borderRadius: 'var(--radius-sm)',
-        fontSize: '13px',
-        color: isSuccess ? 'var(--color-primary)' : 'var(--color-error)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 'var(--space-sm)',
-      }}
+      className={`mb-md py-[10px] px-[12px] rounded-sm text-[13px] flex items-center justify-between gap-sm ${
+        isSuccess
+          ? 'bg-primary-light border border-primary text-primary'
+          : 'bg-[#FEF2F2] border border-[#FECACA] text-error'
+      }`}
     >
       <span>{status.message}</span>
       {!isSuccess && (
         <button
           onClick={() => window.location.reload()}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--color-error)',
-            fontFamily: 'var(--font-sans)',
-            fontSize: '13px',
-            fontWeight: 500,
-            cursor: 'pointer',
-            padding: 0,
-            flexShrink: 0,
-          }}
+          className="bg-none border-none text-error font-sans text-[13px] font-medium cursor-pointer p-0 shrink-0"
         >
           Retry
         </button>
@@ -255,38 +220,12 @@ export function StatusMessage({
 
 export function PreviewPanel({ html, label }: { html: string; label: string }) {
   return (
-    <div
-      style={{
-        flex: 1,
-        minWidth: 0,
-        position: 'sticky',
-        top: '72px',
-      }}
-    >
-      <div
-        style={{
-          fontSize: '11px',
-          fontWeight: 500,
-          color: 'var(--color-muted)',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          marginBottom: 'var(--space-sm)',
-        }}
-      >
+    <div className="flex-1 min-w-0 sticky top-[72px]">
+      <div className="text-[11px] font-medium text-muted uppercase tracking-[0.05em] mb-sm">
         {label}
       </div>
       <div
-        className="prose"
-        style={{
-          background: 'var(--color-card)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-          padding: 'var(--space-lg)',
-          minHeight: '200px',
-          fontSize: '15px',
-          lineHeight: 1.7,
-          color: 'var(--color-text)',
-        }}
+        className="prose bg-card border border-border rounded-md p-lg min-h-[200px] text-[15px] leading-[1.7] text-text"
         dangerouslySetInnerHTML={{
           __html:
             html ||
@@ -309,19 +248,8 @@ export function AutocompleteDropdown({
   return (
     <div
       role="listbox"
-      style={{
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: '100%',
-        zIndex: 100,
-        background: 'var(--color-bg)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-md)',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-        overflow: 'hidden',
-        marginTop: '2px',
-      }}
+      className="absolute left-0 right-0 top-full z-[100] bg-bg border border-border rounded-md overflow-hidden mt-[2px]"
+      style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
     >
       {results.map((r, i) => (
         <div
@@ -332,27 +260,14 @@ export function AutocompleteDropdown({
             e.preventDefault()
             onSelect(r)
           }}
-          style={{
-            padding: '8px 12px',
-            cursor: 'pointer',
-            background:
-              i === selectedIdx ? 'var(--color-primary-light)' : 'transparent',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-sm)',
-            transition: 'background 100ms ease',
-          }}
+          className={`py-[8px] px-[12px] cursor-pointer flex items-center gap-sm transition-[background] duration-100 ${
+            i === selectedIdx ? 'bg-primary-light' : 'bg-transparent'
+          }`}
         >
-          <span style={{ fontSize: '14px', color: 'var(--color-text)' }}>
+          <span className="text-[14px] text-text">
             {r.display_name}
           </span>
-          <span
-            style={{
-              fontSize: '11px',
-              fontFamily: 'var(--font-mono)',
-              color: 'var(--color-muted)',
-            }}
-          >
+          <span className="text-[11px] font-mono text-muted">
             {r.slug}
           </span>
         </div>

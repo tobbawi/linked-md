@@ -55,36 +55,11 @@ export default function AuthPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: 'calc(100vh - 56px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 'var(--space-md)',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '400px',
-          background: 'var(--color-card)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: 'var(--space-xl)',
-        }}
-      >
+    <div className="min-h-[calc(100vh-56px)] flex items-center justify-center p-md">
+      <div className="w-full max-w-[400px] bg-card border border-border rounded-lg p-xl">
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
-          <span
-            style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: '20px',
-              fontWeight: 600,
-              color: 'var(--color-primary)',
-              letterSpacing: '-0.01em',
-            }}
-          >
+        <div className="text-center mb-xl">
+          <span className="font-mono text-[20px] font-semibold text-primary tracking-[-0.01em]">
             linked.md
           </span>
         </div>
@@ -92,15 +67,7 @@ export default function AuthPage() {
         {/* Tabs */}
         <div
           role="tablist"
-          style={{
-            display: 'flex',
-            gap: 0,
-            background: 'var(--color-bg)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-sm)',
-            padding: '3px',
-            marginBottom: 'var(--space-lg)',
-          }}
+          className="flex gap-0 bg-bg border border-border rounded-sm p-[3px] mb-lg"
         >
           {(['signup', 'login'] as Tab[]).map((t) => (
             <button
@@ -108,18 +75,11 @@ export default function AuthPage() {
               role="tab"
               aria-selected={tab === t}
               onClick={() => handleTabChange(t)}
+              className="flex-1 py-[7px] text-[13px] font-sans border-none rounded-sm cursor-pointer transition-colors duration-150"
               style={{
-                flex: 1,
-                padding: '7px 0',
-                fontSize: '13px',
                 fontWeight: tab === t ? 600 : 400,
-                fontFamily: 'var(--font-sans)',
                 color: tab === t ? 'var(--color-ink)' : 'var(--color-secondary)',
                 background: tab === t ? 'var(--color-card)' : 'transparent',
-                border: 'none',
-                borderRadius: 'var(--radius-sm)',
-                cursor: 'pointer',
-                transition: 'background 150ms ease, color 150ms ease',
               }}
             >
               {t === 'signup' ? 'Sign up' : 'Log in'}
@@ -129,16 +89,10 @@ export default function AuthPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} noValidate>
-          <div style={{ marginBottom: 'var(--space-md)' }}>
+          <div className="mb-md">
             <label
               htmlFor="email"
-              style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: 500,
-                color: 'var(--color-text)',
-                marginBottom: 'var(--space-xs)',
-              }}
+              className="block text-[13px] font-medium text-text mb-xs"
             >
               Email
             </label>
@@ -150,33 +104,16 @@ export default function AuthPage() {
               required
               autoComplete="email"
               placeholder="you@example.com"
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                fontSize: '15px',
-                fontFamily: 'var(--font-sans)',
-                color: 'var(--color-text)',
-                background: 'var(--color-bg)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-sm)',
-                outline: 'none',
-                transition: 'border-color 150ms ease',
-              }}
+              className="w-full py-[9px] px-[12px] text-[15px] font-sans text-text bg-bg border border-border rounded-sm outline-none transition-colors duration-150"
               onFocus={(e) => (e.target.style.borderColor = 'var(--color-primary)')}
               onBlur={(e) => (e.target.style.borderColor = 'var(--color-border)')}
             />
           </div>
 
-          <div style={{ marginBottom: 'var(--space-lg)' }}>
+          <div className="mb-lg">
             <label
               htmlFor="password"
-              style={{
-                display: 'block',
-                fontSize: '13px',
-                fontWeight: 500,
-                color: 'var(--color-text)',
-                marginBottom: 'var(--space-xs)',
-              }}
+              className="block text-[13px] font-medium text-text mb-xs"
             >
               Password
             </label>
@@ -188,18 +125,7 @@ export default function AuthPage() {
               required
               autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
               placeholder="••••••••"
-              style={{
-                width: '100%',
-                padding: '9px 12px',
-                fontSize: '15px',
-                fontFamily: 'var(--font-sans)',
-                color: 'var(--color-text)',
-                background: 'var(--color-bg)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-sm)',
-                outline: 'none',
-                transition: 'border-color 150ms ease',
-              }}
+              className="w-full py-[9px] px-[12px] text-[15px] font-sans text-text bg-bg border border-border rounded-sm outline-none transition-colors duration-150"
               onFocus={(e) => (e.target.style.borderColor = 'var(--color-primary)')}
               onBlur={(e) => (e.target.style.borderColor = 'var(--color-border)')}
             />
@@ -209,15 +135,7 @@ export default function AuthPage() {
           {error && (
             <div
               role="alert"
-              style={{
-                marginBottom: 'var(--space-md)',
-                padding: '10px 12px',
-                background: '#FEF2F2',
-                border: '1px solid #FECACA',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '13px',
-                color: 'var(--color-error)',
-              }}
+              className="mb-md py-[10px] px-[12px] bg-[#FEF2F2] border border-[#FECACA] rounded-sm text-[13px] text-error"
             >
               {error}
             </div>
@@ -227,15 +145,7 @@ export default function AuthPage() {
           {success && (
             <div
               role="status"
-              style={{
-                marginBottom: 'var(--space-md)',
-                padding: '10px 12px',
-                background: 'var(--color-primary-light)',
-                border: '1px solid var(--color-primary)',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '13px',
-                color: 'var(--color-primary)',
-              }}
+              className="mb-md py-[10px] px-[12px] bg-primary-light border border-primary rounded-sm text-[13px] text-primary"
             >
               {success}
             </div>
@@ -244,22 +154,10 @@ export default function AuthPage() {
           <button
             type="submit"
             disabled={isPending}
+            className="w-full py-[10px] text-white border-none rounded-sm text-[15px] font-semibold font-sans flex items-center justify-center gap-sm transition-colors duration-150"
             style={{
-              width: '100%',
-              padding: '10px',
               background: isPending ? 'var(--color-muted)' : 'var(--color-primary)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '15px',
-              fontWeight: 600,
-              fontFamily: 'var(--font-sans)',
               cursor: isPending ? 'not-allowed' : 'pointer',
-              transition: 'background 150ms ease',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 'var(--space-sm)',
             }}
           >
             {isPending ? (
@@ -276,27 +174,11 @@ export default function AuthPage() {
         </form>
 
         {/* Switch tab link */}
-        <p
-          style={{
-            marginTop: 'var(--space-lg)',
-            textAlign: 'center',
-            fontSize: '13px',
-            color: 'var(--color-secondary)',
-          }}
-        >
+        <p className="mt-lg text-center text-[13px] text-secondary">
           {tab === 'signup' ? 'Already have an account? ' : "Don't have an account? "}
           <button
             onClick={() => handleTabChange(tab === 'signup' ? 'login' : 'signup')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--color-primary)',
-              fontFamily: 'var(--font-sans)',
-              fontSize: '13px',
-              cursor: 'pointer',
-              padding: 0,
-              fontWeight: 500,
-            }}
+            className="bg-transparent border-none text-primary font-sans text-[13px] cursor-pointer p-0 font-medium"
           >
             {tab === 'signup' ? 'Log in' : 'Sign up'}
           </button>

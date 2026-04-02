@@ -21,31 +21,16 @@ export default async function GraphPage({ params }: { params: { name: string } }
   if (!profile) notFound()
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-md)',
-          paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--color-border)',
-          marginBottom: 'var(--space-lg)',
-        }}
-      >
+    <div className="pt-xl pb-3xl">
+      <div className="flex items-center gap-md pb-lg border-b border-border mb-lg">
         <Link
           href={`/profile/${slug}`}
-          style={{ fontSize: '13px', color: 'var(--color-secondary)' }}
+          className="text-[13px] text-secondary"
         >
           ← {profile.display_name}
         </Link>
-        <span style={{ color: 'var(--color-border)' }}>/</span>
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.25rem',
-            color: 'var(--color-ink)',
-          }}
-        >
+        <span className="text-border">/</span>
+        <h1 className="font-serif text-[1.25rem] text-ink">
           Graph
         </h1>
       </div>

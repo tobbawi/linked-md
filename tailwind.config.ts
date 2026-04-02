@@ -10,8 +10,10 @@ const config: Config = {
     extend: {
       colors: {
         primary: "var(--color-primary)",
+        "primary-deep": "var(--color-primary-deep)",
         "primary-light": "var(--color-primary-light)",
         ink: "var(--color-ink)",
+        faint: "var(--color-faint)",
         text: "var(--color-text)",
         secondary: "var(--color-secondary)",
         muted: "var(--color-muted)",

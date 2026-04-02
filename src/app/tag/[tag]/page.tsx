@@ -34,76 +34,39 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
   const allPosts = posts ?? []
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div
-        style={{
-          paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--color-border)',
-          marginBottom: 'var(--space-lg)',
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.25rem',
-            color: 'var(--color-ink)',
-          }}
-        >
+    <div className="pt-xl pb-3xl">
+      <div className="pb-lg border-b border-border mb-lg">
+        <h1 className="font-serif text-[1.25rem] text-ink">
           #{tag}
         </h1>
-        <p style={{ fontSize: '13px', color: 'var(--color-muted)', marginTop: '4px' }}>
+        <p className="text-[13px] text-muted mt-[4px]">
           {allPosts.length} {allPosts.length === 1 ? 'post' : 'posts'}
         </p>
       </div>
 
       {allPosts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0', color: 'var(--color-muted)' }}>
-          <p style={{ fontSize: '15px' }}>No posts tagged #{tag} yet.</p>
+        <div className="text-center py-3xl text-muted">
+          <p className="text-[15px]">No posts tagged #{tag} yet.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+        <div className="flex flex-col gap-md">
           {allPosts.map((post) => {
             const preview = postPreview(post.markdown_content)
             const previewHtml = renderWikilinks(preview, profileSlugs, companySlugs)
             return (
               <article
                 key={post.id}
-                style={{
-                  background: 'var(--color-card)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: 'var(--space-lg)',
-                }}
+                className="bg-card border border-border rounded-md p-lg"
               >
                 {post.profile && (
                   <Link
                     href={`/profile/${post.profile.slug}`}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 'var(--space-xs)',
-                      marginBottom: 'var(--space-sm)',
-                    }}
+                    className="inline-flex items-center gap-xs mb-sm"
                   >
-                    <div
-                      style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: 'var(--radius-full)',
-                        background: 'var(--color-primary-light)',
-                        border: '1px solid var(--color-primary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        color: 'var(--color-primary)',
-                        flexShrink: 0,
-                      }}
-                    >
+                    <div className="w-[24px] h-[24px] rounded-full bg-primary-light border border-primary flex items-center justify-center text-[11px] font-bold text-primary shrink-0">
                       {post.profile.display_name.charAt(0).toUpperCase()}
                     </div>
-                    <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-ink)' }}>
+                    <span className="text-[13px] font-medium text-ink">
                       {post.profile.display_name}
                     </span>
                   </Link>
@@ -113,52 +76,30 @@ export default async function TagPage({ params }: { params: { tag: string } }) {
                   <Link
                     href={post.profile ? `/profile/${post.profile.slug}/post/${post.slug}` : '#'}
                   >
-                    <h2
-                      style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontSize: '1.1rem',
-                        color: 'var(--color-ink)',
-                        marginBottom: 'var(--space-xs)',
-                        lineHeight: 1.3,
-                      }}
-                    >
+                    <h2 className="font-serif text-[1.1rem] text-ink mb-xs leading-[1.3]">
                       {post.title}
                     </h2>
                   </Link>
                 )}
 
                 <p
-                  style={{
-                    fontSize: '14px',
-                    color: 'var(--color-secondary)',
-                    lineHeight: 1.5,
-                    marginBottom: 'var(--space-sm)',
-                  }}
+                  className="text-[14px] text-secondary leading-[1.5] mb-sm"
                   dangerouslySetInnerHTML={{ __html: previewHtml }}
                 />
 
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginTop: 'var(--space-sm)',
-                  }}
-                >
-                  <span className="md-url" style={{ fontSize: '11px' }}>
+                <div className="flex items-center justify-between mt-sm">
+                  <span className="md-url text-[11px]">
                     {post.slug}.md
                   </span>
-                  <div style={{ display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
+                  <div className="flex gap-xs flex-wrap">
                     {(post.tags ?? []).map((t) => (
                       <Link
                         key={t}
                         href={`/tag/${encodeURIComponent(t)}`}
+                        className="text-[11px] py-[2px] px-[8px] rounded-sm"
                         style={{
-                          fontSize: '11px',
                           color: t === tag ? 'var(--color-bg)' : 'var(--color-primary)',
                           background: t === tag ? 'var(--color-primary)' : 'var(--color-primary-light)',
-                          padding: '2px 8px',
-                          borderRadius: 'var(--radius-sm)',
                         }}
                       >
                         #{t}

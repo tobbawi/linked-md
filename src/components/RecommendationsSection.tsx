@@ -27,48 +27,20 @@ export default function RecommendationsSection({ recommendations: initialRecs, i
   }
 
   return (
-    <section style={{ marginBottom: '2rem' }}>
-      <h2
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '1.25rem',
-          fontWeight: 600,
-          color: 'var(--color-ink)',
-          marginBottom: '1rem',
-          letterSpacing: '-0.01em',
-        }}
-      >
+    <section className="mb-[2rem]">
+      <h2 className="font-serif text-[1.25rem] font-semibold text-ink mb-[1rem] tracking-[-0.01em]">
         Recommendations
       </h2>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+      <div className="flex flex-col gap-md">
         {recs.map((rec) => (
           <div
             key={rec.id}
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: '14px 16px',
-              position: 'relative',
-            }}
+            className="bg-card border border-border rounded-md py-[14px] px-[16px] relative"
           >
             {/* Author */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '8px',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: 'var(--color-ink)',
-                }}
-              >
+            <div className="flex items-center justify-between mb-[8px]">
+              <span className="text-[13px] font-semibold text-ink">
                 {rec.author?.display_name ?? 'Someone'}
               </span>
 
@@ -78,16 +50,8 @@ export default function RecommendationsSection({ recommendations: initialRecs, i
                   onClick={() => handleHide(rec.id)}
                   disabled={isPending}
                   title="Hide this recommendation"
-                  style={{
-                    fontSize: '11px',
-                    color: 'var(--color-muted)',
-                    background: 'none',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '2px 8px',
-                    cursor: 'pointer',
-                    opacity: isPending ? 0.5 : 1,
-                  }}
+                  className="text-[11px] text-muted bg-none border border-border rounded-sm py-[2px] px-[8px] cursor-pointer"
+                  style={{ opacity: isPending ? 0.5 : 1 }}
                 >
                   Hide
                 </button>
@@ -95,15 +59,7 @@ export default function RecommendationsSection({ recommendations: initialRecs, i
             </div>
 
             {/* Body */}
-            <p
-              style={{
-                fontSize: '14px',
-                color: 'var(--color-text)',
-                lineHeight: 1.6,
-                margin: 0,
-                fontStyle: 'italic',
-              }}
-            >
+            <p className="text-[14px] text-text leading-[1.6] m-0 italic">
               &ldquo;{rec.body}&rdquo;
             </p>
           </div>

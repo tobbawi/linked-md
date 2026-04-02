@@ -78,48 +78,15 @@ export function NotificationBell({ mySlug }: Props) {
   }
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref} className="relative">
       <button
         onClick={handleOpen}
-        style={{
-          position: 'relative',
-          width: '32px',
-          height: '32px',
-          borderRadius: 'var(--radius-full)',
-          border: '1px solid var(--color-border)',
-          background: 'var(--color-card)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '15px',
-          color: 'var(--color-secondary)',
-          transition: 'border-color 150ms ease',
-        }}
+        className="relative w-[32px] h-[32px] rounded-full border border-border bg-card cursor-pointer flex items-center justify-center text-[15px] text-secondary transition-[border-color] duration-150 hover:border-primary"
         title="Notifications"
-        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--color-primary)')}
-        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border)')}
       >
         🔔
         {unread > 0 && (
-          <span
-            style={{
-              position: 'absolute',
-              top: '-3px',
-              right: '-3px',
-              width: '14px',
-              height: '14px',
-              borderRadius: 'var(--radius-full)',
-              background: 'var(--color-primary)',
-              color: '#fff',
-              fontSize: '9px',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              lineHeight: 1,
-            }}
-          >
+          <span className="absolute top-[-3px] right-[-3px] w-[14px] h-[14px] rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center leading-none">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
@@ -127,34 +94,16 @@ export function NotificationBell({ mySlug }: Props) {
 
       {open && (
         <div
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 8px)',
-            right: 0,
-            width: '320px',
-            background: 'var(--color-bg)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-            zIndex: 100,
-            overflow: 'hidden',
-          }}
+          className="absolute top-[calc(100%+8px)] right-0 w-[320px] bg-bg border border-border rounded-md z-[100] overflow-hidden"
+          style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
         >
-          <div
-            style={{
-              padding: 'var(--space-sm) var(--space-md)',
-              borderBottom: '1px solid var(--color-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-ink)' }}>
+          <div className="py-sm px-md border-b border-border flex items-center justify-between">
+            <span className="text-[13px] font-semibold text-ink">
               Notifications
             </span>
             <Link
               href="/notifications"
-              style={{ fontSize: '11px', color: 'var(--color-primary)' }}
+              className="text-[11px] text-primary"
               onClick={() => setOpen(false)}
             >
               See all
@@ -162,52 +111,24 @@ export function NotificationBell({ mySlug }: Props) {
           </div>
 
           {notifications.length === 0 ? (
-            <p
-              style={{
-                padding: 'var(--space-lg)',
-                textAlign: 'center',
-                color: 'var(--color-muted)',
-                fontSize: '13px',
-                margin: 0,
-              }}
-            >
+            <p className="p-lg text-center text-muted text-[13px] m-0">
               No notifications yet.
             </p>
           ) : (
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            <ul className="list-none m-0 p-0">
               {notifications.slice(0, 8).map((n) => (
                 <li key={n.id}>
                   <Link
                     href={notificationHref(n, mySlug)}
                     onClick={() => setOpen(false)}
-                    style={{
-                      display: 'block',
-                      padding: 'var(--space-sm) var(--space-md)',
-                      textDecoration: 'none',
-                      borderBottom: '1px solid var(--color-border)',
-                      background: n.read ? 'transparent' : 'var(--color-primary-light)',
-                      transition: 'background 150ms ease',
-                    }}
-                    onMouseEnter={(e) =>
-                      ((e.currentTarget as HTMLElement).style.background = 'var(--color-border)')
-                    }
-                    onMouseLeave={(e) =>
-                      ((e.currentTarget as HTMLElement).style.background = n.read
-                        ? 'transparent'
-                        : 'var(--color-primary-light)')
-                    }
+                    className={`block py-sm px-md no-underline border-b border-border transition-[background] duration-150 hover:bg-border ${
+                      n.read ? 'bg-transparent' : 'bg-primary-light'
+                    }`}
                   >
-                    <p
-                      style={{
-                        fontSize: '13px',
-                        color: 'var(--color-text)',
-                        margin: '0 0 2px',
-                        lineHeight: 1.4,
-                      }}
-                    >
+                    <p className="text-[13px] text-text m-0 mb-[2px] leading-[1.4]">
                       {notificationText(n)}
                     </p>
-                    <p style={{ fontSize: '11px', color: 'var(--color-muted)', margin: 0 }}>
+                    <p className="text-[11px] text-muted m-0">
                       {formatDate(n.created_at)}
                     </p>
                   </Link>

@@ -57,86 +57,88 @@ function postPreview(post: Post): string {
 
 function LandingHero() {
   return (
-    <div
-      style={{
-        paddingTop: 'var(--space-3xl)',
-        paddingBottom: 'var(--space-2xl)',
-        textAlign: 'center',
-      }}
-    >
-      <h1
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '2.625rem',
-          color: 'var(--color-ink)',
-          lineHeight: 1.2,
-          marginBottom: 'var(--space-md)',
-        }}
-      >
-        Your profile is a markdown file.
-      </h1>
-      <p
-        style={{
-          fontSize: '1.125rem',
-          color: 'var(--color-secondary)',
-          maxWidth: '480px',
-          margin: '0 auto var(--space-xl)',
-          lineHeight: 1.6,
-        }}
-      >
-        An open professional network where every profile, post, and company is a{' '}
-        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-primary)' }}>
-          .md
-        </span>{' '}
-        file. Open. Portable. AI-readable.
-      </p>
+    <section className="relative overflow-hidden">
+      <div className="max-w-[1200px] mx-auto px-[40px] py-[100px] pb-[80px] grid grid-cols-1 md:grid-cols-2 gap-[60px] items-center">
+        {/* Left: content */}
+        <div className="relative z-[2]">
+          {/* Hero tag pill */}
+          <div className="inline-flex items-center gap-[8px] font-mono text-[13px] font-medium text-primary bg-primary-light py-[7px] px-[16px] rounded-full mb-[28px]">
+            <span className="w-[7px] h-[7px] bg-primary rounded-full animate-pulse" />
+            Open network &middot; AI-readable
+          </div>
 
-      <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link
-          href="/auth"
-          style={{
-            display: 'inline-block',
-            padding: '10px 24px',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            borderRadius: 'var(--radius-sm)',
-            fontWeight: 600,
-            fontSize: '15px',
-          }}
-        >
-          Get started
-        </Link>
-        <Link
-          href="/auth?tab=login"
-          style={{
-            display: 'inline-block',
-            padding: '10px 24px',
-            background: 'none',
-            color: 'var(--color-secondary)',
-            borderRadius: 'var(--radius-sm)',
-            fontWeight: 500,
-            fontSize: '15px',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          Sign in
-        </Link>
-      </div>
+          {/* H1 */}
+          <h1
+            className="font-serif text-[64px] font-normal text-ink leading-[1.05] tracking-[-0.035em] mb-[24px]"
+            style={{ fontVariationSettings: "'opsz' 72" }}
+          >
+            Your profile<br />is a <em className="italic text-primary">markdown</em><br />file.
+          </h1>
 
-      <div
-        style={{
-          marginTop: 'var(--space-xl)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 'var(--space-sm)',
-          color: 'var(--color-muted)',
-          fontSize: '13px',
-        }}
-      >
-        <span>Your profile lives at</span>
-        <span className="md-url">/profile/your-name.md</span>
+          {/* Subtitle */}
+          <p className="text-[18px] text-secondary leading-[1.6] max-w-[440px] mb-[36px]">
+            The professional network where every profile, post, and company is a{' '}
+            <code className="font-mono text-[16px] text-primary bg-primary-light px-[8px] py-[2px] rounded-[5px]">
+              .md
+            </code>{' '}
+            file. Open. Portable. Yours.
+          </p>
+
+          {/* Action buttons */}
+          <div className="flex gap-[12px] mb-[32px]">
+            <Link
+              href="/auth"
+              className="inline-flex items-center py-[14px] px-[32px] bg-ink text-white rounded-[12px] font-semibold text-[16px] hover:bg-text hover:-translate-y-[1px] hover:shadow-[0_4px_16px_rgba(0,0,0,0.15)] transition-all"
+            >
+              Create your profile
+            </Link>
+            <Link
+              href="/auth?tab=login"
+              className="inline-flex items-center py-[14px] px-[32px] bg-transparent text-secondary rounded-[12px] font-semibold text-[16px] border-[1.5px] border-border hover:text-ink hover:border-secondary transition-all"
+            >
+              Sign in
+            </Link>
+          </div>
+
+          {/* Filepath line */}
+          <div className="font-mono text-[14px] text-faint">
+            Your profile lives at{' '}
+            <span className="text-primary bg-primary-light py-[4px] px-[12px] rounded-[6px] ml-[4px]">
+              /profile/your-name.md
+            </span>
+          </div>
+        </div>
+
+        {/* Right: decorative profile card */}
+        <div className="relative hidden md:block">
+          <div
+            className="bg-white border-[1.5px] border-border rounded-[20px] p-[32px] shadow-[0_24px_48px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] -rotate-2 hover:rotate-0 transition-transform duration-300"
+          >
+            <div
+              className="font-serif text-[28px] text-ink mb-[4px]"
+              style={{ fontVariationSettings: "'opsz' 32" }}
+            >
+              Wim Tobback
+            </div>
+            <div className="font-mono text-[13px] text-primary bg-primary-light py-[4px] px-[12px] rounded-[6px] inline-block mb-[16px]">
+              /profile/wim-tobback.md
+            </div>
+            <div className="text-[15px] text-secondary font-medium mb-[4px]">AIGENEER</div>
+            <div className="text-[14px] text-muted mb-[16px]">Belgium</div>
+            <div className="text-[14px] text-secondary leading-[1.6] pt-[16px] border-t border-border">
+              Embracing the era of the AIGENEER. Building at the intersection of AI and entrepreneurship. Three roles, one mission.
+            </div>
+          </div>
+          {/* Floating badges */}
+          <div className="absolute top-[-10px] right-[-20px] bg-white border-[1.5px] border-border rounded-[14px] py-[14px] px-[18px] shadow-[0_12px_32px_rgba(0,0,0,0.06)] font-mono text-[12px] text-primary rotate-3">
+            llm.txt available
+          </div>
+          <div className="absolute bottom-[20px] left-[-30px] bg-white border-[1.5px] border-border rounded-[14px] py-[14px] px-[18px] shadow-[0_12px_32px_rgba(0,0,0,0.06)] font-mono text-[12px] text-primary -rotate-3">
+            graph.json
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
 
@@ -152,29 +154,18 @@ function UserSidebar({
   postImpressions: number
 }) {
   return (
-    <div
-      style={{
-        background: 'var(--color-card)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-lg)',
-        overflow: 'hidden',
-        position: 'sticky',
-        top: '72px',
-      }}
-    >
+    <div className="bg-card border border-border rounded-lg overflow-hidden sticky top-[72px]">
       {/* Emerald header strip */}
       <div
-        style={{
-          height: '48px',
-          background: 'linear-gradient(135deg, var(--color-primary) 0%, #0B7D62 100%)',
-        }}
+        className="h-[48px]"
+        style={{ background: 'linear-gradient(135deg, var(--color-primary) 0%, #0B7D62 100%)' }}
       />
 
       {/* Avatar + info */}
-      <div style={{ padding: '0 var(--space-lg) var(--space-lg)', marginTop: '-24px' }}>
+      <div className="px-lg pb-lg pt-0 mt-[-24px]">
         {/* Avatar */}
-        <Link href={`/profile/${profile.slug}`} style={{ display: 'inline-block', marginBottom: 'var(--space-sm)' }}>
-          <div style={{ outline: '3px solid var(--color-card)', borderRadius: '50%', display: 'inline-flex' }}>
+        <Link href={`/profile/${profile.slug}`} className="inline-block mb-sm">
+          <div className="outline-3 outline-card rounded-full inline-flex" style={{ outlineStyle: 'solid' }}>
             <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={52} />
           </div>
         </Link>
@@ -182,19 +173,9 @@ function UserSidebar({
         {/* Name */}
         <Link
           href={`/profile/${profile.slug}`}
-          style={{ textDecoration: 'none' }}
+          className="no-underline"
         >
-          <span
-            style={{
-              display: 'block',
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.0625rem',
-              fontWeight: 400,
-              color: 'var(--color-ink)',
-              lineHeight: 1.3,
-              marginBottom: '2px',
-            }}
-          >
+          <span className="block font-serif text-[1.0625rem] font-normal text-ink leading-[1.3] mb-2xs">
             {profile.display_name}
           </span>
         </Link>
@@ -202,12 +183,8 @@ function UserSidebar({
         {/* Title */}
         {profile.title && (
           <p
-            style={{
-              fontSize: '12px',
-              color: 'var(--color-secondary)',
-              lineHeight: 1.4,
-              marginBottom: profile.location ? '1px' : 'var(--space-sm)',
-            }}
+            className="text-[12px] text-secondary leading-[1.4]"
+            style={{ marginBottom: profile.location ? '1px' : 'var(--space-sm)' }}
           >
             {profile.title}
           </p>
@@ -215,13 +192,7 @@ function UserSidebar({
 
         {/* Location */}
         {profile.location && (
-          <p
-            style={{
-              fontSize: '12px',
-              color: 'var(--color-muted)',
-              marginBottom: 'var(--space-sm)',
-            }}
-          >
+          <p className="text-[12px] text-muted mb-sm">
             {profile.location}
           </p>
         )}
@@ -229,107 +200,44 @@ function UserSidebar({
         {/* View profile link */}
         <Link
           href={`/profile/${profile.slug}`}
-          style={{
-            display: 'block',
-            fontSize: '12px',
-            fontWeight: 500,
-            color: 'var(--color-primary)',
-            marginBottom: 'var(--space-md)',
-          }}
+          className="block text-[12px] font-medium text-primary mb-md"
         >
           View profile →
         </Link>
 
         {/* Divider */}
-        <div style={{ borderTop: '1px solid var(--color-border)', marginBottom: 'var(--space-md)' }} />
+        <div className="border-t border-border mb-md" />
 
         {/* Stats — profile views + post impressions */}
-        <div
-          style={{
-            background: 'var(--color-bg)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            padding: 'var(--space-md)',
-            marginBottom: 'var(--space-md)',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--space-sm)',
-          }}
-        >
+        <div className="bg-bg border border-border rounded-md p-md mb-md flex flex-col gap-sm">
           {/* Profile views */}
           <div>
-            <div
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: 'var(--color-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                marginBottom: '2px',
-              }}
-            >
+            <div className="font-mono text-[10px] font-semibold text-muted uppercase tracking-[0.06em] mb-2xs">
               Profile views
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.5rem',
-                  fontWeight: 400,
-                  color: 'var(--color-primary)',
-                  lineHeight: 1,
-                }}
-              >
+            <div className="flex items-baseline gap-[6px]">
+              <span className="font-serif text-[1.5rem] font-normal text-primary leading-none">
                 {profileViews}
               </span>
-              <span
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--color-muted)',
-                }}
-              >
+              <span className="text-[11px] text-muted">
                 last 7 days
               </span>
             </div>
           </div>
 
           {/* Divider */}
-          <div style={{ borderTop: '1px solid var(--color-border)' }} />
+          <div className="border-t border-border" />
 
           {/* Post impressions */}
           <div>
-            <div
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: 'var(--color-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                marginBottom: '2px',
-              }}
-            >
+            <div className="font-mono text-[10px] font-semibold text-muted uppercase tracking-[0.06em] mb-2xs">
               Post impressions
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-              <span
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.5rem',
-                  fontWeight: 400,
-                  color: 'var(--color-primary)',
-                  lineHeight: 1,
-                }}
-              >
+            <div className="flex items-baseline gap-[6px]">
+              <span className="font-serif text-[1.5rem] font-normal text-primary leading-none">
                 {postImpressions}
               </span>
-              <span
-                style={{
-                  fontSize: '11px',
-                  color: 'var(--color-muted)',
-                }}
-              >
+              <span className="text-[11px] text-muted">
                 last 7 days
               </span>
             </div>
@@ -337,23 +245,15 @@ function UserSidebar({
         </div>
 
         {/* Badges */}
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--space-xs)',
-            marginBottom: 'var(--space-md)',
-          }}
-        >
+        <div className="flex flex-col gap-xs mb-md">
           <a
             href={`/profile/${profile.slug}/llm.txt`}
-            className="llm-badge"
-            style={{ alignSelf: 'flex-start' }}
+            className="llm-badge self-start"
             title="AI-readable profile summary"
           >
             llm.txt available
           </a>
-          <span className="md-url" style={{ alignSelf: 'flex-start', fontSize: '11px' }}>
+          <span className="md-url self-start text-[11px]">
             /profile/{profile.slug}.md
           </span>
         </div>
@@ -361,16 +261,7 @@ function UserSidebar({
         {/* Write a post CTA */}
         <Link
           href="/post/new"
-          style={{
-            display: 'block',
-            textAlign: 'center',
-            padding: '8px 0',
-            background: 'var(--color-primary)',
-            color: '#fff',
-            borderRadius: 'var(--radius-sm)',
-            fontWeight: 600,
-            fontSize: '13px',
-          }}
+          className="block text-center py-sm bg-primary text-white rounded-sm font-semibold text-[13px]"
         >
           + Write a post
         </Link>
@@ -381,60 +272,41 @@ function UserSidebar({
 
 // ── Post card ───────────────────────────────────────────────────────────────
 
-function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string | null }) {
+function PostCard({ post, myProfileId, featured }: { post: FeedPost; myProfileId?: string | null; featured?: boolean }) {
   const mdUrl = `/profile/${post.profile.slug}/post/${post.slug}.md`
 
   return (
     <article
-      style={{
-        background: 'var(--color-card)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-md)',
-        padding: 'var(--space-lg)',
-      }}
+      className={
+        featured
+          ? 'col-span-1 md:col-span-2 md:row-span-2 bg-primary-deep border-primary-deep text-white rounded-[20px] p-[48px] transition-all duration-250 hover:-translate-y-[4px] hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:border-primary relative overflow-hidden border-[1.5px]'
+          : 'bg-card border-[1.5px] border-border rounded-[20px] p-[32px] transition-all duration-250 hover:border-primary hover:-translate-y-[4px] hover:shadow-hover relative overflow-hidden'
+      }
     >
       {/* Author row */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-sm)',
-          marginBottom: 'var(--space-sm)',
-        }}
-      >
-        <Link href={`/profile/${post.profile.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
-          <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={28} />
+      <div className="flex items-center gap-[12px] mb-[20px]">
+        <Link href={`/profile/${post.profile.slug}`} className="inline-flex shrink-0">
+          <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={40} />
         </Link>
-        <Link
-          href={`/profile/${post.profile.slug}`}
-          style={{
-            fontSize: '13px',
-            fontWeight: 500,
-            color: 'var(--color-text)',
-          }}
-        >
-          {post.profile.display_name}
-        </Link>
-        <span style={{ color: 'var(--color-border)' }}>·</span>
-        <time
-          dateTime={post.created_at}
-          style={{ fontSize: '12px', color: 'var(--color-muted)' }}
-        >
-          {formatDate(post.created_at)}
-        </time>
+        <div>
+          <Link
+            href={`/profile/${post.profile.slug}`}
+            className={`text-[14px] font-semibold ${featured ? 'text-white' : 'text-ink'}`}
+          >
+            {post.profile.display_name}
+          </Link>
+          <div className={`text-[12px] ${featured ? 'text-white/60' : 'text-muted'}`}>
+            {formatDate(post.created_at)}
+          </div>
+        </div>
       </div>
 
       {/* Title */}
       {post.title && (
         <Link href={`/profile/${post.profile.slug}/post/${post.slug}`}>
           <h3
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.2rem',
-              color: 'var(--color-ink)',
-              lineHeight: 1.35,
-              marginBottom: 'var(--space-xs)',
-            }}
+            className={`font-serif leading-[1.25] mb-[12px] font-normal tracking-[-0.01em] ${featured ? 'text-white text-[32px]' : 'text-ink text-[22px]'}`}
+            style={{ fontVariationSettings: "'opsz' 32" }}
           >
             {post.title}
           </h3>
@@ -443,88 +315,60 @@ function PostCard({ post, myProfileId }: { post: FeedPost; myProfileId?: string 
 
       {/* Preview */}
       <p
-        style={{
-          fontSize: '14px',
-          color: 'var(--color-secondary)',
-          lineHeight: 1.6,
-          marginBottom: post.tags && post.tags.length > 0 ? 'var(--space-sm)' : 'var(--space-md)',
-        }}
+        className={`text-[14px] leading-[1.65] mb-[20px] ${featured ? 'text-white/70 text-[16px]' : 'text-secondary'}`}
       >
         {postPreview(post)}
       </p>
 
-      {/* Tags */}
-      {post.tags && post.tags.length > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 'var(--space-xs)',
-            marginBottom: 'var(--space-md)',
-          }}
-        >
-          {post.tags.slice(0, 4).map((tag) => (
+      {/* Footer: tags + md URL */}
+      <div className="flex items-center justify-between flex-wrap gap-[10px]">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-[6px]">
+          {(post.tags ?? []).slice(0, 4).map((tag) => (
             <Link
               key={tag}
               href={`/tags/${tag}`}
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '11px',
-                color: 'var(--color-muted)',
-                background: 'var(--color-bg)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-sm)',
-                padding: '2px 7px',
-              }}
+              className={`font-mono text-[11px] py-[4px] px-[12px] rounded-full border inline-flex items-center transition-all duration-150 ${
+                featured
+                  ? 'text-white/80 bg-white/[0.12] border-white/20 hover:text-white hover:border-white/40'
+                  : 'text-secondary bg-bg border-border hover:text-primary hover:border-primary hover:bg-primary-light'
+              }`}
             >
               #{tag}
             </Link>
           ))}
         </div>
-      )}
 
-      {/* Footer */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 'var(--space-sm)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
-          <Link
-            href={`/profile/${post.profile.slug}/post/${post.slug}`}
-            style={{
-              fontSize: '13px',
-              fontWeight: 500,
-              color: 'var(--color-primary)',
-            }}
-          >
-            Read →
-          </Link>
-          {(post.likeCount ?? 0) > 0 && (
-            <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
-              {post.likeCount} likes
-            </span>
-          )}
-          {(post.commentCount ?? 0) > 0 && (
-            <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
-              {post.commentCount} comments
-            </span>
-          )}
-          <RepostButton
-            postId={post.id}
-            postAuthorProfileId={post.profile_id}
-            myProfileId={myProfileId ?? null}
-            initialReposted={post.viewerHasReposted ?? false}
-            repostCount={post.repostCount ?? 0}
-          />
-        </div>
-        <span className="md-url" style={{ fontSize: '11px' }}>
+        <span className={`md-url text-[11px] font-mono ${featured ? 'text-white/40' : 'text-muted'}`}>
           {mdUrl}
         </span>
+      </div>
+
+      {/* Engagement row — below footer */}
+      <div className="flex items-center gap-md mt-[12px]">
+        <Link
+          href={`/profile/${post.profile.slug}/post/${post.slug}`}
+          className={`text-[13px] font-medium ${featured ? 'text-white/80 hover:text-white' : 'text-primary'}`}
+        >
+          Read →
+        </Link>
+        {(post.likeCount ?? 0) > 0 && (
+          <span className={`text-[12px] ${featured ? 'text-white/50' : 'text-muted'}`}>
+            {post.likeCount} likes
+          </span>
+        )}
+        {(post.commentCount ?? 0) > 0 && (
+          <span className={`text-[12px] ${featured ? 'text-white/50' : 'text-muted'}`}>
+            {post.commentCount} comments
+          </span>
+        )}
+        <RepostButton
+          postId={post.id}
+          postAuthorProfileId={post.profile_id}
+          myProfileId={myProfileId ?? null}
+          initialReposted={post.viewerHasReposted ?? false}
+          repostCount={post.repostCount ?? 0}
+        />
       </div>
     </article>
   )
@@ -541,25 +385,17 @@ const JOB_TYPE_LABELS: Record<string, string> = {
 
 function JobCard({ job }: { job: FeedJobListing }) {
   return (
-    <article
-      style={{
-        background: 'var(--color-card)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-md)',
-        padding: 'var(--space-lg)',
-        borderLeft: '3px solid var(--color-primary)',
-      }}
-    >
+    <article className="bg-card border border-border rounded-md p-lg border-l-[3px] border-l-primary">
       {/* Company row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
-        <Link href={`/company/${job.company.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+      <div className="flex items-center gap-sm mb-sm">
+        <Link href={`/company/${job.company.slug}`} className="inline-flex shrink-0">
           <Avatar name={job.company.name} size={24} shape="square" />
         </Link>
-        <Link href={`/company/${job.company.slug}`} style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-secondary)' }}>
+        <Link href={`/company/${job.company.slug}`} className="text-[13px] font-medium text-secondary">
           {job.company.name}
         </Link>
-        <span style={{ color: 'var(--color-border)' }}>·</span>
-        <span style={{ fontSize: '11px', color: 'var(--color-muted)', fontFamily: 'var(--font-mono)' }}>
+        <span className="text-border">·</span>
+        <span className="text-[11px] text-muted font-mono">
           {JOB_TYPE_LABELS[job.type] ?? job.type}
         </span>
       </div>
@@ -567,27 +403,22 @@ function JobCard({ job }: { job: FeedJobListing }) {
       {/* Title */}
       <Link href={`/company/${job.company.slug}`}>
         <h3
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.1rem',
-            color: 'var(--color-ink)',
-            lineHeight: 1.35,
-            marginBottom: job.location ? 'var(--space-xs)' : 'var(--space-md)',
-          }}
+          className="font-serif text-[1.1rem] text-ink leading-[1.35]"
+          style={{ marginBottom: job.location ? 'var(--space-xs)' : 'var(--space-md)' }}
         >
           {job.title}
         </h3>
       </Link>
 
       {job.location && (
-        <p style={{ fontSize: '13px', color: 'var(--color-muted)', marginBottom: 'var(--space-md)' }}>
+        <p className="text-[13px] text-muted mb-md">
           {job.location}
         </p>
       )}
 
       <Link
         href={`/company/${job.company.slug}`}
-        style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-primary)' }}
+        className="text-[13px] font-medium text-primary"
       >
         View opening →
       </Link>
@@ -601,72 +432,54 @@ function RepostCard({ repost, myProfileId }: { repost: FeedRepost; myProfileId?:
   const { reposter, post } = repost
   const author = post.post_author
   return (
-    <article
-      style={{
-        background: 'var(--color-card)',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-md)',
-        padding: 'var(--space-lg)',
-      }}
-    >
+    <article className="bg-card border border-border rounded-md p-lg hover:shadow-sm transition-all">
       {/* Reshared-by row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-md)' }}>
+      <div className="flex items-center gap-sm mb-md">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
           stroke="var(--color-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
         >
           <path d="M17 1l4 4-4 4" /><path d="M3 11V9a4 4 0 0 1 4-4h14" />
           <path d="M7 23l-4-4 4-4" /><path d="M21 13v2a4 4 0 0 1-4 4H3" />
         </svg>
-        <Link href={`/profile/${reposter.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+        <Link href={`/profile/${reposter.slug}`} className="inline-flex shrink-0">
           <Avatar name={reposter.display_name} avatarUrl={reposter.avatar_url} size={18} />
         </Link>
-        <Link href={`/profile/${reposter.slug}`} style={{ fontSize: '12px', color: 'var(--color-secondary)', fontWeight: 500 }}>
+        <Link href={`/profile/${reposter.slug}`} className="text-[12px] text-secondary font-medium">
           {reposter.display_name}
         </Link>
-        <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>reshared</span>
+        <span className="text-[12px] text-muted">reshared</span>
       </div>
 
       {/* Optional comment */}
       {repost.comment && (
-        <p style={{ fontSize: '14px', color: 'var(--color-text)', marginBottom: 'var(--space-md)', fontStyle: 'italic' }}>
+        <p className="text-[14px] text-text mb-md italic">
           &ldquo;{repost.comment}&rdquo;
         </p>
       )}
 
       {/* Original post */}
-      <div style={{
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-sm)',
-        padding: 'var(--space-md)',
-        background: 'var(--color-bg)',
-      }}>
+      <div className="border border-border rounded-sm p-md bg-bg">
         {/* Original author row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
-          <Link href={`/profile/${author.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+        <div className="flex items-center gap-sm mb-sm">
+          <Link href={`/profile/${author.slug}`} className="inline-flex shrink-0">
             <Avatar name={author.display_name} avatarUrl={author.avatar_url} size={24} />
           </Link>
-          <Link href={`/profile/${author.slug}`} style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-text)' }}>
+          <Link href={`/profile/${author.slug}`} className="text-[13px] font-medium text-text">
             {author.display_name}
           </Link>
         </div>
 
         {post.title && (
           <Link href={`/profile/${author.slug}/post/${post.slug}`}>
-            <h3 style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.1rem',
-              color: 'var(--color-ink)',
-              lineHeight: 1.35,
-              marginBottom: 'var(--space-xs)',
-            }}>
+            <h3 className="font-serif text-[1.1rem] text-ink leading-[1.35] mb-xs">
               {post.title}
             </h3>
           </Link>
         )}
-        <p style={{ fontSize: '13px', color: 'var(--color-secondary)', lineHeight: 1.5, marginBottom: 'var(--space-sm)' }}>
+        <p className="text-[13px] text-secondary leading-[1.5] mb-sm">
           {(post.markdown_content ?? '').replace(/^#{1,6}\s+/gm, '').replace(/\*\*?([^*]+)\*\*?/g, '$1').trim().slice(0, 120).trimEnd()}…
         </p>
-        <Link href={`/profile/${author.slug}/post/${post.slug}`} style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-primary)' }}>
+        <Link href={`/profile/${author.slug}/post/${post.slug}`} className="text-[12px] font-medium text-primary">
           Read →
         </Link>
       </div>
@@ -684,76 +497,33 @@ function RightWidgets({
   trendingTags: string[]
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+    <div className="flex flex-col gap-lg">
       {/* People to follow */}
       {suggestedProfiles.length > 0 && (
-        <div
-          style={{
-            background: 'var(--color-card)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              padding: 'var(--space-sm) var(--space-md)',
-              borderBottom: '1px solid var(--color-border)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: 'var(--color-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-              }}
-            >
+        <div className="bg-card border border-border rounded-md overflow-hidden">
+          <div className="py-sm px-md border-b border-border">
+            <span className="font-mono text-[10px] font-semibold text-muted uppercase tracking-[0.06em]">
               People to follow
             </span>
           </div>
-          <div style={{ padding: 'var(--space-sm) 0' }}>
+          <div className="py-sm">
             {suggestedProfiles.map((p) => (
               <div
                 key={p.slug}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--space-sm)',
-                  padding: 'var(--space-xs) var(--space-md)',
-                }}
+                className="flex items-center gap-sm py-xs px-md"
               >
-                <Link href={`/profile/${p.slug}`} style={{ display: 'inline-flex', flexShrink: 0 }}>
+                <Link href={`/profile/${p.slug}`} className="inline-flex shrink-0">
                   <Avatar name={p.display_name} size={28} />
                 </Link>
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="flex-1 min-w-0">
                   <Link
                     href={`/profile/${p.slug}`}
-                    style={{
-                      display: 'block',
-                      fontSize: '12px',
-                      fontWeight: 500,
-                      color: 'var(--color-ink)',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
+                    className="block text-[12px] font-medium text-ink whitespace-nowrap overflow-hidden text-ellipsis"
                   >
                     {p.display_name}
                   </Link>
                   {p.title && (
-                    <span
-                      style={{
-                        fontSize: '11px',
-                        color: 'var(--color-muted)',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: 'block',
-                      }}
-                    >
+                    <span className="block text-[11px] text-muted whitespace-nowrap overflow-hidden text-ellipsis">
                       {p.title}
                     </span>
                   )}
@@ -761,14 +531,10 @@ function RightWidgets({
               </div>
             ))}
           </div>
-          <div style={{ padding: 'var(--space-xs) var(--space-md)', borderTop: '1px solid var(--color-border)' }}>
+          <div className="py-xs px-md border-t border-border">
             <Link
               href="/people"
-              style={{
-                fontSize: '11px',
-                color: 'var(--color-primary)',
-                fontWeight: 500,
-              }}
+              className="text-[11px] text-primary font-medium"
             >
               See all →
             </Link>
@@ -778,46 +544,18 @@ function RightWidgets({
 
       {/* Trending tags */}
       {trendingTags.length > 0 && (
-        <div
-          style={{
-            background: 'var(--color-card)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              padding: 'var(--space-sm) var(--space-md)',
-              borderBottom: '1px solid var(--color-border)',
-            }}
-          >
-            <span
-              style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: 'var(--color-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-              }}
-            >
+        <div className="bg-card border border-border rounded-md overflow-hidden">
+          <div className="py-sm px-md border-b border-border">
+            <span className="font-mono text-[10px] font-semibold text-muted uppercase tracking-[0.06em]">
               Trending tags
             </span>
           </div>
-          <div style={{ padding: 'var(--space-sm) var(--space-md)', display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)' }}>
+          <div className="py-sm px-md flex flex-wrap gap-xs">
             {trendingTags.map((tag) => (
               <Link
                 key={tag}
                 href={`/tags/${tag}`}
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '11px',
-                  color: 'var(--color-primary)',
-                  background: 'var(--color-primary-light)',
-                  borderRadius: 'var(--radius-sm)',
-                  padding: '2px 7px',
-                }}
+                className="font-mono text-[11px] text-primary bg-primary-light rounded-sm py-2xs px-[7px]"
               >
                 #{tag}
               </Link>
@@ -831,52 +569,30 @@ function RightWidgets({
 
 function EmptyFeed({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
-    <div
-      style={{
-        textAlign: 'center',
-        padding: 'var(--space-3xl) 0',
-        color: 'var(--color-muted)',
-      }}
-    >
+    <div className="text-center py-3xl text-muted">
       {isLoggedIn ? (
         <>
-          <p style={{ fontSize: '15px', marginBottom: 'var(--space-sm)', color: 'var(--color-ink)' }}>
+          <p className="text-[15px] mb-sm text-ink">
             Your feed is empty.
           </p>
-          <p style={{ fontSize: '14px', color: 'var(--color-secondary)', marginBottom: 'var(--space-lg)' }}>
+          <p className="text-[14px] text-secondary mb-lg">
             Follow people to see their posts here.
           </p>
           <Link
             href="/people"
-            style={{
-              display: 'inline-block',
-              padding: '10px 24px',
-              background: 'var(--color-primary)',
-              color: '#fff',
-              borderRadius: 'var(--radius-sm)',
-              fontWeight: 600,
-              fontSize: '14px',
-            }}
+            className="inline-block py-[10px] px-lg bg-primary text-white rounded-sm font-semibold text-[14px]"
           >
             Discover people →
           </Link>
         </>
       ) : (
         <>
-          <p style={{ fontSize: '15px', marginBottom: 'var(--space-md)' }}>
+          <p className="text-[15px] mb-md">
             No posts yet. Be the first.
           </p>
           <Link
             href="/auth"
-            style={{
-              display: 'inline-block',
-              padding: '10px 24px',
-              background: 'var(--color-primary)',
-              color: '#fff',
-              borderRadius: 'var(--radius-sm)',
-              fontWeight: 600,
-              fontSize: '14px',
-            }}
+            className="inline-block py-[10px] px-lg bg-primary text-white rounded-sm font-semibold text-[14px]"
           >
             Get started
           </Link>
@@ -1094,42 +810,21 @@ export default async function HomePage() {
       {!isLoggedIn && <LandingHero />}
 
       {isLoggedIn && !hasProfile && (
-        <div
-          style={{
-            marginTop: 'var(--space-xl)',
-            padding: 'var(--space-lg)',
-            background: 'var(--color-primary-light)',
-            border: '1px solid var(--color-primary)',
-            borderRadius: 'var(--radius-md)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 'var(--space-md)',
-            flexWrap: 'wrap',
-          }}
-        >
+        <div className="mt-xl p-lg bg-primary-light border border-primary rounded-md flex items-center justify-between gap-md flex-wrap">
           <div>
-            <p style={{ fontWeight: 600, color: 'var(--color-ink)', marginBottom: '2px' }}>
+            <p className="font-semibold text-ink mb-2xs">
               Welcome to linked.md!
             </p>
-            <p style={{ fontSize: '14px', color: 'var(--color-secondary)' }}>
+            <p className="text-[14px] text-secondary">
               Set up your profile to get started. Your profile will live at{' '}
-              <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-primary)' }}>
+              <span className="font-mono text-primary">
                 /profile/your-name.md
               </span>
             </p>
           </div>
           <Link
             href="/editor"
-            style={{
-              padding: '8px 20px',
-              background: 'var(--color-primary)',
-              color: '#fff',
-              borderRadius: 'var(--radius-sm)',
-              fontWeight: 600,
-              fontSize: '14px',
-              flexShrink: 0,
-            }}
+            className="py-sm px-[20px] bg-primary text-white rounded-sm font-semibold text-[14px] shrink-0"
           >
             Create your profile →
           </Link>
@@ -1138,22 +833,13 @@ export default async function HomePage() {
 
       {/* Feed layout: sidebar + posts (+ right widgets when logged in) */}
       <div
-        style={{
-          display: 'flex',
-          gap: 'var(--space-xl)',
-          alignItems: 'flex-start',
-          paddingTop: isLoggedIn ? 'var(--space-xl)' : 0,
-        }}
+        className="flex gap-xl items-start"
+        style={{ paddingTop: isLoggedIn ? 'var(--space-xl)' : 0 }}
       >
         {/* Left sidebar — only for logged-in users with a profile */}
         {isLoggedIn && currentProfile && (
           <aside
-            style={{
-              width: '220px',
-              flexShrink: 0,
-              display: 'none', // hidden on mobile via CSS; override in layout
-            }}
-            className="home-sidebar"
+            className="home-sidebar w-[220px] shrink-0 hidden"
           >
             <UserSidebar
               profile={currentProfile}
@@ -1164,30 +850,15 @@ export default async function HomePage() {
         )}
 
         {/* Main feed */}
-        <main style={{ flex: 1, minWidth: 0 }}>
+        <main className="flex-1 min-w-0">
           {/* Write a post button — visible on mobile or when no sidebar */}
           {isLoggedIn && (
             <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                marginBottom: 'var(--space-lg)',
-                borderBottom: '1px solid var(--color-border)',
-                paddingBottom: 'var(--space-lg)',
-              }}
-              className="feed-write-btn"
+              className="feed-write-btn flex justify-end mb-lg border-b border-border pb-lg"
             >
               <Link
                 href="/post/new"
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: 'var(--color-primary)',
-                  padding: '6px 14px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--color-primary-light)',
-                  border: '1px solid var(--color-primary)',
-                }}
+                className="text-[13px] font-medium text-primary py-[6px] px-[14px] rounded-sm bg-primary-light border border-primary"
               >
                 + Write a post
               </Link>
@@ -1200,10 +871,29 @@ export default async function HomePage() {
               ...feedJobs,
               ...feedReposts,
             ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            return feedItems.length === 0 ? (
-              <EmptyFeed isLoggedIn={isLoggedIn} />
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+            if (feedItems.length === 0) return <EmptyFeed isLoggedIn={isLoggedIn} />
+
+            // Logged-out: bento grid layout
+            if (!isLoggedIn) {
+              let firstPostIndex = 0
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-[20px]">
+                  {feedItems.map((item) => {
+                    if ('feed_type' in item) {
+                      if (item.feed_type === 'job') return <JobCard key={`job-${item.id}`} job={item as FeedJobListing} />
+                      if (item.feed_type === 'repost') return <RepostCard key={`repost-${item.id}`} repost={item as FeedRepost} myProfileId={myProfileId} />
+                    }
+                    const isFeatured = firstPostIndex === 0
+                    firstPostIndex++
+                    return <PostCard key={item.id} post={item as FeedPost} myProfileId={myProfileId} featured={isFeatured} />
+                  })}
+                </div>
+              )
+            }
+
+            // Logged-in: keep linear feed
+            return (
+              <div className="flex flex-col gap-lg">
                 {feedItems.map((item) => {
                   if ('feed_type' in item) {
                     if (item.feed_type === 'job') return <JobCard key={`job-${item.id}`} job={item as FeedJobListing} />
@@ -1219,14 +909,7 @@ export default async function HomePage() {
         {/* Right widgets — only for logged-in users on desktop */}
         {isLoggedIn && (suggestedProfiles.length > 0 || trendingTags.length > 0) && (
           <aside
-            style={{
-              width: '200px',
-              flexShrink: 0,
-              display: 'none', // hidden on mobile
-              position: 'sticky',
-              top: '72px',
-            }}
-            className="home-sidebar"
+            className="home-sidebar w-[200px] shrink-0 hidden sticky top-[72px]"
           >
             <RightWidgets
               suggestedProfiles={suggestedProfiles}

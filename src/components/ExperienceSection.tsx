@@ -10,33 +10,18 @@ export default function ExperienceSection({ experience }: Props) {
   if (experience.length === 0) return null
 
   return (
-    <section style={{ marginBottom: '2rem' }}>
-      <h2
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '1.25rem',
-          fontWeight: 600,
-          color: 'var(--color-ink)',
-          marginBottom: '1.25rem',
-          letterSpacing: '-0.01em',
-        }}
-      >
+    <section className="mb-[2rem]">
+      <h2 className="font-serif text-[1.25rem] font-semibold text-ink mb-[1.25rem] tracking-[-0.01em]">
         Experience
       </h2>
 
       {/* Timeline */}
-      <div style={{ position: 'relative', paddingLeft: '20px' }}>
+      <div className="relative pl-[20px]">
         {/* Vertical spine */}
         <div
           aria-hidden
-          style={{
-            position: 'absolute',
-            left: '6px',
-            top: '8px',
-            bottom: '8px',
-            width: '1px',
-            background: 'linear-gradient(to bottom, var(--color-primary), var(--color-border))',
-          }}
+          className="absolute left-[6px] top-[8px] bottom-[8px] w-px"
+          style={{ background: 'linear-gradient(to bottom, var(--color-primary), var(--color-border))' }}
         />
 
         {experience.map((entry, idx) => {
@@ -46,80 +31,30 @@ export default function ExperienceSection({ experience }: Props) {
           return (
             <div
               key={entry.id}
-              style={{
-                position: 'relative',
-                paddingBottom: isLast ? 0 : '1.5rem',
-              }}
+              className="relative"
+              style={{ paddingBottom: isLast ? 0 : '1.5rem' }}
             >
               {/* Timeline dot */}
               <div
                 aria-hidden
+                className="absolute left-[-20px] top-[7px] w-[13px] h-[13px] rounded-full transition-[border-color] duration-150 z-[1]"
                 style={{
-                  position: 'absolute',
-                  left: '-20px',
-                  top: '7px',
-                  width: '13px',
-                  height: '13px',
-                  borderRadius: '50%',
                   background: entry.is_current ? 'var(--color-primary)' : 'var(--color-card)',
                   border: `2px solid ${entry.is_current ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                  transition: 'border-color 150ms ease',
-                  zIndex: 1,
                 }}
               />
 
               {/* Entry card */}
               <div
-                style={{
-                  background: 'var(--color-card)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '14px 16px',
-                  transition: 'border-color 150ms ease',
-                }}
-                onMouseEnter={e => {
-                  ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--color-primary)'
-                }}
-                onMouseLeave={e => {
-                  ;(e.currentTarget as HTMLDivElement).style.borderColor = 'var(--color-border)'
-                }}
+                className="bg-card border border-border rounded-md py-[14px] px-[16px] transition-[border-color] duration-150 hover:border-primary"
               >
                 {/* Top row: title + current badge */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'space-between',
-                    gap: '8px',
-                    marginBottom: '4px',
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: '0.9375rem',
-                      fontWeight: 600,
-                      color: 'var(--color-ink)',
-                      lineHeight: 1.3,
-                    }}
-                  >
+                <div className="flex items-start justify-between gap-[8px] mb-[4px]">
+                  <span className="text-[0.9375rem] font-semibold text-ink leading-[1.3]">
                     {entry.title}
                   </span>
                   {entry.is_current && (
-                    <span
-                      style={{
-                        flexShrink: 0,
-                        fontSize: '10px',
-                        fontWeight: 600,
-                        fontFamily: 'var(--font-mono)',
-                        color: 'var(--color-primary)',
-                        background: 'var(--color-primary-light)',
-                        padding: '2px 7px',
-                        borderRadius: 'var(--radius-full)',
-                        letterSpacing: '0.04em',
-                        textTransform: 'uppercase',
-                        border: '1px solid var(--color-primary)',
-                      }}
-                    >
+                    <span className="shrink-0 text-[10px] font-semibold font-mono text-primary bg-primary-light py-[2px] px-[7px] rounded-full tracking-[0.04em] uppercase border border-primary">
                       now
                     </span>
                   )}
@@ -127,63 +62,26 @@ export default function ExperienceSection({ experience }: Props) {
 
                 {/* Company + period row */}
                 <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: '8px',
-                    flexWrap: 'wrap',
-                    marginBottom: entry.description ? '10px' : 0,
-                  }}
+                  className="flex items-baseline gap-[8px] flex-wrap"
+                  style={{ marginBottom: entry.description ? '10px' : 0 }}
                 >
                   {entry.company_slug ? (
                     <Link
                       href={`/company/${entry.company_slug}`}
-                      style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontStyle: 'italic',
-                        fontSize: '0.9375rem',
-                        color: 'var(--color-primary)',
-                        textDecoration: 'none',
-                        lineHeight: 1.3,
-                      }}
-                      onMouseEnter={e => { ;(e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline' }}
-                      onMouseLeave={e => { ;(e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none' }}
+                      className="font-serif italic text-[0.9375rem] text-primary no-underline leading-[1.3] hover:underline"
                     >
                       {entry.company_name}
                     </Link>
                   ) : (
-                    <span
-                      style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontStyle: 'italic',
-                        fontSize: '0.9375rem',
-                        color: 'var(--color-secondary)',
-                        lineHeight: 1.3,
-                      }}
-                    >
+                    <span className="font-serif italic text-[0.9375rem] text-secondary leading-[1.3]">
                       {entry.company_name}
                     </span>
                   )}
 
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '11px',
-                      color: 'var(--color-muted)',
-                      letterSpacing: '0.01em',
-                    }}
-                  >
+                  <span className="font-mono text-[11px] text-muted tracking-[0.01em]">
                     {formatPeriod(entry)}
                     {duration && (
-                      <span
-                        style={{
-                          marginLeft: '5px',
-                          padding: '1px 5px',
-                          background: 'var(--color-bg)',
-                          borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--color-border)',
-                        }}
-                      >
+                      <span className="ml-[5px] py-[1px] px-[5px] bg-bg rounded-sm border border-border">
                         {duration}
                       </span>
                     )}
@@ -192,14 +90,7 @@ export default function ExperienceSection({ experience }: Props) {
 
                 {/* Description */}
                 {entry.description && (
-                  <p
-                    style={{
-                      fontSize: '13px',
-                      color: 'var(--color-secondary)',
-                      lineHeight: 1.6,
-                      margin: 0,
-                    }}
-                  >
+                  <p className="text-[13px] text-secondary leading-[1.6] m-0">
                     {entry.description}
                   </p>
                 )}
