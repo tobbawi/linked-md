@@ -3,6 +3,8 @@ import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import Avatar from '@/components/Avatar'
 import type { Profile } from '@/types'
 
+export const revalidate = 120 // ISR: revalidate every 2 minutes
+
 export default async function PeoplePage() {
   const supabase = createServerClient()
 

@@ -3,6 +3,8 @@ import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import Avatar from '@/components/Avatar'
 import type { Company } from '@/types'
 
+export const revalidate = 120 // ISR: revalidate every 2 minutes
+
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
     month: 'short',
