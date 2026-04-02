@@ -6,6 +6,8 @@ import { cookies } from 'next/headers'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+// Connection pooler URL (pgBouncer) — use for server-side queries to avoid connection exhaustion
+const poolerUrl = process.env.SUPABASE_POOLER_URL || supabaseUrl
 
 // Server client (service role) — for use in API routes and server components
 export function createServerClient() {
