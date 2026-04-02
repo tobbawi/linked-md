@@ -172,8 +172,9 @@ export default async function CompanyPage({ params }: PageProps) {
   const slug = params.slug
 
   return (
-    <div className="pt-xl pb-3xl">
+    <div>
       <FilepathBar path={"/company/" + slug + ".md"} href={"/company/" + slug + ".md"} />
+      <div className="pt-xl pb-3xl">
       <div className="flex gap-xl items-start">
         {/* Left sidebar */}
         <aside className="w-[240px] shrink-0">
@@ -461,6 +462,7 @@ export default async function CompanyPage({ params }: PageProps) {
             </a>
           </div>
         </main>
+      </div>
       </div>
     </div>
   )
