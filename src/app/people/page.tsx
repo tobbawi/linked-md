@@ -33,38 +33,15 @@ export default async function PeoplePage() {
   const allProfiles = profiles ?? []
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--color-border)',
-          marginBottom: 'var(--space-lg)',
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.25rem',
-            color: 'var(--color-ink)',
-          }}
-        >
+    <div className="pt-xl pb-3xl">
+      <div className="flex items-center justify-between pb-lg border-b border-border mb-lg">
+        <h1 className="font-serif text-[1.25rem] text-ink">
           People
         </h1>
         {isLoggedIn && (
           <Link
             href="/editor"
-            style={{
-              fontSize: '13px',
-              fontWeight: 500,
-              color: 'var(--color-primary)',
-              padding: '6px 14px',
-              borderRadius: 'var(--radius-sm)',
-              background: 'var(--color-primary-light)',
-              border: '1px solid var(--color-primary)',
-            }}
+            className="text-[13px] font-medium text-primary py-[6px] px-[14px] rounded-sm bg-primary-light border border-primary"
           >
             Edit your profile
           </Link>
@@ -72,81 +49,58 @@ export default async function PeoplePage() {
       </div>
 
       {allProfiles.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0', color: 'var(--color-muted)' }}>
-          <p style={{ fontSize: '15px' }}>No profiles yet.</p>
+        <div className="text-center py-3xl text-muted">
+          <p className="text-[15px]">No profiles yet.</p>
         </div>
       ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: 'var(--space-md)',
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-md">
           {allProfiles.map((profile) => {
             const followers = followerMap.get(profile.id) ?? 0
             return (
               <Link
                 key={profile.id}
                 href={`/profile/${profile.slug}`}
-                style={{ textDecoration: 'none' }}
+                className="no-underline"
               >
                 <div className="company-card">
                   {/* Avatar */}
-                  <div style={{ marginBottom: 'var(--space-sm)' }}>
+                  <div className="mb-sm">
                     <Avatar name={profile.display_name} avatarUrl={profile.avatar_url} size={40} />
                   </div>
 
                   <h2
+                    className="font-serif text-[1rem] text-ink leading-[1.3]"
                     style={{
-                      fontFamily: 'var(--font-serif)',
-                      fontSize: '1rem',
-                      color: 'var(--color-ink)',
                       marginBottom: profile.title ? '2px' : 'var(--space-xs)',
-                      lineHeight: 1.3,
                     }}
                   >
                     {profile.display_name}
                   </h2>
 
                   {profile.title && (
-                    <p style={{ fontSize: '12px', color: 'var(--color-text)', fontWeight: 500, marginBottom: '2px' }}>
+                    <p className="text-[12px] text-text font-medium mb-[2px]">
                       {profile.title}
                     </p>
                   )}
 
                   {profile.location && (
-                    <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginBottom: 'var(--space-xs)' }}>
+                    <p className="text-[11px] text-muted mb-xs">
                       {profile.location}
                     </p>
                   )}
 
                   {profile.bio && !profile.title && (
-                    <p
-                      style={{
-                        fontSize: '13px',
-                        color: 'var(--color-secondary)',
-                        lineHeight: 1.4,
-                        marginBottom: 'var(--space-sm)',
-                      }}
-                    >
+                    <p className="text-[13px] text-secondary leading-[1.4] mb-sm">
                       {profile.bio}
                     </p>
                   )}
 
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginTop: 'var(--space-sm)',
-                    }}
-                  >
-                    <span className="md-url" style={{ fontSize: '11px' }}>
+                  <div className="flex items-center justify-between mt-sm">
+                    <span className="md-url text-[11px]">
                       /profile/{profile.slug}.md
                     </span>
                     {followers > 0 && (
-                      <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                      <span className="text-[12px] text-muted">
                         {followers} {followers === 1 ? 'follower' : 'followers'}
                       </span>
                     )}

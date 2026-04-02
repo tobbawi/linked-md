@@ -152,7 +152,7 @@ export default function MessageThreadPage() {
 
   if (loading) {
     return (
-      <div style={{ paddingTop: 'var(--space-3xl)', textAlign: 'center', color: 'var(--color-muted)' }}>
+      <div className="pt-3xl text-center text-muted">
         Loading…
       </div>
     )
@@ -160,9 +160,9 @@ export default function MessageThreadPage() {
 
   if (error) {
     return (
-      <div style={{ paddingTop: 'var(--space-xl)', maxWidth: '640px', margin: '0 auto' }}>
-        <p style={{ color: 'var(--color-muted)', fontSize: '15px' }}>{error}</p>
-        <Link href="/messages" style={{ fontSize: '13px', color: 'var(--color-primary)' }}>← Back to messages</Link>
+      <div className="pt-xl max-w-[640px] mx-auto">
+        <p className="text-muted text-[15px]">{error}</p>
+        <Link href="/messages" className="text-[13px] text-primary">← Back to messages</Link>
       </div>
     )
   }
@@ -180,29 +180,10 @@ export default function MessageThreadPage() {
   }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: 'calc(100vh - 64px)',
-        maxWidth: '640px',
-        margin: '0 auto',
-        paddingTop: 'var(--space-md)',
-      }}
-    >
+    <div className="flex flex-col h-[calc(100vh-64px)] max-w-[640px] mx-auto pt-md">
       {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--space-md)',
-          padding: 'var(--space-md) 0',
-          borderBottom: '1px solid var(--color-border)',
-          marginBottom: 'var(--space-md)',
-          flexShrink: 0,
-        }}
-      >
-        <Link href="/messages" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+      <div className="flex items-center gap-md py-md border-b border-border mb-md shrink-0">
+        <Link href="/messages" className="text-[13px] text-secondary">
           ←
         </Link>
         {otherProfile && (
@@ -210,7 +191,7 @@ export default function MessageThreadPage() {
             <Avatar name={otherProfile.display_name} avatarUrl={otherProfile.avatar_url} size={36} />
             <Link
               href={`/profile/${otherProfile.slug}`}
-              style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-ink)' }}
+              className="text-[15px] font-semibold text-ink"
             >
               {otherProfile.display_name}
             </Link>
@@ -219,18 +200,9 @@ export default function MessageThreadPage() {
       </div>
 
       {/* Messages */}
-      <div
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--space-xs)',
-          paddingBottom: 'var(--space-md)',
-        }}
-      >
+      <div className="flex-1 overflow-y-auto flex flex-col gap-xs pb-md">
         {messages.length === 0 && (
-          <p style={{ textAlign: 'center', color: 'var(--color-muted)', fontSize: '14px', marginTop: 'var(--space-xl)' }}>
+          <p className="text-center text-muted text-[14px] mt-xl">
             Say hello 👋
           </p>
         )}
@@ -238,14 +210,7 @@ export default function MessageThreadPage() {
         {grouped.map(group => (
           <div key={group.date}>
             {/* Date divider */}
-            <div
-              style={{
-                textAlign: 'center',
-                fontSize: '11px',
-                color: 'var(--color-muted)',
-                margin: 'var(--space-md) 0 var(--space-sm)',
-              }}
-            >
+            <div className="text-center text-[11px] text-muted my-md mb-sm">
               {group.date}
             </div>
 
@@ -257,38 +222,26 @@ export default function MessageThreadPage() {
               return (
                 <div
                   key={msg.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: isMe ? 'flex-end' : 'flex-start',
-                    marginTop: isContinuation ? '2px' : 'var(--space-sm)',
-                    paddingLeft: isMe ? 'var(--space-3xl)' : 0,
-                    paddingRight: isMe ? 0 : 'var(--space-3xl)',
-                  }}
+                  className={isMe ? 'flex justify-end pl-3xl' : 'flex justify-start pr-3xl'}
+                  style={{ marginTop: isContinuation ? '2px' : 'var(--space-sm)' }}
                 >
                   <div
+                    className="max-w-[80%] py-[8px] px-[12px] text-[14px] leading-[1.5] whitespace-pre-wrap break-words"
                     style={{
-                      maxWidth: '80%',
-                      padding: '8px 12px',
                       borderRadius: isMe
                         ? `var(--radius-md) var(--radius-md) 4px var(--radius-md)`
                         : `var(--radius-md) var(--radius-md) var(--radius-md) 4px`,
                       background: isMe ? 'var(--color-primary)' : 'var(--color-card)',
                       border: isMe ? 'none' : '1px solid var(--color-border)',
                       color: isMe ? '#fff' : 'var(--color-ink)',
-                      fontSize: '14px',
-                      lineHeight: 1.5,
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-word',
                       opacity: msg.id.startsWith('temp-') ? 0.6 : 1,
                     }}
                   >
                     {msg.body}
                     <div
+                      className="text-[10px] mt-[4px] text-right"
                       style={{
-                        fontSize: '10px',
-                        marginTop: '4px',
                         color: isMe ? 'rgba(255,255,255,0.6)' : 'var(--color-muted)',
-                        textAlign: 'right',
                       }}
                     >
                       {formatTime(msg.created_at)}
@@ -306,15 +259,7 @@ export default function MessageThreadPage() {
       {/* Input */}
       <form
         onSubmit={handleSend}
-        style={{
-          flexShrink: 0,
-          borderTop: '1px solid var(--color-border)',
-          paddingTop: 'var(--space-md)',
-          paddingBottom: 'var(--space-md)',
-          display: 'flex',
-          gap: 'var(--space-sm)',
-          alignItems: 'flex-end',
-        }}
+        className="shrink-0 border-t border-border pt-md pb-md flex gap-sm items-end"
       >
         <textarea
           ref={inputRef}
@@ -323,35 +268,15 @@ export default function MessageThreadPage() {
           onKeyDown={handleKeyDown}
           placeholder="Message…"
           rows={1}
-          style={{
-            flex: 1,
-            padding: '10px 14px',
-            fontSize: '14px',
-            background: 'var(--color-card)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            color: 'var(--color-ink)',
-            resize: 'none',
-            lineHeight: 1.5,
-            maxHeight: '120px',
-            overflowY: 'auto',
-          }}
+          className="flex-1 py-[10px] px-[14px] text-[14px] bg-card border border-border rounded-md text-ink resize-none leading-[1.5] max-h-[120px] overflow-y-auto"
         />
         <button
           type="submit"
           disabled={!body.trim() || sending}
+          className="py-[10px] px-[16px] text-[13px] font-medium bg-primary text-white border-none rounded-md shrink-0 transition-opacity duration-150"
           style={{
-            padding: '10px 16px',
-            fontSize: '13px',
-            fontWeight: 500,
-            background: 'var(--color-primary)',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 'var(--radius-md)',
             cursor: !body.trim() || sending ? 'not-allowed' : 'pointer',
             opacity: !body.trim() || sending ? 0.5 : 1,
-            flexShrink: 0,
-            transition: 'opacity 150ms ease',
           }}
         >
           Send

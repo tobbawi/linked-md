@@ -120,34 +120,26 @@ function ExperienceEntryRow({ entry, index, total, onChange, onRemove, onMove }:
     { v: 10, l: 'Oct' }, { v: 11, l: 'Nov' }, { v: 12, l: 'Dec' },
   ]
 
-  const fieldStyle: React.CSSProperties = {
-    padding: '6px 10px',
-    fontSize: '13px',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-sm)',
-    background: 'var(--color-bg)',
-    color: 'var(--color-text)',
-    width: '100%',
-  }
+  const fieldCls = "py-[6px] px-[10px] text-[13px] border border-border rounded-sm bg-bg text-text w-full"
 
   return (
-    <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-md)', background: 'var(--color-bg)', marginBottom: 'var(--space-sm)' }}>
-      <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'flex-start', marginBottom: 'var(--space-sm)' }}>
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)' }}>
+    <div className="border border-border rounded-md p-md bg-bg mb-sm">
+      <div className="flex gap-sm items-start mb-sm">
+        <div className="flex-1 grid grid-cols-2 gap-sm">
           {/* Title */}
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-muted)', display: 'block', marginBottom: '3px' }}>Job title</label>
+            <label className="text-[11px] font-medium text-muted block mb-[3px]">Job title</label>
             <input
               value={entry.title}
               onChange={e => onChange(index, { title: e.target.value })}
               placeholder="Software Engineer"
-              style={fieldStyle}
+              className={fieldCls}
             />
           </div>
 
           {/* Company */}
-          <div style={{ position: 'relative' }}>
-            <label style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-muted)', display: 'block', marginBottom: '3px' }}>Company</label>
+          <div className="relative">
+            <label className="text-[11px] font-medium text-muted block mb-[3px]">Company</label>
             <input
               value={companyQuery}
               onChange={e => {
@@ -156,7 +148,7 @@ function ExperienceEntryRow({ entry, index, total, onChange, onRemove, onMove }:
               }}
               onKeyDown={autocomplete.handleKey}
               placeholder="Acme Corp"
-              style={fieldStyle}
+              className={fieldCls}
               autoComplete="off"
             />
             {autocomplete.results.length > 0 && (
@@ -167,7 +159,7 @@ function ExperienceEntryRow({ entry, index, total, onChange, onRemove, onMove }:
               />
             )}
             {entry.company_slug && (
-              <span style={{ fontSize: '10px', color: 'var(--color-primary)', marginTop: '2px', display: 'block' }}>
+              <span className="text-[10px] text-primary mt-[2px] block">
                 linked to /company/{entry.company_slug}
               </span>
             )}
@@ -175,44 +167,46 @@ function ExperienceEntryRow({ entry, index, total, onChange, onRemove, onMove }:
         </div>
 
         {/* Controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
+        <div className="flex flex-col gap-[2px] shrink-0">
           <button
             type="button"
             onClick={() => onMove(index, -1)}
             disabled={index === 0}
             title="Move up"
-            style={{ padding: '3px 6px', fontSize: '11px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: 'none', cursor: index === 0 ? 'default' : 'pointer', opacity: index === 0 ? 0.3 : 1 }}
+            className="py-[3px] px-[6px] text-[11px] border border-border rounded-sm bg-transparent"
+            style={{ cursor: index === 0 ? 'default' : 'pointer', opacity: index === 0 ? 0.3 : 1 }}
           >↑</button>
           <button
             type="button"
             onClick={() => onMove(index, 1)}
             disabled={index === total - 1}
             title="Move down"
-            style={{ padding: '3px 6px', fontSize: '11px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: 'none', cursor: index === total - 1 ? 'default' : 'pointer', opacity: index === total - 1 ? 0.3 : 1 }}
+            className="py-[3px] px-[6px] text-[11px] border border-border rounded-sm bg-transparent"
+            style={{ cursor: index === total - 1 ? 'default' : 'pointer', opacity: index === total - 1 ? 0.3 : 1 }}
           >↓</button>
           <button
             type="button"
             onClick={() => onRemove(index)}
             title="Remove"
-            style={{ padding: '3px 6px', fontSize: '11px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: 'none', cursor: 'pointer', color: 'var(--color-error, #dc2626)' }}
+            className="py-[3px] px-[6px] text-[11px] border border-border rounded-sm bg-transparent cursor-pointer text-error"
           >✕</button>
         </div>
       </div>
 
       {/* Dates row */}
-      <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-          <span style={{ fontSize: '11px', color: 'var(--color-muted)', whiteSpace: 'nowrap' }}>From</span>
-          <select value={entry.start_month ?? ''} onChange={e => onChange(index, { start_month: e.target.value ? Number(e.target.value) : null })} style={{ ...fieldStyle, width: 'auto' }}>
+      <div className="flex gap-sm items-center flex-wrap">
+        <div className="flex gap-[4px] items-center">
+          <span className="text-[11px] text-muted whitespace-nowrap">From</span>
+          <select value={entry.start_month ?? ''} onChange={e => onChange(index, { start_month: e.target.value ? Number(e.target.value) : null })} className={`${fieldCls} !w-auto`}>
             <option value="">–</option>
             {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
           </select>
-          <select value={entry.start_year} onChange={e => onChange(index, { start_year: Number(e.target.value) })} style={{ ...fieldStyle, width: 'auto' }}>
+          <select value={entry.start_year} onChange={e => onChange(index, { start_year: Number(e.target.value) })} className={`${fieldCls} !w-auto`}>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--color-text)', cursor: 'pointer', userSelect: 'none' }}>
+        <label className="flex items-center gap-[4px] text-[12px] text-text cursor-pointer select-none">
           <input
             type="checkbox"
             checked={entry.is_current}
@@ -222,13 +216,13 @@ function ExperienceEntryRow({ entry, index, total, onChange, onRemove, onMove }:
         </label>
 
         {!entry.is_current && (
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted)', whiteSpace: 'nowrap' }}>To</span>
-            <select value={entry.end_month ?? ''} onChange={e => onChange(index, { end_month: e.target.value ? Number(e.target.value) : null })} style={{ ...fieldStyle, width: 'auto' }}>
+          <div className="flex gap-[4px] items-center">
+            <span className="text-[11px] text-muted whitespace-nowrap">To</span>
+            <select value={entry.end_month ?? ''} onChange={e => onChange(index, { end_month: e.target.value ? Number(e.target.value) : null })} className={`${fieldCls} !w-auto`}>
               <option value="">–</option>
               {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
             </select>
-            <select value={entry.end_year ?? ''} onChange={e => onChange(index, { end_year: e.target.value ? Number(e.target.value) : null })} style={{ ...fieldStyle, width: 'auto' }}>
+            <select value={entry.end_year ?? ''} onChange={e => onChange(index, { end_year: e.target.value ? Number(e.target.value) : null })} className={`${fieldCls} !w-auto`}>
               <option value="">–</option>
               {years.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
@@ -237,12 +231,12 @@ function ExperienceEntryRow({ entry, index, total, onChange, onRemove, onMove }:
       </div>
 
       {/* Description */}
-      <div style={{ marginTop: 'var(--space-sm)' }}>
+      <div className="mt-sm">
         <input
           value={entry.description ?? ''}
           onChange={e => onChange(index, { description: e.target.value || null })}
           placeholder="Description (optional)"
-          style={fieldStyle}
+          className={fieldCls}
         />
       </div>
     </div>
@@ -285,80 +279,72 @@ function EducationEntryRow({ entry, index, total, onChange, onRemove, onMove }: 
     { v: 7, l: 'Jul' }, { v: 8, l: 'Aug' }, { v: 9, l: 'Sep' },
     { v: 10, l: 'Oct' }, { v: 11, l: 'Nov' }, { v: 12, l: 'Dec' },
   ]
-  const fieldStyle: React.CSSProperties = {
-    padding: '6px 10px',
-    fontSize: '13px',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-sm)',
-    background: 'var(--color-bg)',
-    color: 'var(--color-text)',
-    width: '100%',
-  }
+  const fieldCls = "py-[6px] px-[10px] text-[13px] border border-border rounded-sm bg-bg text-text w-full"
 
   return (
-    <div style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-md)', background: 'var(--color-bg)', marginBottom: 'var(--space-sm)' }}>
-      <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'flex-start', marginBottom: 'var(--space-sm)' }}>
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-sm)' }}>
+    <div className="border border-border rounded-md p-md bg-bg mb-sm">
+      <div className="flex gap-sm items-start mb-sm">
+        <div className="flex-1 grid grid-cols-2 gap-sm">
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-muted)', display: 'block', marginBottom: '3px' }}>School</label>
+            <label className="text-[11px] font-medium text-muted block mb-[3px]">School</label>
             <input
               value={entry.school}
               onChange={e => onChange(index, { school: e.target.value })}
               placeholder="MIT"
-              style={fieldStyle}
+              className={fieldCls}
             />
           </div>
           <div>
-            <label style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-muted)', display: 'block', marginBottom: '3px' }}>Degree</label>
+            <label className="text-[11px] font-medium text-muted block mb-[3px]">Degree</label>
             <input
               value={entry.degree ?? ''}
               onChange={e => onChange(index, { degree: e.target.value || null })}
               placeholder="BS, MS, PhD…"
-              style={fieldStyle}
+              className={fieldCls}
             />
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', flexShrink: 0 }}>
-          <button type="button" onClick={() => onMove(index, -1)} disabled={index === 0} title="Move up" style={{ padding: '3px 6px', fontSize: '11px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: 'none', cursor: index === 0 ? 'default' : 'pointer', opacity: index === 0 ? 0.3 : 1 }}>↑</button>
-          <button type="button" onClick={() => onMove(index, 1)} disabled={index === total - 1} title="Move down" style={{ padding: '3px 6px', fontSize: '11px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: 'none', cursor: index === total - 1 ? 'default' : 'pointer', opacity: index === total - 1 ? 0.3 : 1 }}>↓</button>
-          <button type="button" onClick={() => onRemove(index)} title="Remove" style={{ padding: '3px 6px', fontSize: '11px', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', background: 'none', cursor: 'pointer', color: 'var(--color-error, #dc2626)' }}>✕</button>
+        <div className="flex flex-col gap-[2px] shrink-0">
+          <button type="button" onClick={() => onMove(index, -1)} disabled={index === 0} title="Move up" className="py-[3px] px-[6px] text-[11px] border border-border rounded-sm bg-transparent" style={{ cursor: index === 0 ? 'default' : 'pointer', opacity: index === 0 ? 0.3 : 1 }}>↑</button>
+          <button type="button" onClick={() => onMove(index, 1)} disabled={index === total - 1} title="Move down" className="py-[3px] px-[6px] text-[11px] border border-border rounded-sm bg-transparent" style={{ cursor: index === total - 1 ? 'default' : 'pointer', opacity: index === total - 1 ? 0.3 : 1 }}>↓</button>
+          <button type="button" onClick={() => onRemove(index)} title="Remove" className="py-[3px] px-[6px] text-[11px] border border-border rounded-sm bg-transparent cursor-pointer text-error">✕</button>
         </div>
       </div>
 
-      <div style={{ marginBottom: 'var(--space-sm)' }}>
+      <div className="mb-sm">
         <input
           value={entry.field_of_study ?? ''}
           onChange={e => onChange(index, { field_of_study: e.target.value || null })}
           placeholder="Field of study (optional)"
-          style={fieldStyle}
+          className={fieldCls}
         />
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-          <span style={{ fontSize: '11px', color: 'var(--color-muted)', whiteSpace: 'nowrap' }}>From</span>
-          <select value={entry.start_month ?? ''} onChange={e => onChange(index, { start_month: e.target.value ? Number(e.target.value) : null })} style={{ ...fieldStyle, width: 'auto' }}>
+      <div className="flex gap-sm items-center flex-wrap">
+        <div className="flex gap-[4px] items-center">
+          <span className="text-[11px] text-muted whitespace-nowrap">From</span>
+          <select value={entry.start_month ?? ''} onChange={e => onChange(index, { start_month: e.target.value ? Number(e.target.value) : null })} className={`${fieldCls} !w-auto`}>
             <option value="">–</option>
             {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
           </select>
-          <select value={entry.start_year} onChange={e => onChange(index, { start_year: Number(e.target.value) })} style={{ ...fieldStyle, width: 'auto' }}>
+          <select value={entry.start_year} onChange={e => onChange(index, { start_year: Number(e.target.value) })} className={`${fieldCls} !w-auto`}>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
 
-        <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: 'var(--color-text)', cursor: 'pointer', userSelect: 'none' }}>
+        <label className="flex items-center gap-[4px] text-[12px] text-text cursor-pointer select-none">
           <input type="checkbox" checked={entry.is_current} onChange={e => onChange(index, { is_current: e.target.checked, end_year: null, end_month: null })} />
           Current
         </label>
 
         {!entry.is_current && (
-          <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted)', whiteSpace: 'nowrap' }}>To</span>
-            <select value={entry.end_month ?? ''} onChange={e => onChange(index, { end_month: e.target.value ? Number(e.target.value) : null })} style={{ ...fieldStyle, width: 'auto' }}>
+          <div className="flex gap-[4px] items-center">
+            <span className="text-[11px] text-muted whitespace-nowrap">To</span>
+            <select value={entry.end_month ?? ''} onChange={e => onChange(index, { end_month: e.target.value ? Number(e.target.value) : null })} className={`${fieldCls} !w-auto`}>
               <option value="">–</option>
               {months.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
             </select>
-            <select value={entry.end_year ?? ''} onChange={e => onChange(index, { end_year: e.target.value ? Number(e.target.value) : null })} style={{ ...fieldStyle, width: 'auto' }}>
+            <select value={entry.end_year ?? ''} onChange={e => onChange(index, { end_year: e.target.value ? Number(e.target.value) : null })} className={`${fieldCls} !w-auto`}>
               <option value="">–</option>
               {years.map(y => <option key={y} value={y}>{y}</option>)}
             </select>
@@ -575,109 +561,62 @@ export default function EditorPage() {
 
   if (!authChecked) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'calc(100vh - 56px)',
-          color: 'var(--color-muted)',
-          fontSize: '15px',
-        }}
-      >
+      <div className="flex items-center justify-center h-[calc(100vh-56px)] text-muted text-[15px]">
         Loading…
       </div>
     )
   }
 
   return (
-    <div style={{ paddingTop: 'var(--space-lg)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-lg pb-3xl">
       {isNewProfile && (
-        <div
-          style={{
-            marginBottom: 'var(--space-lg)',
-            padding: 'var(--space-md) var(--space-lg)',
-            background: 'var(--color-primary-light)',
-            border: '1px solid var(--color-primary)',
-            borderRadius: 'var(--radius-md)',
-          }}
-        >
-          <p style={{ fontWeight: 600, color: 'var(--color-ink)', marginBottom: '2px' }}>
+        <div className="mb-lg px-lg py-md bg-primary-light border border-primary rounded-md">
+          <p className="font-semibold text-ink mb-[2px]">
             Welcome to linked.md!
           </p>
-          <p style={{ fontSize: '14px', color: 'var(--color-secondary)' }}>
+          <p className="text-[14px] text-secondary">
             Fill in your display name and slug to create your profile. Your profile will be
             publicly visible at{' '}
-            <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-primary)' }}>
+            <span className="font-mono text-primary">
               /profile/your-slug.md
             </span>
           </p>
         </div>
       )}
 
-      <h1
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '1.25rem',
-          fontWeight: 600,
-          color: 'var(--color-ink)',
-          marginBottom: 'var(--space-lg)',
-        }}
-      >
+      <h1 className="font-serif text-[1.25rem] font-semibold text-ink mb-lg">
         Edit profile
       </h1>
 
-      <div style={{ display: 'flex', gap: 'var(--space-lg)', alignItems: 'flex-start' }}>
+      <div className="flex gap-lg items-start">
         {/* Left — form */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-lg)',
-              marginBottom: 'var(--space-lg)',
-            }}
-          >
+        <div className="flex-1 min-w-0">
+          <div className="bg-card border border-border rounded-md p-lg mb-lg">
             {/* Avatar upload */}
-            <div style={{ marginBottom: 'var(--space-lg)' }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  color: 'var(--color-secondary)',
-                  marginBottom: 'var(--space-sm)',
-                }}
-              >
+            <div className="mb-lg">
+              <label className="block text-[13px] font-medium text-secondary mb-sm">
                 Profile photo
               </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+              <div className="flex items-center gap-md">
                 <Avatar name={displayName || slug || '?'} avatarUrl={avatarUrl} size={52} />
                 <div>
                   <button
                     type="button"
                     onClick={() => avatarInputRef.current?.click()}
                     disabled={avatarUploading}
+                    className="text-[13px] font-medium text-primary bg-primary-light border border-primary rounded-sm py-[5px] px-[12px]"
                     style={{
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      color: 'var(--color-primary)',
-                      background: 'var(--color-primary-light)',
-                      border: '1px solid var(--color-primary)',
-                      borderRadius: 'var(--radius-sm)',
-                      padding: '5px 12px',
                       cursor: avatarUploading ? 'not-allowed' : 'pointer',
                       opacity: avatarUploading ? 0.6 : 1,
                     }}
                   >
                     {avatarUploading ? 'Uploading…' : avatarUrl ? 'Change photo' : 'Upload photo'}
                   </button>
-                  <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>
+                  <p className="text-[11px] text-muted mt-[4px]">
                     jpeg, png or webp · max 2MB · initials shown if no photo
                   </p>
                   {avatarError && (
-                    <p style={{ fontSize: '12px', color: 'var(--color-error, #E11D48)', marginTop: '4px' }}>
+                    <p className="text-[12px] text-error mt-[4px]">
                       {avatarError}
                     </p>
                   )}
@@ -687,7 +626,7 @@ export default function EditorPage() {
                 ref={avatarInputRef}
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
-                style={{ display: 'none' }}
+                className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0]
                   if (!file) return
@@ -759,7 +698,7 @@ export default function EditorPage() {
             </FieldGroup>
 
             <FieldGroup label="Profile content (markdown)" htmlFor="profile-content">
-              <div style={{ position: 'relative' }}>
+              <div className="relative">
                 <textarea
                   id="profile-content"
                   ref={textareaRef}
@@ -791,37 +730,20 @@ export default function EditorPage() {
           </div>
 
           {/* Experience section */}
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-lg)',
-              marginBottom: 'var(--space-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-md)' }}>
-              <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-ink)' }}>Experience</h2>
+          <div className="bg-card border border-border rounded-md p-lg mb-lg">
+            <div className="flex items-center justify-between mb-md">
+              <h2 className="text-[15px] font-semibold text-ink">Experience</h2>
               <button
                 type="button"
                 onClick={() => setExperience(prev => [...prev, emptyEntry()])}
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  color: 'var(--color-primary)',
-                  padding: '4px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--color-primary-light)',
-                  border: '1px solid var(--color-primary)',
-                  cursor: 'pointer',
-                }}
+                className="text-[12px] font-medium text-primary py-[4px] px-[10px] rounded-sm bg-primary-light border border-primary cursor-pointer"
               >
                 + Add position
               </button>
             </div>
 
             {experience.length === 0 ? (
-              <p style={{ fontSize: '13px', color: 'var(--color-muted)', fontStyle: 'italic' }}>
+              <p className="text-[13px] text-muted italic">
                 No experience entries yet.
               </p>
             ) : (
@@ -840,37 +762,20 @@ export default function EditorPage() {
           </div>
 
           {/* Education section */}
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-lg)',
-              marginBottom: 'var(--space-lg)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-md)' }}>
-              <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-ink)' }}>Education</h2>
+          <div className="bg-card border border-border rounded-md p-lg mb-lg">
+            <div className="flex items-center justify-between mb-md">
+              <h2 className="text-[15px] font-semibold text-ink">Education</h2>
               <button
                 type="button"
                 onClick={() => setEducation(prev => [...prev, emptyEducation()])}
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  color: 'var(--color-primary)',
-                  padding: '4px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--color-primary-light)',
-                  border: '1px solid var(--color-primary)',
-                  cursor: 'pointer',
-                }}
+                className="text-[12px] font-medium text-primary py-[4px] px-[10px] rounded-sm bg-primary-light border border-primary cursor-pointer"
               >
                 + Add school
               </button>
             </div>
 
             {education.length === 0 ? (
-              <p style={{ fontSize: '13px', color: 'var(--color-muted)', fontStyle: 'italic' }}>
+              <p className="text-[13px] text-muted italic">
                 No education entries yet.
               </p>
             ) : (
@@ -889,49 +794,22 @@ export default function EditorPage() {
           </div>
 
           {/* Skills section */}
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-lg)',
-              marginBottom: 'var(--space-lg)',
-            }}
-          >
-            <h2 style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-ink)', marginBottom: 'var(--space-md)' }}>Skills</h2>
+          <div className="bg-card border border-border rounded-md p-lg mb-lg">
+            <h2 className="text-[15px] font-semibold text-ink mb-md">Skills</h2>
 
             {/* Existing skills */}
             {skills.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-xs)', marginBottom: 'var(--space-md)' }}>
+              <div className="flex flex-wrap gap-xs mb-md">
                 {skills.map((skill, idx) => (
                   <div
                     key={idx}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      background: 'var(--color-primary-light)',
-                      border: '1px solid var(--color-primary)',
-                      borderRadius: 'var(--radius-full)',
-                      padding: '3px 10px 3px 10px',
-                      fontSize: '12px',
-                      color: 'var(--color-primary)',
-                      fontWeight: 500,
-                    }}
+                    className="inline-flex items-center gap-[4px] bg-primary-light border border-primary rounded-full py-[3px] px-[10px] text-[12px] text-primary font-medium"
                   >
                     {skill}
                     <button
                       type="button"
                       onClick={() => setSkills(prev => prev.filter((_, i) => i !== idx))}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        color: 'var(--color-primary)',
-                        fontSize: '12px',
-                        lineHeight: 1,
-                        padding: '0 0 0 2px',
-                      }}
+                      className="bg-transparent border-none cursor-pointer text-primary text-[12px] leading-none p-0 pl-[2px]"
                       title="Remove skill"
                     >
                       ✕
@@ -942,7 +820,7 @@ export default function EditorPage() {
             )}
 
             {/* Add skill input */}
-            <div style={{ display: 'flex', gap: 'var(--space-xs)' }}>
+            <div className="flex gap-xs">
               <input
                 value={skillInput}
                 onChange={e => setSkillInput(e.target.value)}
@@ -957,15 +835,7 @@ export default function EditorPage() {
                   }
                 }}
                 placeholder="Type a skill and press Enter"
-                style={{
-                  flex: 1,
-                  padding: '6px 10px',
-                  fontSize: '13px',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--color-bg)',
-                  color: 'var(--color-text)',
-                }}
+                className="flex-1 py-[6px] px-[10px] text-[13px] border border-border rounded-sm bg-bg text-text"
               />
               <button
                 type="button"
@@ -976,16 +846,7 @@ export default function EditorPage() {
                   }
                   setSkillInput('')
                 }}
-                style={{
-                  padding: '6px 12px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  color: 'var(--color-primary)',
-                  background: 'var(--color-primary-light)',
-                  border: '1px solid var(--color-primary)',
-                  borderRadius: 'var(--radius-sm)',
-                  cursor: 'pointer',
-                }}
+                className="py-[6px] px-[12px] text-[12px] font-medium text-primary bg-primary-light border border-primary rounded-sm cursor-pointer"
               >
                 Add
               </button>
@@ -1000,7 +861,7 @@ export default function EditorPage() {
         </div>
 
         {/* Right — completeness + preview */}
-        <div style={{ width: '220px', flexShrink: 0 }}>
+        <div className="w-[220px] shrink-0">
           {(() => {
             const { score, hints } = computeCompleteness({
               has_avatar: false, // avatar upload deferred to M2.2
@@ -1013,64 +874,37 @@ export default function EditorPage() {
             })
             const barColor = score >= 80 ? 'var(--color-primary)' : score >= 50 ? '#f59e0b' : '#ef4444'
             return (
-              <div
-                style={{
-                  background: 'var(--color-card)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: 'var(--space-md)',
-                  marginBottom: 'var(--space-md)',
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-ink)' }}>Profile strength</span>
+              <div className="bg-card border border-border rounded-md p-md mb-md">
+                <div className="flex items-center justify-between mb-[8px]">
+                  <span className="text-[12px] font-semibold text-ink">Profile strength</span>
                   <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      color: barColor,
-                    }}
+                    className="font-mono text-[13px] font-bold"
+                    style={{ color: barColor }}
                   >
                     {score}%
                   </span>
                 </div>
                 <div
-                  style={{
-                    height: '6px',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'var(--color-border)',
-                    overflow: 'hidden',
-                    marginBottom: hints.length > 0 ? '12px' : 0,
-                  }}
+                  className="h-[6px] rounded-full bg-border overflow-hidden"
+                  style={{ marginBottom: hints.length > 0 ? '12px' : 0 }}
                 >
                   <div
+                    className="h-full rounded-full transition-[width] duration-300 ease-in-out"
                     style={{
-                      height: '100%',
                       width: `${score}%`,
                       background: barColor,
-                      borderRadius: 'var(--radius-full)',
-                      transition: 'width 300ms ease',
                     }}
                   />
                 </div>
                 {hints.length > 0 && (
-                  <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  <ul className="list-none m-0 p-0">
                     {hints.map(h => (
                       <li
                         key={h.label}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          fontSize: '11px',
-                          color: 'var(--color-muted)',
-                          padding: '3px 0',
-                          borderBottom: '1px solid var(--color-border)',
-                        }}
+                        className="flex items-center justify-between text-[11px] text-muted py-[3px] border-b border-border"
                       >
                         <span>{h.label}</span>
-                        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-primary)' }}>+{h.pts}</span>
+                        <span className="font-mono text-primary">+{h.pts}</span>
                       </li>
                     ))}
                   </ul>

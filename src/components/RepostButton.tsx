@@ -48,20 +48,11 @@ export function RepostButton({
       onClick={toggle}
       disabled={loading}
       title={reposted ? 'Undo repost' : 'Repost'}
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '4px',
-        background: 'none',
-        border: 'none',
-        cursor: loading ? 'default' : 'pointer',
-        padding: '2px 0',
-        opacity: loading ? 0.6 : 1,
-        color: reposted ? 'var(--color-primary)' : 'var(--color-muted)',
-        fontSize: '12px',
-        fontFamily: 'var(--font-sans)',
-        transition: 'color 150ms ease',
-      }}
+      className={`inline-flex items-center gap-[4px] bg-none border-none py-[2px] px-0 text-[12px] font-sans transition-colors duration-150 ${
+        loading ? 'cursor-default opacity-60' : 'cursor-pointer opacity-100'
+      } ${
+        reposted ? 'text-primary' : 'text-muted'
+      }`}
     >
       {/* Repost icon (two arrows forming a loop) */}
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"

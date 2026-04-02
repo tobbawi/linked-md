@@ -32,37 +32,22 @@ export function CompanyFollowButton({ companySlug, initialFollowing, followerCou
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+    <div className="flex items-center gap-sm">
       <button
         onClick={toggle}
         disabled={loading}
-        style={{
-          fontSize: '12px',
-          fontWeight: 500,
-          padding: '5px 14px',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid',
-          cursor: loading ? 'default' : 'pointer',
-          opacity: loading ? 0.6 : 1,
-          fontFamily: 'var(--font-sans)',
-          transition: 'background 150ms ease, color 150ms ease',
-          ...(following
-            ? {
-                background: 'var(--color-card)',
-                color: 'var(--color-secondary)',
-                borderColor: 'var(--color-border)',
-              }
-            : {
-                background: 'var(--color-primary)',
-                color: '#fff',
-                borderColor: 'var(--color-primary)',
-              }),
-        }}
+        className={`text-[12px] font-medium py-[5px] px-[14px] rounded-sm border border-solid font-sans transition-[background,color] duration-150 ${
+          loading ? 'cursor-default opacity-60' : 'cursor-pointer opacity-100'
+        } ${
+          following
+            ? 'bg-card text-secondary border-border'
+            : 'bg-primary text-white border-primary'
+        }`}
       >
         {following ? 'Following' : 'Follow'}
       </button>
       {count > 0 && (
-        <span style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+        <span className="text-[12px] text-muted">
           {count} {count === 1 ? 'follower' : 'followers'}
         </span>
       )}

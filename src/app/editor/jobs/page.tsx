@@ -189,7 +189,7 @@ function JobsEditorInner() {
 
   if (loading) {
     return (
-      <div style={{ paddingTop: 'var(--space-3xl)', textAlign: 'center', color: 'var(--color-muted)' }}>
+      <div className="pt-3xl text-center text-muted">
         Loading…
       </div>
     )
@@ -197,34 +197,29 @@ function JobsEditorInner() {
 
   if (error) {
     return (
-      <div style={{ paddingTop: 'var(--space-3xl)', maxWidth: '480px', margin: '0 auto' }}>
-        <p style={{ color: 'var(--color-muted)', fontSize: '15px' }}>{error}</p>
+      <div className="pt-3xl max-w-[480px] mx-auto">
+        <p className="text-muted text-[15px]">{error}</p>
       </div>
     )
   }
+
+  const inputCls = "w-full py-[8px] px-[12px] text-[14px] bg-bg border border-border rounded-sm text-ink box-border"
 
   const activeJobs = jobs.filter(j => j.active)
   const inactiveJobs = jobs.filter(j => !j.active)
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-xl pb-3xl">
       <div>
         {/* Header */}
-        <div style={{ marginBottom: 'var(--space-xl)' }}>
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.25rem',
-              color: 'var(--color-ink)',
-              marginBottom: 'var(--space-xs)',
-            }}
-          >
+        <div className="mb-xl">
+          <h1 className="font-serif text-[1.25rem] text-ink mb-xs">
             Manage Jobs
           </h1>
           {company && (
-            <p style={{ fontSize: '14px', color: 'var(--color-secondary)' }}>
+            <p className="text-[14px] text-secondary">
               for{' '}
-              <a href={`/company/${company.slug}`} style={{ color: 'var(--color-primary)' }}>
+              <a href={`/company/${company.slug}`} className="text-primary">
                 {company.name}
               </a>
             </p>
@@ -232,87 +227,45 @@ function JobsEditorInner() {
         </div>
 
         {/* Form */}
-        <div
-          style={{
-            background: 'var(--color-card)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-lg)',
-            padding: 'var(--space-lg)',
-            marginBottom: 'var(--space-xl)',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: '14px',
-              fontWeight: 600,
-              color: 'var(--color-ink)',
-              marginBottom: 'var(--space-md)',
-            }}
-          >
+        <div className="bg-card border border-border rounded-lg p-lg mb-xl">
+          <h2 className="text-[14px] font-semibold text-ink mb-md">
             {editingId ? 'Edit role' : 'Post a new role'}
           </h2>
 
-          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <form onSubmit={handleSave} className="flex flex-col gap-md">
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '6px' }}>
+              <label className="block text-[12px] font-medium text-secondary mb-[6px]">
                 Role title *
               </label>
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. Senior Software Engineer"
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  background: 'var(--color-bg)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--color-ink)',
-                  boxSizing: 'border-box',
-                }}
+                className={inputCls}
               />
             </div>
 
-            <div style={{ display: 'flex', gap: 'var(--space-md)' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '6px' }}>
+            <div className="flex gap-md">
+              <div className="flex-1">
+                <label className="block text-[12px] font-medium text-secondary mb-[6px]">
                   Location
                 </label>
                 <input
                   value={location}
                   onChange={e => setLocation(e.target.value)}
                   placeholder="e.g. Remote, New York"
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    fontSize: '14px',
-                    background: 'var(--color-bg)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-sm)',
-                    color: 'var(--color-ink)',
-                    boxSizing: 'border-box',
-                  }}
+                  className={inputCls}
                 />
               </div>
 
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '6px' }}>
+              <div className="flex-1">
+                <label className="block text-[12px] font-medium text-secondary mb-[6px]">
                   Type
                 </label>
                 <select
                   value={type}
                   onChange={e => setType(e.target.value as JobListing['type'])}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    fontSize: '14px',
-                    background: 'var(--color-bg)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-sm)',
-                    color: 'var(--color-ink)',
-                    boxSizing: 'border-box',
-                  }}
+                  className={inputCls}
                 >
                   {JOB_TYPES.map(t => (
                     <option key={t.value} value={t.value}>{t.label}</option>
@@ -322,7 +275,7 @@ function JobsEditorInner() {
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '6px' }}>
+              <label className="block text-[12px] font-medium text-secondary mb-[6px]">
                 Description (markdown)
               </label>
               <textarea
@@ -330,37 +283,20 @@ function JobsEditorInner() {
                 onChange={e => setDescriptionMd(e.target.value)}
                 rows={8}
                 placeholder="Describe the role, responsibilities, requirements…"
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  fontSize: '14px',
-                  fontFamily: 'var(--font-mono)',
-                  background: 'var(--color-bg)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-sm)',
-                  color: 'var(--color-ink)',
-                  resize: 'vertical',
-                  boxSizing: 'border-box',
-                }}
+                className={`${inputCls} font-mono resize-y`}
               />
             </div>
 
             {formError && (
-              <p style={{ fontSize: '13px', color: '#dc2626' }}>{formError}</p>
+              <p className="text-[13px] text-[#dc2626]">{formError}</p>
             )}
 
-            <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+            <div className="flex gap-sm items-center">
               <button
                 type="submit"
                 disabled={saving}
+                className="py-[8px] px-[20px] text-[13px] font-medium bg-primary text-white border-none rounded-sm"
                 style={{
-                  padding: '8px 20px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  background: 'var(--color-primary)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 'var(--radius-sm)',
                   cursor: saving ? 'not-allowed' : 'pointer',
                   opacity: saving ? 0.6 : 1,
                 }}
@@ -372,15 +308,7 @@ function JobsEditorInner() {
                 <button
                   type="button"
                   onClick={startNew}
-                  style={{
-                    padding: '8px 16px',
-                    fontSize: '13px',
-                    color: 'var(--color-secondary)',
-                    background: 'transparent',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-sm)',
-                    cursor: 'pointer',
-                  }}
+                  className="py-[8px] px-[16px] text-[13px] text-secondary bg-transparent border border-border rounded-sm cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -391,57 +319,32 @@ function JobsEditorInner() {
 
         {/* Active jobs */}
         {activeJobs.length > 0 && (
-          <div style={{ marginBottom: 'var(--space-xl)' }}>
-            <h2 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-md)' }}>
+          <div className="mb-xl">
+            <h2 className="text-[13px] font-medium text-muted uppercase tracking-[0.05em] mb-md">
               Active ({activeJobs.length})
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+            <div className="flex flex-col gap-sm">
               {activeJobs.map(job => (
                 <div
                   key={job.id}
-                  style={{
-                    padding: 'var(--space-md)',
-                    background: 'var(--color-card)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-md)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 'var(--space-md)',
-                  }}
+                  className="p-md bg-card border border-border rounded-md flex items-center justify-between gap-md"
                 >
                   <div>
-                    <p style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-ink)' }}>{job.title}</p>
-                    <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '2px' }}>
+                    <p className="text-[14px] font-medium text-ink">{job.title}</p>
+                    <p className="text-[12px] text-muted mt-[2px]">
                       {job.type}{job.location ? ` · ${job.location}` : ''}
                     </p>
                   </div>
-                  <div style={{ display: 'flex', gap: 'var(--space-xs)', flexShrink: 0 }}>
+                  <div className="flex gap-xs shrink-0">
                     <button
                       onClick={() => startEdit(job)}
-                      style={{
-                        fontSize: '12px',
-                        padding: '4px 10px',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        background: 'transparent',
-                        color: 'var(--color-secondary)',
-                        cursor: 'pointer',
-                      }}
+                      className="text-[12px] py-[4px] px-[10px] border border-border rounded-sm bg-transparent text-secondary cursor-pointer"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDeactivate(job)}
-                      style={{
-                        fontSize: '12px',
-                        padding: '4px 10px',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-sm)',
-                        background: 'transparent',
-                        color: '#dc2626',
-                        cursor: 'pointer',
-                      }}
+                      className="text-[12px] py-[4px] px-[10px] border border-border rounded-sm bg-transparent text-[#dc2626] cursor-pointer"
                     >
                       Remove
                     </button>
@@ -455,23 +358,17 @@ function JobsEditorInner() {
         {/* Inactive jobs */}
         {inactiveJobs.length > 0 && (
           <div>
-            <h2 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-md)' }}>
+            <h2 className="text-[13px] font-medium text-muted uppercase tracking-[0.05em] mb-md">
               Closed ({inactiveJobs.length})
             </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+            <div className="flex flex-col gap-sm">
               {inactiveJobs.map(job => (
                 <div
                   key={job.id}
-                  style={{
-                    padding: 'var(--space-md)',
-                    background: 'var(--color-card)',
-                    border: '1px solid var(--color-border)',
-                    borderRadius: 'var(--radius-md)',
-                    opacity: 0.6,
-                  }}
+                  className="p-md bg-card border border-border rounded-md opacity-60"
                 >
-                  <p style={{ fontSize: '14px', color: 'var(--color-ink)' }}>{job.title}</p>
-                  <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '2px' }}>
+                  <p className="text-[14px] text-ink">{job.title}</p>
+                  <p className="text-[12px] text-muted mt-[2px]">
                     {job.type}{job.location ? ` · ${job.location}` : ''}
                   </p>
                 </div>
@@ -481,7 +378,7 @@ function JobsEditorInner() {
         )}
 
         {activeJobs.length === 0 && inactiveJobs.length === 0 && (
-          <p style={{ fontSize: '14px', color: 'var(--color-muted)' }}>
+          <p className="text-[14px] text-muted">
             No roles posted yet. Post your first role above.
           </p>
         )}
@@ -492,7 +389,7 @@ function JobsEditorInner() {
 
 export default function JobsEditorPage() {
   return (
-    <Suspense fallback={<div style={{ paddingTop: 'var(--space-3xl)', textAlign: 'center', color: 'var(--color-muted)' }}>Loading…</div>}>
+    <Suspense fallback={<div className="pt-3xl text-center text-muted">Loading…</div>}>
       <JobsEditorInner />
     </Suspense>
   )

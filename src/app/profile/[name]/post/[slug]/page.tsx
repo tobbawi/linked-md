@@ -149,24 +149,14 @@ export default async function PostPage({ params }: PageProps) {
   const mdUrl = `/profile/${profile.slug}/post/${post.slug}.md`
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-xl pb-3xl">
       <PostViewTracker postId={post.id} />
-      <div style={{ maxWidth: '680px' }}>
+      <div className="max-w-[680px] border-l-2 border-border pl-lg">
         {/* Back to profile */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 'var(--space-xl)',
-          }}
-        >
+        <div className="flex items-center justify-between mb-xl">
           <Link
             href={`/profile/${profile.slug}`}
-            style={{
-              fontSize: '13px',
-              color: 'var(--color-secondary)',
-            }}
+            className="text-[13px] text-secondary"
           >
             ← {profile.display_name}
           </Link>
@@ -177,42 +167,27 @@ export default async function PostPage({ params }: PageProps) {
         </div>
 
         {/* Post header */}
-        <header style={{ marginBottom: 'var(--space-xl)' }}>
+        <header className="mb-xl">
           {post.title && (
-            <h1
-              style={{
-                fontFamily: 'var(--font-serif)',
-                fontSize: '2rem',
-                color: 'var(--color-ink)',
-                lineHeight: 1.25,
-                marginBottom: 'var(--space-md)',
-              }}
-            >
+            <h1 className="font-serif text-[2rem] text-ink leading-[1.25] mb-md">
               {post.title}
             </h1>
           )}
 
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-md)',
-              flexWrap: 'wrap',
-            }}
-          >
+          <div className="flex items-center gap-md flex-wrap">
             <Link
               href={`/profile/${profile.slug}`}
-              style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-text)' }}
+              className="text-[14px] font-medium text-text"
             >
               {profile.display_name}
             </Link>
             <time
               dateTime={post.created_at}
-              style={{ fontSize: '13px', color: 'var(--color-muted)' }}
+              className="text-[13px] text-muted"
             >
               {formatDate(post.created_at)}
             </time>
-            <a href={mdUrl} className="md-url" style={{ fontSize: '12px' }} title="Raw markdown">
+            <a href={mdUrl} className="md-url text-[12px]" title="Raw markdown">
               {mdUrl}
             </a>
           </div>
@@ -220,13 +195,12 @@ export default async function PostPage({ params }: PageProps) {
 
         {/* Post body */}
         <article
-          className="prose"
-          style={{ fontSize: '16px', lineHeight: 1.75, color: 'var(--color-text)' }}
+          className="prose text-[16px] leading-[1.75] text-text"
           dangerouslySetInnerHTML={{ __html: contentHtml }}
         />
 
         {/* Like + Repost buttons */}
-        <div style={{ marginTop: 'var(--space-xl)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+        <div className="mt-xl flex items-center gap-md">
           <LikeButton postId={post.id} initialLiked={isLiked} likeCount={likeCount ?? 0} />
           <RepostButton
             postId={post.id}
@@ -245,51 +219,18 @@ export default async function PostPage({ params }: PageProps) {
         />
 
         {/* Footer */}
-        <footer
-          style={{
-            marginTop: 'var(--space-3xl)',
-            paddingTop: 'var(--space-lg)',
-            borderTop: '1px solid var(--color-border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 'var(--space-sm)',
-          }}
-        >
+        <footer className="mt-3xl pt-lg border-t border-border flex items-center justify-between flex-wrap gap-sm">
           <Link
             href={`/profile/${profile.slug}`}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-sm)',
-              fontSize: '14px',
-              color: 'var(--color-text)',
-            }}
+            className="flex items-center gap-sm text-[14px] text-text"
           >
-            <div
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--color-primary-light)',
-                border: '1px solid var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '14px',
-                fontWeight: 700,
-                color: 'var(--color-primary)',
-                fontFamily: 'var(--font-serif)',
-                flexShrink: 0,
-              }}
-            >
+            <div className="w-[36px] h-[36px] rounded-full bg-primary-light border border-primary flex items-center justify-center text-[14px] font-bold text-primary font-serif shrink-0">
               {profile.display_name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <div style={{ fontWeight: 500 }}>{profile.display_name}</div>
+              <div className="font-medium">{profile.display_name}</div>
               {profile.bio && (
-                <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                <div className="text-[12px] text-muted">
                   {profile.bio}
                 </div>
               )}

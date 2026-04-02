@@ -91,11 +91,11 @@ export function GraphCanvas({ slug, displayName }: { slug: string; displayName: 
   }, [slug])
 
   if (error) {
-    return <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>Failed to load graph.</p>
+    return <p className="text-muted text-[14px]">Failed to load graph.</p>
   }
 
   if (!data) {
-    return <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>Loading graph…</p>
+    return <p className="text-muted text-[14px]">Loading graph…</p>
   }
 
   const nodes = layoutNodes(data)
@@ -111,14 +111,7 @@ export function GraphCanvas({ slug, displayName }: { slug: string; displayName: 
     <div>
       <svg
         viewBox="0 0 800 520"
-        style={{
-          width: '100%',
-          maxWidth: '800px',
-          display: 'block',
-          background: 'var(--color-card)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-        }}
+        className="w-full max-w-[800px] block bg-card border border-border rounded-md"
       >
         {/* Edges */}
         {nodes.slice(1).map((node) => (
@@ -229,31 +222,22 @@ export function GraphCanvas({ slug, displayName }: { slug: string; displayName: 
       </svg>
 
       {/* Legend */}
-      <div
-        style={{
-          marginTop: 'var(--space-md)',
-          display: 'flex',
-          gap: 'var(--space-lg)',
-          flexWrap: 'wrap',
-          fontSize: '12px',
-          color: 'var(--color-muted)',
-        }}
-      >
+      <div className="mt-md flex gap-lg flex-wrap text-[12px] text-muted">
         <span>
-          <svg width="20" height="10" style={{ verticalAlign: 'middle', marginRight: 4 }}>
+          <svg width="20" height="10" className="align-middle mr-[4px] inline">
             <line x1="0" y1="5" x2="20" y2="5" stroke="var(--color-primary)" strokeWidth="1.5" />
           </svg>
           outbound links ({resolvedOutbound.length} resolved)
         </span>
         <span>
-          <svg width="20" height="10" style={{ verticalAlign: 'middle', marginRight: 4 }}>
+          <svg width="20" height="10" className="align-middle mr-[4px] inline">
             <line x1="0" y1="5" x2="20" y2="5" stroke="var(--color-primary)" strokeWidth="1.5" strokeDasharray="4 3" />
           </svg>
           inbound links ({inboundSlugs.length})
         </span>
         {unresolvedOutbound.length > 0 && (
           <span>
-            <svg width="20" height="10" style={{ verticalAlign: 'middle', marginRight: 4 }}>
+            <svg width="20" height="10" className="align-middle mr-[4px] inline">
               <line x1="0" y1="5" x2="20" y2="5" stroke="var(--color-border)" strokeWidth="1.5" />
             </svg>
             unresolved ({unresolvedOutbound.length})
@@ -261,15 +245,9 @@ export function GraphCanvas({ slug, displayName }: { slug: string; displayName: 
         )}
       </div>
 
-      <div
-        style={{
-          marginTop: 'var(--space-sm)',
-          fontSize: '12px',
-          color: 'var(--color-muted)',
-        }}
-      >
+      <div className="mt-sm text-[12px] text-muted">
         {data.post_count} post{data.post_count !== 1 ? 's' : ''} ·{' '}
-        <Link href={`/profile/${slug}/graph.json`} style={{ color: 'var(--color-primary)' }}>
+        <Link href={`/profile/${slug}/graph.json`} className="text-primary">
           graph.json
         </Link>
       </div>

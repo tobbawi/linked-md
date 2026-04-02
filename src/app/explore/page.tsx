@@ -31,60 +31,38 @@ export default async function ExplorePage() {
   const allPosts = posts ?? []
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div
-        style={{
-          paddingBottom: 'var(--space-lg)',
-          borderBottom: '1px solid var(--color-border)',
-          marginBottom: 'var(--space-lg)',
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '1.25rem',
-            color: 'var(--color-ink)',
-          }}
-        >
+    <div className="pt-xl pb-3xl">
+      <div className="pb-lg border-b border-border mb-lg">
+        <h1 className="font-serif text-[1.25rem] text-ink">
           Explore
         </h1>
-        <p style={{ fontSize: '13px', color: 'var(--color-muted)', marginTop: '4px' }}>
+        <p className="text-[13px] text-muted mt-[4px]">
           Recent posts from across the network
         </p>
       </div>
 
       {allPosts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: 'var(--space-3xl) 0', color: 'var(--color-muted)' }}>
-          <p style={{ fontSize: '15px' }}>No posts yet. Be the first to write something.</p>
+        <div className="text-center py-3xl text-muted">
+          <p className="text-[15px]">No posts yet. Be the first to write something.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+        <div className="flex flex-col gap-md">
           {allPosts.map((post) => {
             const preview = postPreview(post.markdown_content)
             const previewHtml = renderWikilinks(preview, profileSlugs, companySlugs)
             return (
               <article
                 key={post.id}
-                style={{
-                  background: 'var(--color-card)',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: 'var(--space-lg)',
-                }}
+                className="bg-card border border-border rounded-md p-lg"
               >
                 {/* Author */}
                 {post.profile && (
                   <Link
                     href={`/profile/${post.profile.slug}`}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 'var(--space-xs)',
-                      marginBottom: 'var(--space-sm)',
-                    }}
+                    className="inline-flex items-center gap-xs mb-sm"
                   >
                     <Avatar name={post.profile.display_name} avatarUrl={post.profile.avatar_url} size={24} />
-                    <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-ink)' }}>
+                    <span className="text-[13px] font-medium text-ink">
                       {post.profile.display_name}
                     </span>
                   </Link>
@@ -93,15 +71,7 @@ export default async function ExplorePage() {
                 {/* Title */}
                 {post.title && (
                   <Link href={post.profile ? `/profile/${post.profile.slug}/post/${post.slug}` : '#'}>
-                    <h2
-                      style={{
-                        fontFamily: 'var(--font-serif)',
-                        fontSize: '1.1rem',
-                        color: 'var(--color-ink)',
-                        marginBottom: 'var(--space-xs)',
-                        lineHeight: 1.3,
-                      }}
-                    >
+                    <h2 className="font-serif text-[1.1rem] text-ink mb-xs leading-[1.3]">
                       {post.title}
                     </h2>
                   </Link>
@@ -109,40 +79,21 @@ export default async function ExplorePage() {
 
                 {/* Preview */}
                 <p
-                  className="prose"
-                  style={{
-                    fontSize: '14px',
-                    color: 'var(--color-secondary)',
-                    lineHeight: 1.5,
-                    marginBottom: 'var(--space-sm)',
-                  }}
+                  className="prose text-[14px] text-secondary leading-[1.5] mb-sm"
                   dangerouslySetInnerHTML={{ __html: previewHtml }}
                 />
 
                 {/* Footer */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginTop: 'var(--space-sm)',
-                  }}
-                >
-                  <span className="md-url" style={{ fontSize: '11px' }}>
+                <div className="flex items-center justify-between mt-sm">
+                  <span className="md-url text-[11px]">
                     {post.profile && `/profile/${post.profile.slug}/post/`}{post.slug}.md
                   </span>
-                  <div style={{ display: 'flex', gap: 'var(--space-xs)', flexWrap: 'wrap' }}>
+                  <div className="flex gap-xs flex-wrap">
                     {(post.tags ?? []).map((tag) => (
                       <Link
                         key={tag}
                         href={`/tag/${encodeURIComponent(tag)}`}
-                        style={{
-                          fontSize: '11px',
-                          color: 'var(--color-primary)',
-                          background: 'var(--color-primary-light)',
-                          padding: '2px 8px',
-                          borderRadius: 'var(--radius-sm)',
-                        }}
+                        className="text-[11px] text-primary bg-primary-light py-[2px] px-[8px] rounded-sm"
                       >
                         #{tag}
                       </Link>

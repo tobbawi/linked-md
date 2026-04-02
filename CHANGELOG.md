@@ -15,6 +15,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - **ISR on list pages.** Explore (30s), People (120s), Companies (120s) pages serve cached HTML and revalidate in the background.
 - **R2 storage abstraction.** New `src/lib/storage.ts` with `StorageProvider` interface. Local filesystem in dev, Cloudflare R2 in production. Prepares for Vercel deployment.
 - **Connection pooler support.** Server-side queries use pgBouncer pooler URL when `SUPABASE_POOLER_URL` is set, avoiding connection exhaustion.
+- **Synthetic data seed script.** `scripts/seed-synthetic.mjs` populates the network with 1,000 profiles, 200 companies, 5,000 posts, plus experience, education, skills, follows, likes, comments, and job listings. Idempotent, batched, uses deterministic email patterns.
+
+### Changed
+- **Complete design overhaul (M7).** Every page redesigned with Tailwind CSS v4. 795 inline styles eliminated. New bento grid homepage with featured emerald card. Split hero with floating profile card. Frosted glass nav. Profile cards with gradient headers and overlapping avatars. Cards with shadows, hover lift, 20px radii. Bolder Fraunces serif headings throughout.
+- **7 shared UI components:** Card, Button, MdBadge, LlmBadge, FilepathBar, PageShell, SectionHeading.
+- **Design tokens updated:** white cards, softer borders, 4-tier shadow system, refined dark mode.
+- **Nav:** fixed frosted glass, extrabold logo, pill nav links, Sign in + Get started buttons.
+- **Profile page:** emerald gradient header, overlapping avatar, 26px name, document gutter, FilepathBar.
+- **Homepage:** two-column hero with 64px italic headline + floating card. Bento grid feed (3-col desktop).
+
+### Fixed
+- CSS reset specificity: wrapped `* { margin: 0 }` in `@layer base` so Tailwind utilities work.
+- Touch targets: hero CTAs to 44px, tag pills to 28px.
+- Company FilepathBar alignment with profile page.
 
 ---
 

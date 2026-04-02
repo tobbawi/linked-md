@@ -72,69 +72,36 @@ export default function SearchPage() {
   }
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-xl pb-3xl">
       {/* Search input */}
-      <div style={{ marginBottom: 'var(--space-lg)' }}>
+      <div className="mb-lg">
         <input
           autoFocus
           type="text"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search people, companies, posts…"
-          style={{
-            width: '100%',
-            fontSize: '1rem',
-            fontFamily: 'var(--font-sans)',
-            padding: '10px 14px',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            background: 'var(--color-card)',
-            color: 'var(--color-ink)',
-            }}
-          className="search-input"
+          className="search-input w-full text-[1rem] font-sans py-[10px] px-[14px] border border-border rounded-md bg-card text-ink focus:border-primary"
           onFocus={(e) => (e.target.style.borderColor = 'var(--color-primary)')}
           onBlur={(e) => (e.target.style.borderColor = 'var(--color-border)')}
         />
       </div>
 
       {/* Tabs */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--space-xs)',
-          borderBottom: '1px solid var(--color-border)',
-          marginBottom: 'var(--space-lg)',
-        }}
-      >
+      <div className="flex gap-xs border-b border-border mb-lg">
         {(['people', 'companies', 'posts'] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
+            className="py-[8px] px-[16px] text-[13px] font-medium font-sans bg-transparent border-none cursor-pointer -mb-[1px]"
             style={{
-              padding: '8px 16px',
-              fontSize: '13px',
-              fontWeight: 500,
-              fontFamily: 'var(--font-sans)',
-              background: 'none',
-              border: 'none',
               borderBottom: tab === t ? '2px solid var(--color-primary)' : '2px solid transparent',
               color: tab === t ? 'var(--color-primary)' : 'var(--color-secondary)',
-              cursor: 'pointer',
-              marginBottom: '-1px',
             }}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
             {q && tabCounts[t] > 0 && (
-              <span
-                style={{
-                  marginLeft: '6px',
-                  fontSize: '11px',
-                  background: 'var(--color-primary-light)',
-                  color: 'var(--color-primary)',
-                  padding: '1px 6px',
-                  borderRadius: 'var(--radius-full)',
-                }}
-              >
+              <span className="ml-[6px] text-[11px] bg-primary-light text-primary py-[1px] px-[6px] rounded-full">
                 {tabCounts[t]}
               </span>
             )}
@@ -144,51 +111,35 @@ export default function SearchPage() {
 
       {/* Empty / loading */}
       {!q && (
-        <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>
+        <p className="text-muted text-[14px]">
           Start typing to search across the network.
         </p>
       )}
       {q && loading && (
-        <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>Searching…</p>
+        <p className="text-muted text-[14px]">Searching…</p>
       )}
 
       {/* Results */}
       {q && !loading && tab === 'people' && (
         results.profiles.length === 0 ? (
-          <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>No people found for "{q}".</p>
+          <p className="text-muted text-[14px]">No people found for &ldquo;{q}&rdquo;.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+          <div className="flex flex-col gap-xs">
             {results.profiles.map((p) => (
-              <Link key={p.slug} href={`/profile/${p.slug}`} style={{ textDecoration: 'none' }}>
+              <Link key={p.slug} href={`/profile/${p.slug}`} className="no-underline">
                 <div className="search-result-row">
-                  <div
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: 'var(--radius-full)',
-                      background: 'var(--color-primary-light)',
-                      border: '1px solid var(--color-primary)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      color: 'var(--color-primary)',
-                      fontFamily: 'var(--font-serif)',
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className="w-[36px] h-[36px] rounded-full bg-primary-light border border-primary flex items-center justify-center text-[14px] font-bold text-primary font-serif shrink-0">
                     {p.display_name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 500, color: 'var(--color-ink)', fontSize: '14px' }}>
+                    <div className="font-medium text-ink text-[14px]">
                       {p.display_name}
                     </div>
                     {p.title && (
-                      <div style={{ fontSize: '12px', color: 'var(--color-secondary)' }}>{p.title}</div>
+                      <div className="text-[12px] text-secondary">{p.title}</div>
                     )}
                     {!p.title && p.bio && (
-                      <div style={{ fontSize: '12px', color: 'var(--color-secondary)' }}>
+                      <div className="text-[12px] text-secondary">
                         {snippet(p.bio, q)}
                       </div>
                     )}
@@ -202,37 +153,21 @@ export default function SearchPage() {
 
       {q && !loading && tab === 'companies' && (
         results.companies.length === 0 ? (
-          <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>No companies found for "{q}".</p>
+          <p className="text-muted text-[14px]">No companies found for &ldquo;{q}&rdquo;.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+          <div className="flex flex-col gap-xs">
             {results.companies.map((c) => (
-              <Link key={c.slug} href={`/company/${c.slug}`} style={{ textDecoration: 'none' }}>
+              <Link key={c.slug} href={`/company/${c.slug}`} className="no-underline">
                 <div className="search-result-row">
-                  <div
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'var(--color-card)',
-                      border: '1px solid var(--color-border)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      color: 'var(--color-secondary)',
-                      fontFamily: 'var(--font-serif)',
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className="w-[36px] h-[36px] rounded-sm bg-card border border-border flex items-center justify-center text-[14px] font-bold text-secondary font-serif shrink-0">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 500, color: 'var(--color-ink)', fontSize: '14px' }}>
+                    <div className="font-medium text-ink text-[14px]">
                       {c.name}
                     </div>
                     {c.tagline && (
-                      <div style={{ fontSize: '12px', color: 'var(--color-secondary)' }}>
+                      <div className="text-[12px] text-secondary">
                         {snippet(c.tagline, q)}
                       </div>
                     )}
@@ -246,25 +181,25 @@ export default function SearchPage() {
 
       {q && !loading && tab === 'posts' && (
         results.posts.length === 0 ? (
-          <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>No posts found for "{q}".</p>
+          <p className="text-muted text-[14px]">No posts found for &ldquo;{q}&rdquo;.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
+          <div className="flex flex-col gap-xs">
             {results.posts.map((p) => (
               <Link
                 key={`${p.profile?.slug}-${p.slug}`}
                 href={p.profile ? `/profile/${p.profile.slug}/post/${p.slug}` : '#'}
-                style={{ textDecoration: 'none' }}
+                className="no-underline"
               >
-                <div className="search-result-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 'var(--space-2xs)' }}>
-                  <div style={{ fontWeight: 500, color: 'var(--color-ink)', fontSize: '14px' }}>
+                <div className="search-result-row flex-col items-start gap-2xs">
+                  <div className="font-medium text-ink text-[14px]">
                     {p.title ?? `/${p.slug}.md`}
                   </div>
                   {p.profile && (
-                    <div style={{ fontSize: '11px', color: 'var(--color-muted)' }}>
+                    <div className="text-[11px] text-muted">
                       by {p.profile.display_name}
                     </div>
                   )}
-                  <div style={{ fontSize: '12px', color: 'var(--color-secondary)', lineHeight: 1.4 }}>
+                  <div className="text-[12px] text-secondary leading-[1.4]">
                     {snippet(p.markdown_content, q)}
                   </div>
                 </div>

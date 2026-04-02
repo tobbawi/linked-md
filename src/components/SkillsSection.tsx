@@ -46,21 +46,12 @@ export default function SkillsSection({ skills: initialSkills, isOwner, isLogged
   }
 
   return (
-    <section style={{ marginBottom: '2rem' }}>
-      <h2
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '1.25rem',
-          fontWeight: 600,
-          color: 'var(--color-ink)',
-          marginBottom: '1rem',
-          letterSpacing: '-0.01em',
-        }}
-      >
+    <section className="mb-[2rem]">
+      <h2 className="font-serif text-[1.25rem] font-semibold text-ink mb-[1rem] tracking-[-0.01em]">
         Skills
       </h2>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
+      <div className="flex flex-wrap gap-sm">
         {skills.map(skill => {
           const endorsed = skill.viewer_has_endorsed ?? false
           const count = skill.endorsement_count ?? 0
@@ -70,19 +61,13 @@ export default function SkillsSection({ skills: initialSkills, isOwner, isLogged
           return (
             <div
               key={skill.id}
+              className={`inline-flex items-center gap-0 rounded-full text-[13px] font-medium min-h-[32px] transition-[opacity,border-color,background] duration-150 ${
+                endorsed
+                  ? 'border border-primary bg-primary-light text-primary'
+                  : 'border border-border bg-card text-text'
+              }`}
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 0,
-                borderRadius: 'var(--radius-full)',
-                border: `1px solid ${endorsed ? 'var(--color-primary)' : 'var(--color-border)'}`,
-                background: endorsed ? 'var(--color-primary-light)' : 'var(--color-card)',
-                fontSize: '13px',
-                fontWeight: 500,
-                color: endorsed ? 'var(--color-primary)' : 'var(--color-text)',
-                minHeight: '32px',
                 opacity: isPending && canEndorse ? 0.6 : 1,
-                transition: 'opacity 150ms ease, border-color 150ms ease, background 150ms ease',
                 animation: isError ? 'shake 150ms ease' : undefined,
               }}
             >
@@ -93,21 +78,7 @@ export default function SkillsSection({ skills: initialSkills, isOwner, isLogged
                   aria-label={endorsed
                     ? `Remove endorsement for ${skill.name}`
                     : `Endorse ${skill.name} — ${count} endorsement${count !== 1 ? 's' : ''}`}
-                  style={{
-                    minWidth: '32px',
-                    minHeight: '32px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'none',
-                    border: 'none',
-                    borderRadius: 'var(--radius-full) 0 0 var(--radius-full)',
-                    cursor: 'pointer',
-                    padding: '0 8px 0 10px',
-                    color: 'inherit',
-                    fontSize: '13px',
-                    fontWeight: 500,
-                  }}
+                  className="min-w-[32px] min-h-[32px] flex items-center justify-center bg-none border-none rounded-l-full cursor-pointer py-0 pl-[10px] pr-[8px] text-inherit text-[13px] font-medium"
                 >
                   {endorsed ? '✓' : '+'}
                 </button>
@@ -115,21 +86,14 @@ export default function SkillsSection({ skills: initialSkills, isOwner, isLogged
 
               <span
                 aria-hidden={canEndorse}
+                className={isOwner ? 'cursor-default' : ''}
                 style={{
                   padding: canEndorse ? '4px 12px 4px 0' : '4px 12px',
-                  cursor: isOwner ? 'default' : undefined,
                 }}
               >
                 {skill.name}
                 {count > 0 && (
-                  <span
-                    style={{
-                      marginLeft: '6px',
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '11px',
-                      color: 'var(--color-muted)',
-                    }}
-                  >
+                  <span className="ml-[6px] font-mono text-[11px] text-muted">
                     · {count}
                   </span>
                 )}

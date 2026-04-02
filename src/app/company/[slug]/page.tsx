@@ -5,6 +5,7 @@ import { createServerClient, createAuthServerClient } from '@/lib/supabase'
 import { renderWikilinks } from '@/lib/wikilinks'
 import Avatar from '@/components/Avatar'
 import { CompanyFollowButton } from '@/components/CompanyFollowButton'
+import { FilepathBar } from '@/components/ui'
 import type { Company, Profile, ExperienceEntry, JobListing, CompanyMember } from '@/types'
 
 interface PageProps {
@@ -168,75 +169,35 @@ export default async function CompanyPage({ params }: PageProps) {
   const contentHtml = String(result)
 
   const mdUrl = `/company/${company.slug}.md`
-
-  // Badge styles
-  const chipStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    fontSize: '10px',
-    fontWeight: 600,
-    letterSpacing: '0.04em',
-    textTransform: 'uppercase',
-    color: 'var(--color-secondary)',
-    background: 'var(--color-bg)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-sm)',
-    padding: '1px 6px',
-  }
+  const slug = params.slug
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
-      <div style={{ display: 'flex', gap: 'var(--space-xl)', alignItems: 'flex-start' }}>
+    <div>
+      <FilepathBar path={"/company/" + slug + ".md"} href={"/company/" + slug + ".md"} />
+      <div className="pt-xl pb-3xl">
+      <div className="flex gap-xl items-start">
         {/* Left sidebar */}
-        <aside style={{ width: '240px', flexShrink: 0 }}>
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-lg)',
-              padding: 'var(--space-lg)',
-              position: 'sticky',
-              top: '72px',
-            }}
-          >
+        <aside className="w-[240px] shrink-0">
+          <div className="bg-card border border-border rounded-lg p-lg sticky top-[72px]">
             {/* Company avatar */}
-            <div style={{ marginBottom: 'var(--space-md)' }}>
+            <div className="mb-md">
               <Avatar name={company.name} size={64} shape="square" />
             </div>
 
             {/* Name + edit */}
             <div
+              className="flex items-start justify-between gap-sm"
               style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                gap: 'var(--space-sm)',
                 marginBottom: company.tagline ? 'var(--space-xs)' : 'var(--space-md)',
               }}
             >
-              <h1
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.125rem',
-                  color: 'var(--color-ink)',
-                  lineHeight: 1.3,
-                }}
-              >
+              <h1 className="font-serif text-[1.125rem] text-ink leading-[1.3]">
                 {company.name}
               </h1>
               {isAdmin && (
                 <Link
                   href={`/editor/company?slug=${company.slug}`}
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    color: 'var(--color-secondary)',
-                    padding: '3px 8px',
-                    borderRadius: 'var(--radius-sm)',
-                    border: '1px solid var(--color-border)',
-                    flexShrink: 0,
-                    whiteSpace: 'nowrap',
-                  }}
+                  className="text-[11px] font-medium text-secondary py-[3px] px-[8px] rounded-sm border border-border shrink-0 whitespace-nowrap"
                 >
                   Edit
                 </Link>
@@ -245,15 +206,7 @@ export default async function CompanyPage({ params }: PageProps) {
 
             {/* Tagline */}
             {company.tagline && (
-              <p
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--color-secondary)',
-                  lineHeight: 1.4,
-                  marginBottom: 'var(--space-md)',
-                  fontStyle: 'italic',
-                }}
-              >
+              <p className="text-[13px] text-secondary leading-[1.4] mb-md italic">
                 {company.tagline}
               </p>
             )}
@@ -264,15 +217,7 @@ export default async function CompanyPage({ params }: PageProps) {
                 href={company.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  color: 'var(--color-primary)',
-                  marginBottom: 'var(--space-md)',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
+                className="block text-[12px] text-primary mb-md overflow-hidden text-ellipsis whitespace-nowrap"
               >
                 {company.website.replace(/^https?:\/\//, '')}
               </a>
@@ -280,21 +225,8 @@ export default async function CompanyPage({ params }: PageProps) {
 
             {/* Jobs badge */}
             {jobs.length > 0 && (
-              <div style={{ marginBottom: 'var(--space-sm)' }}>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    color: 'var(--color-primary)',
-                    background: 'var(--color-primary-light)',
-                    border: '1px solid var(--color-primary)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '2px 8px',
-                  }}
-                >
+              <div className="mb-sm">
+                <span className="inline-flex items-center gap-[4px] text-[11px] font-medium text-primary bg-primary-light border border-primary rounded-sm py-[2px] px-[8px]">
                   {jobs.length} open role{jobs.length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -302,7 +234,7 @@ export default async function CompanyPage({ params }: PageProps) {
 
             {/* Follow button — for logged-in non-creators (co-admins can follow too) */}
             {myProfileId && !isOriginalCreator && (
-              <div style={{ marginBottom: 'var(--space-md)' }}>
+              <div className="mb-md">
                 <CompanyFollowButton
                   companySlug={company.slug}
                   initialFollowing={viewerFollowing}
@@ -313,37 +245,31 @@ export default async function CompanyPage({ params }: PageProps) {
 
             {/* Follower count — shown to original creator only */}
             {isOriginalCreator && companyFollowerCount > 0 && (
-              <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: 'var(--space-md)' }}>
+              <p className="text-[12px] text-muted mb-md">
                 {companyFollowerCount} {companyFollowerCount === 1 ? 'follower' : 'followers'}
               </p>
             )}
 
             {/* Badges */}
             <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--space-xs)',
-                marginBottom: people.length > 0 ? 'var(--space-md)' : 0,
-              }}
+              className="flex flex-col gap-xs"
+              style={{ marginBottom: people.length > 0 ? 'var(--space-md)' : 0 }}
             >
               <a
                 href={`/company/${company.slug}/llm.txt`}
-                className="llm-badge"
-                style={{ alignSelf: 'flex-start' }}
+                className="llm-badge self-start"
                 title="AI-readable company profile summary"
               >
                 llm.txt available
               </a>
               <a
                 href={`/company/${company.slug}/llm-full.txt`}
-                className="llm-badge"
-                style={{ alignSelf: 'flex-start' }}
+                className="llm-badge self-start"
                 title="Full AI-readable company profile with all people"
               >
                 llm-full.txt
               </a>
-              <span className="md-url" style={{ alignSelf: 'flex-start' }}>
+              <span className="md-url self-start">
                 /company/{company.slug}.md
               </span>
             </div>
@@ -354,16 +280,16 @@ export default async function CompanyPage({ params }: PageProps) {
               const hiddenAdmins = members.filter(m => m.profile && !peopleProfileIds.has(m.profile_id))
               if (hiddenAdmins.length === 0) return null
               return (
-                <div style={{ marginBottom: 'var(--space-md)' }}>
-                  <p style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-sm)' }}>
+                <div className="mb-md">
+                  <p className="text-[11px] font-medium text-muted uppercase tracking-[0.05em] mb-sm">
                     Managed by
                   </p>
                   {hiddenAdmins.map(m => (
-                    <div key={m.profile_id} style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                      <Link href={`/profile/${m.profile!.slug}`} style={{ fontSize: '13px', color: 'var(--color-text)', fontWeight: 500 }}>
+                    <div key={m.profile_id} className="flex items-center gap-[6px] mb-[4px]">
+                      <Link href={`/profile/${m.profile!.slug}`} className="text-[13px] text-text font-medium">
                         {m.profile!.display_name}
                       </Link>
-                      <span style={chipStyle}>
+                      <span className="inline-flex items-center text-[10px] font-semibold tracking-[0.04em] uppercase text-secondary bg-bg border border-border rounded-sm py-[1px] px-[6px]">
                         {m.profile!.user_id === company.user_id ? 'owner' : 'admin'}
                       </span>
                     </div>
@@ -375,42 +301,33 @@ export default async function CompanyPage({ params }: PageProps) {
             {/* People — with admin badges */}
             {people.length > 0 && (
               <div>
-                <p
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    color: 'var(--color-muted)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                    marginBottom: 'var(--space-sm)',
-                  }}
-                >
+                <p className="text-[11px] font-medium text-muted uppercase tracking-[0.05em] mb-sm">
                   People ({people.length})
                 </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                <div className="flex flex-col gap-sm">
                   {people.map((e) => {
                     const isPersonAdmin = adminProfileIds.has(e.profile.id)
                     const isYou = myProfileSlug === e.profile.slug
                     return (
                       <div key={e.id}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                        <div className="flex items-center gap-[6px] flex-wrap">
                           <Link
                             href={`/profile/${e.profile.slug}`}
-                            style={{ fontSize: '13px', color: 'var(--color-text)', fontWeight: 500 }}
+                            className="text-[13px] text-text font-medium"
                           >
                             {e.profile.display_name}
                           </Link>
                           {isPersonAdmin && (
-                            <span style={chipStyle}>
+                            <span className="inline-flex items-center text-[10px] font-semibold tracking-[0.04em] uppercase text-secondary bg-bg border border-border rounded-sm py-[1px] px-[6px]">
                               {memberSlugToUserId.get(e.profile.slug) === company.user_id ? 'owner' : 'admin'}
                             </span>
                           )}
-                          {isYou && <span style={{ ...chipStyle, color: 'var(--color-primary)', borderColor: 'var(--color-primary)', background: 'var(--color-primary-light)' }}>you</span>}
+                          {isYou && <span className="inline-flex items-center text-[10px] font-semibold tracking-[0.04em] uppercase text-primary bg-primary-light border border-primary/20 rounded-sm py-[1px] px-[6px]">you</span>}
                         </div>
-                        <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '1px' }}>
+                        <div className="text-[11px] text-muted mt-[1px]">
                           {e.title}
                           {e.is_current && (
-                            <span style={{ marginLeft: '4px', color: 'var(--color-primary)', fontWeight: 500 }}>· now</span>
+                            <span className="ml-[4px] text-primary font-medium">· now</span>
                           )}
                         </div>
                       </div>
@@ -421,12 +338,7 @@ export default async function CompanyPage({ params }: PageProps) {
                 {isAdmin && (
                   <Link
                     href={`/editor/company?slug=${company.slug}&tab=team`}
-                    style={{
-                      display: 'block',
-                      marginTop: 'var(--space-md)',
-                      fontSize: '12px',
-                      color: 'var(--color-primary)',
-                    }}
+                    className="block mt-md text-[12px] text-primary"
                   >
                     Manage admins →
                   </Link>
@@ -438,7 +350,7 @@ export default async function CompanyPage({ params }: PageProps) {
             {isAdmin && people.length === 0 && (
               <Link
                 href={`/editor/company?slug=${company.slug}&tab=team`}
-                style={{ display: 'block', fontSize: '12px', color: 'var(--color-primary)', marginTop: 'var(--space-xs)' }}
+                className="block text-[12px] text-primary mt-xs"
               >
                 Manage admins →
               </Link>
@@ -447,16 +359,12 @@ export default async function CompanyPage({ params }: PageProps) {
         </aside>
 
         {/* Main content */}
-        <main style={{ flex: 1, minWidth: 0 }}>
+        <main className="flex-1 min-w-0">
           {/* Bio */}
           {company.bio && (
             <p
+              className="text-[15px] text-secondary leading-[1.6] mb-xl pb-lg"
               style={{
-                fontSize: '15px',
-                color: 'var(--color-secondary)',
-                lineHeight: 1.6,
-                marginBottom: 'var(--space-xl)',
-                paddingBottom: 'var(--space-lg)',
                 borderBottom: (company.markdown_content || jobs.length > 0) ? '1px solid var(--color-border)' : 'none',
               }}
             >
@@ -467,8 +375,8 @@ export default async function CompanyPage({ params }: PageProps) {
           {/* Markdown content */}
           {company.markdown_content && (
             <article
-              className="prose"
-              style={{ fontSize: '16px', lineHeight: 1.75, color: 'var(--color-text)', marginBottom: jobs.length > 0 ? 'var(--space-3xl)' : 0 }}
+              className="prose text-[16px] leading-[1.75] text-text"
+              style={{ marginBottom: jobs.length > 0 ? 'var(--space-3xl)' : 0 }}
               dangerouslySetInnerHTML={{ __html: contentHtml }}
             />
           )}
@@ -476,69 +384,43 @@ export default async function CompanyPage({ params }: PageProps) {
           {/* Open Roles */}
           {jobs.length > 0 && (
             <section>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 'var(--space-lg)',
-                paddingBottom: 'var(--space-md)',
-                borderBottom: '1px solid var(--color-border)',
-              }}>
-                <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.25rem', color: 'var(--color-ink)' }}>
+              <div className="flex items-center justify-between mb-lg pb-md border-b border-border">
+                <h2 className="font-serif text-[1.25rem] text-ink">
                   Open Roles
                 </h2>
                 {/* REGRESSION: co-admin can manage jobs (company_admins policy) */}
                 {isAdmin && (
                   <Link
                     href={`/editor/jobs?company=${company.slug}`}
-                    style={{
-                      fontSize: '12px',
-                      color: 'var(--color-secondary)',
-                      padding: '4px 10px',
-                      borderRadius: 'var(--radius-sm)',
-                      border: '1px solid var(--color-border)',
-                    }}
+                    className="text-[12px] text-secondary py-[4px] px-[10px] rounded-sm border border-border"
                   >
                     Manage jobs
                   </Link>
                 )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+              <div className="flex flex-col gap-lg">
                 {jobs.map((job) => (
                   <div
                     key={job.id}
-                    style={{
-                      padding: 'var(--space-lg)',
-                      background: 'var(--color-card)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-md)',
-                    }}
+                    className="p-lg bg-card border border-border rounded-md"
                   >
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 'var(--space-md)', marginBottom: 'var(--space-sm)' }}>
-                      <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-ink)' }}>
+                    <div className="flex items-start justify-between gap-md mb-sm">
+                      <h3 className="text-[16px] font-semibold text-ink">
                         {job.title}
                       </h3>
-                      <div style={{ display: 'flex', gap: 'var(--space-xs)', flexShrink: 0 }}>
-                        <span style={{
-                          fontSize: '11px',
-                          fontWeight: 500,
-                          color: 'var(--color-secondary)',
-                          background: 'var(--color-bg)',
-                          border: '1px solid var(--color-border)',
-                          borderRadius: 'var(--radius-sm)',
-                          padding: '2px 8px',
-                        }}>
+                      <div className="flex gap-xs shrink-0">
+                        <span className="text-[11px] font-medium text-secondary bg-bg border border-border rounded-sm py-[2px] px-[8px]">
                           {JOB_TYPE_LABELS[job.type] ?? job.type}
                         </span>
                       </div>
                     </div>
                     {job.location && (
-                      <p style={{ fontSize: '13px', color: 'var(--color-secondary)', marginBottom: 'var(--space-sm)' }}>
+                      <p className="text-[13px] text-secondary mb-sm">
                         {job.location}
                       </p>
                     )}
                     {job.description_md && (
-                      <p style={{ fontSize: '14px', color: 'var(--color-text)', lineHeight: 1.6, marginTop: 'var(--space-sm)' }}>
+                      <p className="text-[14px] text-text leading-[1.6] mt-sm">
                         {job.description_md.length > 300
                           ? job.description_md.slice(0, 300) + '…'
                           : job.description_md}
@@ -551,39 +433,28 @@ export default async function CompanyPage({ params }: PageProps) {
           )}
 
           {isAdmin && jobs.length === 0 && (
-            <div style={{ marginTop: 'var(--space-xl)', padding: 'var(--space-lg)', background: 'var(--color-card)', border: '1px dashed var(--color-border)', borderRadius: 'var(--radius-md)' }}>
-              <p style={{ fontSize: '14px', color: 'var(--color-muted)', marginBottom: 'var(--space-sm)' }}>
+            <div className="mt-xl p-lg bg-card border border-dashed border-border rounded-md">
+              <p className="text-[14px] text-muted mb-sm">
                 No open roles yet.
               </p>
-              <Link href={`/editor/jobs?company=${company.slug}`} style={{ fontSize: '13px', color: 'var(--color-primary)' }}>
+              <Link href={`/editor/jobs?company=${company.slug}`} className="text-[13px] text-primary">
                 Post your first role →
               </Link>
             </div>
           )}
 
           {!company.bio && !company.markdown_content && jobs.length === 0 && (
-            <p style={{ color: 'var(--color-muted)', fontSize: '15px', paddingTop: 'var(--space-lg)' }}>
+            <p className="text-muted text-[15px] pt-lg">
               No description yet.
               {isAdmin && (
-                <> <Link href={`/editor/company?slug=${company.slug}`} style={{ color: 'var(--color-primary)' }}>Add one →</Link></>
+                <> <Link href={`/editor/company?slug=${company.slug}`} className="text-primary">Add one →</Link></>
               )}
             </p>
           )}
 
           {/* Footer */}
-          <div
-            style={{
-              marginTop: 'var(--space-3xl)',
-              paddingTop: 'var(--space-lg)',
-              borderTop: '1px solid var(--color-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: 'var(--space-sm)',
-            }}
-          >
-            <Link href="/companies" style={{ fontSize: '13px', color: 'var(--color-secondary)' }}>
+          <div className="mt-3xl pt-lg border-t border-border flex items-center justify-between flex-wrap gap-sm">
+            <Link href="/companies" className="text-[13px] text-secondary">
               ← All companies
             </Link>
             <a href={mdUrl} className="llm-badge" title="Raw markdown source">
@@ -591,6 +462,7 @@ export default async function CompanyPage({ params }: PageProps) {
             </a>
           </div>
         </main>
+      </div>
       </div>
     </div>
   )

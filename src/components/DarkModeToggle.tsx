@@ -24,22 +24,7 @@ export function DarkModeToggle() {
     <button
       onClick={toggle}
       title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
-      style={{
-        background: 'none',
-        border: '1px solid var(--color-border)',
-        borderRadius: 'var(--radius-sm)',
-        cursor: 'pointer',
-        padding: '0',
-        fontSize: '14px',
-        lineHeight: 1,
-        color: 'var(--color-secondary)',
-        fontFamily: 'var(--font-sans)',
-        minWidth: '44px',
-        minHeight: '44px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      className="bg-none border border-border rounded-sm cursor-pointer p-0 text-[14px] leading-none text-secondary font-sans min-w-[44px] min-h-[44px] flex items-center justify-center"
     >
       {dark ? '☀' : '☾'}
     </button>

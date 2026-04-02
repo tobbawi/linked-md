@@ -37,19 +37,12 @@ export default function Avatar({
 
   return (
     <div
+      className="relative inline-flex shrink-0 items-center justify-center font-bold font-serif overflow-hidden"
       style={{
-        position: 'relative',
         width: `${size}px`,
         height: `${size}px`,
         borderRadius,
-        flexShrink: 0,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         fontSize,
-        fontWeight: 700,
-        fontFamily: 'var(--font-serif)',
-        overflow: 'hidden',
         ...bgStyle,
       }}
     >
@@ -63,14 +56,8 @@ export default function Avatar({
           src={avatarUrl}
           alt={name ?? ''}
           loading="lazy"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius,
-          }}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ borderRadius }}
           onError={(e) => {
             // On broken image, hide the img so initials show through
             ;(e.currentTarget as HTMLImageElement).style.display = 'none'

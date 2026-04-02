@@ -147,45 +147,22 @@ function NewPostPageInner() {
 
   if (!authChecked) {
     return (
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: 'calc(100vh - 56px)',
-          color: 'var(--color-muted)',
-          fontSize: '15px',
-        }}
-      >
+      <div className="flex items-center justify-center h-[calc(100vh-56px)] text-muted text-[15px]">
         Loading…
       </div>
     )
   }
 
   return (
-    <div style={{ paddingTop: 'var(--space-lg)', paddingBottom: 'var(--space-3xl)' }}>
-      <h1
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '1.25rem',
-          color: 'var(--color-ink)',
-          marginBottom: 'var(--space-lg)',
-        }}
-      >
+    <div className="pt-lg pb-3xl">
+      <h1 className="font-serif text-[1.25rem] text-ink mb-lg">
         {postParam ? 'Edit post' : 'New post'}
       </h1>
 
-      <div style={{ display: 'flex', gap: 'var(--space-lg)', alignItems: 'flex-start' }}>
+      <div className="flex gap-lg items-start">
         {/* Left — form */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              padding: 'var(--space-lg)',
-            }}
-          >
+        <div className="flex-1 min-w-0">
+          <div className="bg-card border border-border rounded-md p-lg">
             <FieldGroup label="Title" htmlFor="post-title">
               <Input
                 id="post-title"
@@ -212,7 +189,7 @@ function NewPostPageInner() {
             </FieldGroup>
 
             <FieldGroup label="Content (markdown)" htmlFor="post-content">
-              <div style={{ position: 'relative' }}>
+              <div className="relative">
                 <textarea
                   id="post-content"
                   ref={textareaRef}
@@ -240,14 +217,7 @@ function NewPostPageInner() {
                   />
                 )}
               </div>
-              <p
-                style={{
-                  marginTop: 'var(--space-xs)',
-                  fontSize: '11px',
-                  color: 'var(--color-muted)',
-                  fontFamily: 'var(--font-mono)',
-                }}
-              >
+              <p className="mt-xs text-[11px] text-muted font-mono">
                 Tip: Use [[Name]] to link people
               </p>
             </FieldGroup>
@@ -266,13 +236,7 @@ function NewPostPageInner() {
             {status?.type === 'success' && status.url && (
               <a
                 href={status.url}
-                style={{
-                  display: 'inline-block',
-                  marginBottom: 'var(--space-md)',
-                  fontSize: '13px',
-                  fontFamily: 'var(--font-mono)',
-                  color: 'var(--color-primary)',
-                }}
+                className="inline-block mb-md text-[13px] font-mono text-primary"
               >
                 {status.url}
               </a>
@@ -295,16 +259,7 @@ export default function NewPostPage() {
   return (
     <Suspense
       fallback={
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: 'calc(100vh - 56px)',
-            color: 'var(--color-muted)',
-            fontSize: '15px',
-          }}
-        >
+        <div className="flex items-center justify-center h-[calc(100vh-56px)] text-muted text-[15px]">
           Loading…
         </div>
       }

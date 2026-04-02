@@ -51,7 +51,7 @@ function Sparkline({ buckets }: { buckets: { label: string; count: number }[] })
     <svg
       width={width}
       height={height}
-      style={{ display: 'block', overflow: 'visible' }}
+      className="block overflow-visible"
     >
       <polyline
         points={points}
@@ -172,37 +172,23 @@ export default async function AnalyticsPage() {
     .slice(0, 10)
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-xl pb-3xl">
       <div>
         {/* Header */}
-        <div style={{ marginBottom: 'var(--space-xl)' }}>
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.25rem',
-              color: 'var(--color-ink)',
-              marginBottom: 'var(--space-xs)',
-            }}
-          >
+        <div className="mb-xl">
+          <h1 className="font-serif text-[1.25rem] text-ink mb-xs">
             Analytics
           </h1>
-          <p style={{ fontSize: '14px', color: 'var(--color-secondary)' }}>
+          <p className="text-[14px] text-secondary">
             Last 30 days ·{' '}
-            <Link href={`/profile/${profile.slug}`} style={{ color: 'var(--color-primary)' }}>
+            <Link href={`/profile/${profile.slug}`} className="text-primary">
               {profile.display_name}
             </Link>
           </p>
         </div>
 
         {/* Stat cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 'var(--space-md)',
-            marginBottom: 'var(--space-xl)',
-          }}
-        >
+        <div className="grid grid-cols-3 gap-md mb-xl">
           {[
             { label: 'Profile views', value: totalProfileViews30d, delta: profileViews7d, unit: 'last 7d' },
             { label: 'Post impressions', value: totalPostViews30d, delta: postViews7d, unit: 'last 7d' },
@@ -210,31 +196,17 @@ export default async function AnalyticsPage() {
           ].map(stat => (
             <div
               key={stat.label}
-              style={{
-                padding: 'var(--space-lg)',
-                background: 'var(--color-card)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-md)',
-              }}
+              className="p-lg bg-card border border-border rounded-md"
             >
-              <p style={{ fontSize: '11px', fontWeight: 500, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-xs)' }}>
+              <p className="text-[11px] font-medium text-muted uppercase tracking-[0.05em] mb-xs">
                 {stat.label}
               </p>
-              <p
-                style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                  color: 'var(--color-ink)',
-                  lineHeight: 1,
-                  marginBottom: 'var(--space-xs)',
-                }}
-              >
+              <p className="font-serif text-[2rem] font-bold text-ink leading-none mb-xs">
                 {stat.value.toLocaleString()}
               </p>
-              <p style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+              <p className="text-[12px] text-muted">
                 {stat.delta !== null ? (
-                  <><strong style={{ color: 'var(--color-primary)' }}>{stat.delta}</strong> {stat.unit}</>
+                  <><strong className="text-primary">{stat.delta}</strong> {stat.unit}</>
                 ) : stat.unit}
               </p>
             </div>
@@ -242,69 +214,46 @@ export default async function AnalyticsPage() {
         </div>
 
         {/* Profile views chart */}
-        <div
-          style={{
-            padding: 'var(--space-lg)',
-            background: 'var(--color-card)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            marginBottom: 'var(--space-lg)',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-ink)' }}>Profile views</h2>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted)' }}>30 days</span>
+        <div className="p-lg bg-card border border-border rounded-md mb-lg">
+          <div className="flex justify-between items-center mb-md">
+            <h2 className="text-[13px] font-semibold text-ink">Profile views</h2>
+            <span className="text-[11px] text-muted">30 days</span>
           </div>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="overflow-x-auto">
             <Sparkline buckets={profileViewBuckets} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-            <span style={{ fontSize: '10px', color: 'var(--color-muted)' }}>{profileViewBuckets[0]?.label}</span>
-            <span style={{ fontSize: '10px', color: 'var(--color-muted)' }}>{profileViewBuckets[profileViewBuckets.length - 1]?.label}</span>
+          <div className="flex justify-between mt-[4px]">
+            <span className="text-[10px] text-muted">{profileViewBuckets[0]?.label}</span>
+            <span className="text-[10px] text-muted">{profileViewBuckets[profileViewBuckets.length - 1]?.label}</span>
           </div>
         </div>
 
         {/* Post impressions chart */}
-        <div
-          style={{
-            padding: 'var(--space-lg)',
-            background: 'var(--color-card)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            marginBottom: 'var(--space-xl)',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-md)' }}>
-            <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-ink)' }}>Post impressions</h2>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted)' }}>30 days</span>
+        <div className="p-lg bg-card border border-border rounded-md mb-xl">
+          <div className="flex justify-between items-center mb-md">
+            <h2 className="text-[13px] font-semibold text-ink">Post impressions</h2>
+            <span className="text-[11px] text-muted">30 days</span>
           </div>
-          <div style={{ overflowX: 'auto' }}>
+          <div className="overflow-x-auto">
             <Sparkline buckets={postViewBuckets} />
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-            <span style={{ fontSize: '10px', color: 'var(--color-muted)' }}>{postViewBuckets[0]?.label}</span>
-            <span style={{ fontSize: '10px', color: 'var(--color-muted)' }}>{postViewBuckets[postViewBuckets.length - 1]?.label}</span>
+          <div className="flex justify-between mt-[4px]">
+            <span className="text-[10px] text-muted">{postViewBuckets[0]?.label}</span>
+            <span className="text-[10px] text-muted">{postViewBuckets[postViewBuckets.length - 1]?.label}</span>
           </div>
         </div>
 
         {/* Top posts */}
         {topPosts.length > 0 && (
-          <div
-            style={{
-              background: 'var(--color-card)',
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              overflow: 'hidden',
-            }}
-          >
-            <div style={{ padding: 'var(--space-sm) var(--space-lg)', borderBottom: '1px solid var(--color-border)' }}>
-              <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-ink)' }}>Posts (30 days)</span>
+          <div className="bg-card border border-border rounded-md overflow-hidden">
+            <div className="py-sm px-lg border-b border-border">
+              <span className="text-[13px] font-semibold text-ink">Posts (30 days)</span>
             </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <table className="w-full border-collapse text-[13px]">
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                <tr className="border-b border-border">
                   {['Title', 'Views', 'Likes', 'Comments', 'Reposts'].map(h => (
-                    <th key={h} style={{ padding: '8px 16px', textAlign: h === 'Title' ? 'left' : 'right', fontSize: '11px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    <th key={h} className="py-[8px] px-[16px] text-[11px] font-mono font-semibold text-muted uppercase tracking-[0.06em]" style={{ textAlign: h === 'Title' ? 'left' : 'right' }}>
                       {h}
                     </th>
                   ))}
@@ -313,10 +262,10 @@ export default async function AnalyticsPage() {
               <tbody>
                 {topPosts.map((post, i) => (
                   <tr key={post.id} style={{ borderBottom: i < topPosts.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
-                    <td style={{ padding: '10px 16px', maxWidth: '260px' }}>
+                    <td className="py-[10px] px-[16px] max-w-[260px]">
                       <Link
                         href={`/profile/${profile.slug}/post/${post.slug}`}
-                        style={{ color: 'var(--color-text)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}
+                        className="text-text font-medium overflow-hidden text-ellipsis whitespace-nowrap block"
                       >
                         {post.title ?? post.slug}
                       </Link>
@@ -327,7 +276,7 @@ export default async function AnalyticsPage() {
                       commentsByPostId[post.id] ?? 0,
                       repostsByPostId[post.id] ?? 0,
                     ].map((v, j) => (
-                      <td key={j} style={{ padding: '10px 16px', textAlign: 'right', color: v > 0 ? 'var(--color-ink)' : 'var(--color-muted)', fontVariantNumeric: 'tabular-nums' }}>
+                      <td key={j} className="py-[10px] px-[16px] text-right tabular-nums" style={{ color: v > 0 ? 'var(--color-ink)' : 'var(--color-muted)' }}>
                         {v}
                       </td>
                     ))}
@@ -339,7 +288,7 @@ export default async function AnalyticsPage() {
         )}
 
         {totalProfileViews30d === 0 && totalPostViews30d === 0 && (
-          <p style={{ fontSize: '14px', color: 'var(--color-muted)' }}>
+          <p className="text-[14px] text-muted">
             No views recorded yet. Share your profile to get started.
           </p>
         )}

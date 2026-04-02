@@ -209,24 +209,13 @@ function CompanyEditorInner() {
 
   if (loading) {
     return (
-      <div style={{ padding: 'var(--space-3xl)', textAlign: 'center', color: 'var(--color-muted)' }}>
+      <div className="p-3xl text-center text-muted">
         Loading…
       </div>
     )
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: '100%',
-    padding: 'var(--space-sm) var(--space-md)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-sm)',
-    fontSize: '14px',
-    fontFamily: 'var(--font-sans)',
-    color: 'var(--color-text)',
-    background: 'var(--color-card)',
-    boxSizing: 'border-box',
-    outline: 'none',
-  }
+  const inputCls = "w-full py-sm px-md border border-border rounded-sm text-[14px] font-sans text-text bg-card box-border outline-none"
 
   function onFocus(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) {
     e.target.style.borderColor = 'var(--color-primary)'
@@ -236,29 +225,16 @@ function CompanyEditorInner() {
   }
 
   return (
-    <div style={{ paddingTop: 'var(--space-xl)', paddingBottom: 'var(--space-3xl)' }}>
+    <div className="pt-xl pb-3xl">
       <div>
         {/* Header */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 'var(--space-xl)',
-          }}
-        >
-          <h1
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.25rem',
-              color: 'var(--color-ink)',
-            }}
-          >
+        <div className="flex items-center justify-between mb-xl">
+          <h1 className="font-serif text-[1.25rem] text-ink">
             {isEditing ? 'Edit company' : 'Add a company'}
           </h1>
           <a
             href={isEditing ? `/company/${editSlug}` : '/companies'}
-            style={{ fontSize: '13px', color: 'var(--color-secondary)' }}
+            className="text-[13px] text-secondary"
           >
             {isEditing ? `← ${name || 'Company'}` : '← Companies'}
           </a>
@@ -266,30 +242,16 @@ function CompanyEditorInner() {
 
         {/* Tabs (only when editing) */}
         {isEditing && (
-          <div
-            style={{
-              display: 'flex',
-              gap: '0',
-              borderBottom: '1px solid var(--color-border)',
-              marginBottom: 'var(--space-xl)',
-            }}
-          >
+          <div className="flex gap-0 border-b border-border mb-xl">
             {(['details', 'team'] as Tab[]).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
+                className="py-[8px] px-[16px] text-[13px] bg-transparent border-none -mb-[1px] cursor-pointer capitalize font-sans"
                 style={{
-                  padding: '8px 16px',
-                  fontSize: '13px',
                   fontWeight: activeTab === tab ? 600 : 400,
                   color: activeTab === tab ? 'var(--color-ink)' : 'var(--color-secondary)',
-                  background: 'transparent',
-                  border: 'none',
                   borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
-                  marginBottom: '-1px',
-                  cursor: 'pointer',
-                  textTransform: 'capitalize',
-                  fontFamily: 'var(--font-sans)',
                 }}
               >
                 {tab}
@@ -300,10 +262,10 @@ function CompanyEditorInner() {
 
         {/* Details tab */}
         {activeTab === 'details' && (
-          <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+          <form onSubmit={handleSave} className="flex flex-col gap-md">
             {/* Name */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '4px' }}>
+              <label className="block text-[12px] font-medium text-secondary mb-[4px]">
                 Company name *
               </label>
               <input
@@ -312,7 +274,7 @@ function CompanyEditorInner() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Acme Corp"
                 required
-                style={inputStyle}
+                className={inputCls}
                 onFocus={onFocus}
                 onBlur={onBlur}
               />
@@ -320,11 +282,11 @@ function CompanyEditorInner() {
 
             {/* Slug */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '4px' }}>
+              <label className="block text-[12px] font-medium text-secondary mb-[4px]">
                 URL slug *
               </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
-                <span style={{ fontSize: '13px', color: 'var(--color-muted)', flexShrink: 0 }}>
+              <div className="flex items-center gap-xs">
+                <span className="text-[13px] text-muted shrink-0">
                   /company/
                 </span>
                 <input
@@ -334,14 +296,15 @@ function CompanyEditorInner() {
                   placeholder="acme-corp"
                   required
                   disabled={isEditing}
-                  style={{ ...inputStyle, opacity: isEditing ? 0.6 : 1 }}
+                  className={inputCls}
+                  style={{ opacity: isEditing ? 0.6 : 1 }}
                   onFocus={onFocus}
                   onBlur={onBlur}
                 />
               </div>
-              <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>
+              <p className="text-[11px] text-muted mt-[4px]">
                 Your company profile will be at{' '}
-                <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--color-primary)' }}>
+                <span className="font-mono text-primary">
                   /company/{slug || 'your-company'}.md
                 </span>
               </p>
@@ -349,7 +312,7 @@ function CompanyEditorInner() {
 
             {/* Tagline */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '4px' }}>
+              <label className="block text-[12px] font-medium text-secondary mb-[4px]">
                 Tagline
               </label>
               <input
@@ -357,7 +320,7 @@ function CompanyEditorInner() {
                 value={tagline}
                 onChange={(e) => setTagline(e.target.value)}
                 placeholder="One line about the company"
-                style={inputStyle}
+                className={inputCls}
                 onFocus={onFocus}
                 onBlur={onBlur}
               />
@@ -365,7 +328,7 @@ function CompanyEditorInner() {
 
             {/* Website */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '4px' }}>
+              <label className="block text-[12px] font-medium text-secondary mb-[4px]">
                 Website
               </label>
               <input
@@ -373,7 +336,7 @@ function CompanyEditorInner() {
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
                 placeholder="https://example.com"
-                style={inputStyle}
+                className={inputCls}
                 onFocus={onFocus}
                 onBlur={onBlur}
               />
@@ -381,7 +344,7 @@ function CompanyEditorInner() {
 
             {/* Bio */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '4px' }}>
+              <label className="block text-[12px] font-medium text-secondary mb-[4px]">
                 Short bio
               </label>
               <input
@@ -389,7 +352,7 @@ function CompanyEditorInner() {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="A short description shown in the sidebar"
-                style={inputStyle}
+                className={inputCls}
                 onFocus={onFocus}
                 onBlur={onBlur}
               />
@@ -397,7 +360,7 @@ function CompanyEditorInner() {
 
             {/* Content */}
             <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, color: 'var(--color-secondary)', marginBottom: '4px' }}>
+              <label className="block text-[12px] font-medium text-secondary mb-[4px]">
                 About (markdown)
               </label>
               <textarea
@@ -405,41 +368,29 @@ function CompanyEditorInner() {
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={`Write about the company in markdown.\n\nYou can link to team members with [[Their Name]] and other companies with [[company:Partner Corp]].`}
                 rows={12}
-                style={{
-                  ...inputStyle,
-                  resize: 'vertical',
-                  lineHeight: 1.6,
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '13px',
-                }}
+                className={`${inputCls} resize-y leading-[1.6] font-mono !text-[13px]`}
                 onFocus={onFocus}
                 onBlur={onBlur}
               />
-              <p style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '4px' }}>
+              <p className="text-[11px] text-muted mt-[4px]">
                 Use{' '}
-                <span style={{ fontFamily: 'var(--font-mono)' }}>[[Name]]</span> to link to profiles,{' '}
-                <span style={{ fontFamily: 'var(--font-mono)' }}>[[company:Name]]</span> to link to companies.
+                <span className="font-mono">[[Name]]</span> to link to profiles,{' '}
+                <span className="font-mono">[[company:Name]]</span> to link to companies.
               </p>
             </div>
 
             {error && (
-              <p style={{ color: '#dc2626', fontSize: '13px' }}>{error}</p>
+              <p className="text-[#dc2626] text-[13px]">{error}</p>
             )}
 
-            <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
+            <div className="flex gap-sm items-center">
               <button
                 type="submit"
                 disabled={saving || !name.trim() || !slug.trim()}
+                className="py-[9px] px-[24px] text-white rounded-sm border-none text-[14px] font-semibold font-sans"
                 style={{
-                  padding: '9px 24px',
                   background: saving || !name.trim() || !slug.trim() ? 'var(--color-border)' : 'var(--color-primary)',
-                  color: '#fff',
-                  borderRadius: 'var(--radius-sm)',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: 600,
                   cursor: saving || !name.trim() || !slug.trim() ? 'default' : 'pointer',
-                  fontFamily: 'var(--font-sans)',
                 }}
               >
                 {saving ? 'Saving…' : isEditing ? 'Save changes' : 'Create company'}
@@ -447,7 +398,7 @@ function CompanyEditorInner() {
               {isEditing && (
                 <a
                   href={`/company/${editSlug}`}
-                  style={{ fontSize: '13px', color: 'var(--color-secondary)' }}
+                  className="text-[13px] text-secondary"
                 >
                   Cancel
                 </a>
@@ -458,18 +409,18 @@ function CompanyEditorInner() {
 
         {/* Team tab */}
         {activeTab === 'team' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
+          <div className="flex flex-col gap-xl">
 
             {/* Admins section */}
             <section>
-              <h2 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-md)' }}>
+              <h2 className="text-[13px] font-medium text-muted uppercase tracking-[0.05em] mb-md">
                 Admins
               </h2>
 
               {teamLoading ? (
-                <p style={{ fontSize: '14px', color: 'var(--color-muted)' }}>Loading…</p>
+                <p className="text-[14px] text-muted">Loading…</p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                <div className="flex flex-col gap-sm">
                   {members.map(member => {
                     const p = member.profile
                     if (!p) return null
@@ -479,57 +430,29 @@ function CompanyEditorInner() {
                     return (
                       <div
                         key={member.profile_id}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 'var(--space-md)',
-                          padding: 'var(--space-sm) var(--space-md)',
-                          background: 'var(--color-card)',
-                          border: '1px solid var(--color-border)',
-                          borderRadius: 'var(--radius-md)',
-                        }}
+                        className="flex items-center gap-md py-sm px-md bg-card border border-border rounded-md"
                       >
                         <Avatar
                           name={p.display_name}
                           avatarUrl={p.avatar_url}
                           size={32}
                         />
-                        <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="flex-1 min-w-0">
                           <a
                             href={`/@${p.slug}`}
-                            style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-ink)', textDecoration: 'none' }}
+                            className="text-[14px] font-medium text-ink no-underline"
                           >
                             {p.display_name}
                           </a>
-                          <span style={{ marginLeft: '8px', fontSize: '11px', color: 'var(--color-muted)' }}>@{p.slug}</span>
+                          <span className="ml-[8px] text-[11px] text-muted">@{p.slug}</span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)', flexShrink: 0 }}>
+                        <div className="flex items-center gap-xs shrink-0">
                           {/* Role chip */}
-                          <span
-                            style={{
-                              fontSize: '11px',
-                              fontWeight: 500,
-                              padding: '2px 8px',
-                              borderRadius: '999px',
-                              background: isOwner ? 'var(--color-border)' : 'var(--color-surface, var(--color-border))',
-                              color: 'var(--color-secondary)',
-                              border: '1px solid var(--color-border)',
-                            }}
-                          >
+                          <span className="text-[11px] font-medium py-[2px] px-[8px] rounded-full bg-border text-secondary border border-border">
                             {isOwner ? 'owner' : 'admin'}
                           </span>
                           {isMe && (
-                            <span
-                              style={{
-                                fontSize: '11px',
-                                fontWeight: 500,
-                                padding: '2px 8px',
-                                borderRadius: '999px',
-                                background: 'rgba(13,147,115,0.1)',
-                                color: 'var(--color-primary)',
-                                border: '1px solid rgba(13,147,115,0.2)',
-                              }}
-                            >
+                            <span className="text-[11px] font-medium py-[2px] px-[8px] rounded-full bg-primary-light text-primary border border-primary/20">
                               you
                             </span>
                           )}
@@ -538,12 +461,8 @@ function CompanyEditorInner() {
                             <button
                               onClick={() => handleRemove(member)}
                               disabled={isRemoving}
+                              className="text-[12px] py-[3px] px-[10px] border border-border rounded-sm bg-transparent"
                               style={{
-                                fontSize: '12px',
-                                padding: '3px 10px',
-                                border: '1px solid var(--color-border)',
-                                borderRadius: 'var(--radius-sm)',
-                                background: 'transparent',
                                 color: isRemoving ? 'var(--color-muted)' : '#dc2626',
                                 cursor: isRemoving ? 'not-allowed' : 'pointer',
                                 opacity: isRemoving ? 0.5 : 1,
@@ -562,49 +481,26 @@ function CompanyEditorInner() {
               {/* Invite form */}
               <form
                 onSubmit={handleInvite}
-                style={{
-                  marginTop: 'var(--space-md)',
-                  display: 'flex',
-                  gap: 'var(--space-sm)',
-                  alignItems: 'flex-start',
-                }}
+                className="mt-md flex gap-sm items-start"
               >
-                <div style={{ flex: 1 }}>
+                <div className="flex-1">
                   <input
                     value={inviteHandle}
                     onChange={e => setInviteHandle(e.target.value)}
                     placeholder="@handle or username"
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      fontSize: '14px',
-                      background: 'var(--color-card)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-sm)',
-                      color: 'var(--color-ink)',
-                      boxSizing: 'border-box',
-                      outline: 'none',
-                      fontFamily: 'var(--font-sans)',
-                    }}
+                    className="w-full py-[8px] px-[12px] text-[14px] bg-card border border-border rounded-sm text-ink box-border outline-none font-sans"
                   />
                   {inviteError && (
-                    <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>{inviteError}</p>
+                    <p className="text-[12px] text-[#dc2626] mt-[4px]">{inviteError}</p>
                   )}
                 </div>
                 <button
                   type="submit"
                   disabled={inviting || !inviteHandle.trim()}
+                  className="py-[8px] px-[16px] text-[13px] font-medium text-white border-none rounded-sm whitespace-nowrap font-sans"
                   style={{
-                    padding: '8px 16px',
-                    fontSize: '13px',
-                    fontWeight: 500,
                     background: inviting || !inviteHandle.trim() ? 'var(--color-border)' : 'var(--color-primary)',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 'var(--radius-sm)',
                     cursor: inviting || !inviteHandle.trim() ? 'not-allowed' : 'pointer',
-                    whiteSpace: 'nowrap',
-                    fontFamily: 'var(--font-sans)',
                   }}
                 >
                   {inviting ? 'Adding…' : 'Add admin'}
@@ -614,44 +510,36 @@ function CompanyEditorInner() {
 
             {/* Employee roster (read-only) */}
             <section>
-              <h2 style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 'var(--space-md)' }}>
+              <h2 className="text-[13px] font-medium text-muted uppercase tracking-[0.05em] mb-md">
                 Employees
-                <span style={{ marginLeft: '8px', fontWeight: 400, textTransform: 'none', fontSize: '11px', color: 'var(--color-muted)' }}>
+                <span className="ml-[8px] font-normal normal-case text-[11px] text-muted">
                   — from experience entries
                 </span>
               </h2>
 
               {teamLoading ? (
-                <p style={{ fontSize: '14px', color: 'var(--color-muted)' }}>Loading…</p>
+                <p className="text-[14px] text-muted">Loading…</p>
               ) : employees.length === 0 ? (
-                <p style={{ fontSize: '14px', color: 'var(--color-muted)' }}>
+                <p className="text-[14px] text-muted">
                   No employees yet. When someone adds this company to their experience, they appear here.
                 </p>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-sm)' }}>
+                <div className="flex flex-col gap-sm">
                   {employees.map(({ profile: p }) => (
                     <div
                       key={p.id}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 'var(--space-md)',
-                        padding: 'var(--space-sm) var(--space-md)',
-                        background: 'var(--color-card)',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 'var(--radius-md)',
-                      }}
+                      className="flex items-center gap-md py-sm px-md bg-card border border-border rounded-md"
                     >
                       <Avatar name={p.display_name} avatarUrl={p.avatar_url} size={32} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="flex-1 min-w-0">
                         <a
                           href={`/@${p.slug}`}
-                          style={{ fontSize: '14px', fontWeight: 500, color: 'var(--color-ink)', textDecoration: 'none' }}
+                          className="text-[14px] font-medium text-ink no-underline"
                         >
                           {p.display_name}
                         </a>
                         {p.title && (
-                          <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginTop: '1px' }}>{p.title}</p>
+                          <p className="text-[12px] text-muted mt-[1px]">{p.title}</p>
                         )}
                       </div>
                     </div>

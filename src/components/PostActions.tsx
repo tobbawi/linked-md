@@ -35,17 +35,10 @@ export function PostActions({ postSlug, profileSlug }: PostActionsProps) {
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+    <div className="flex items-center gap-sm">
       <Link
         href={`/post/new?post=${postSlug}`}
-        style={{
-          fontSize: '13px',
-          fontWeight: 500,
-          color: 'var(--color-secondary)',
-          padding: '5px 12px',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--color-border)',
-        }}
+        className="text-[13px] font-medium text-secondary py-[5px] px-[12px] rounded-sm border border-border"
       >
         Edit
       </Link>
@@ -53,18 +46,11 @@ export function PostActions({ postSlug, profileSlug }: PostActionsProps) {
       <button
         onClick={handleDelete}
         disabled={deleting}
-        style={{
-          fontSize: '13px',
-          fontWeight: 500,
-          color: confirming ? '#fff' : 'var(--color-error, #DC2626)',
-          background: confirming ? 'var(--color-error, #DC2626)' : 'transparent',
-          padding: '5px 12px',
-          borderRadius: 'var(--radius-sm)',
-          border: '1px solid var(--color-error, #DC2626)',
-          cursor: deleting ? 'not-allowed' : 'pointer',
-          fontFamily: 'var(--font-sans)',
-          transition: 'all 150ms ease',
-        }}
+        className={`text-[13px] font-medium py-[5px] px-[12px] rounded-sm border border-solid border-error font-sans transition-all duration-150 ${
+          confirming ? 'text-white bg-error' : 'text-error bg-transparent'
+        } ${
+          deleting ? 'cursor-not-allowed' : 'cursor-pointer'
+        }`}
       >
         {deleting ? 'Deleting…' : confirming ? 'Confirm delete' : 'Delete'}
       </button>
@@ -72,15 +58,7 @@ export function PostActions({ postSlug, profileSlug }: PostActionsProps) {
       {confirming && !deleting && (
         <button
           onClick={() => setConfirming(false)}
-          style={{
-            fontSize: '13px',
-            color: 'var(--color-muted)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: 'var(--font-sans)',
-            padding: '5px 4px',
-          }}
+          className="text-[13px] text-muted bg-none border-none cursor-pointer font-sans py-[5px] px-[4px]"
         >
           Cancel
         </button>
